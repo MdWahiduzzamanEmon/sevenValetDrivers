@@ -4,6 +4,7 @@ import {SCREEN_WIDTH} from '../../config';
 import logout from '../../assets/logout.png';
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
 import {useNavigation} from '@react-navigation/native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 const Header = ({...props}) => {
   const navigate = useNavigation() as any;
@@ -13,7 +14,7 @@ const Header = ({...props}) => {
     navigate.navigate('Auth');
   };
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {/* Logo or App Icon */}
       <Image
         source={require('../../assets/logo.png')} // update path to your logo
@@ -40,7 +41,7 @@ const Header = ({...props}) => {
           Logout
         </TextWrapper>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -54,6 +55,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: SCREEN_WIDTH,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
   },
   logo: {
     width: 70,

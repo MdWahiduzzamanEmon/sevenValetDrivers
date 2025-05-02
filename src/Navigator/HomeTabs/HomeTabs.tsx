@@ -3,14 +3,15 @@ import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {Image, StyleSheet, TouchableOpacity} from 'react-native';
 import SuspenseComponent from '../../Provider/Suspense/Suspense';
 import Ongoin from '../../assets/ongoing.png';
-import completedTask from '../../assets/completed_task.png';
+import asignedTask from '../../assets/completed_task.png';
 import profileIcon from '../../assets/profile.png';
+import pendingtask from '../../assets/pendingtask.png';
+// import Pending from '../../Screen/Pending/Pending';
 
 // Lazy-loaded screens
 const OngoinTask = lazy(() => import('../../Screen/OngoinTask/OngoinTask'));
-const CompletedTask = lazy(
-  () => import('../../Screen/CompletedTask/CompletedTask'),
-);
+const PendingTask = lazy(() => import('../../Screen/Pending/Pending'));
+const AsignedTask = lazy(() => import('../../Screen/AsignedTask/AsignedTask'));
 const Profile = lazy(() => import('../../Screen/Profile/Profile'));
 
 // Tab Navigator
@@ -19,7 +20,8 @@ const Tab = createBottomTabNavigator();
 // Icon paths
 const icons = {
   home: Ongoin,
-  completed: completedTask,
+  pending: pendingtask,
+  asigned: asignedTask,
   profile: profileIcon,
 };
 
@@ -39,9 +41,14 @@ const tabScreens = [
     icon: icons.home,
   },
   {
-    name: 'Completed',
-    component: withSuspense(CompletedTask),
-    icon: icons.completed,
+    name: 'Pending',
+    component: withSuspense(PendingTask),
+    icon: icons.pending,
+  },
+  {
+    name: 'Asigned',
+    component: withSuspense(AsignedTask),
+    icon: icons.asigned,
   },
   {
     name: 'Profile',
@@ -59,7 +66,6 @@ const renderTabBarIcon = (routeName: string) => {
     <Image source={matchedTab?.icon} style={styles.icon} resizeMode="contain" />
   );
 };
-
 
 const HomeTabs = () => {
   return (

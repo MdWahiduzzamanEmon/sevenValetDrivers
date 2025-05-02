@@ -14,7 +14,7 @@ import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
 import CustomDropdown from '../../Utils/CustomDropdown/CustomDropdown';
 import CustomTextInput from '../../Utils/CustomTextInput/CustomTextInput';
 import CustomButton from '../../Utils/CustomButton/CustomButton';
-import { PADDING_SCREEN_HORIZONTAL } from '../../config';
+import {PADDING_SCREEN_HORIZONTAL} from '../../config';
 
 if (Platform.OS === 'android') {
   UIManager.setLayoutAnimationEnabledExperimental &&
@@ -59,10 +59,8 @@ const Profile = ({route}: any) => {
             value={selectLanguage}
             options={[
               {label: 'English', value: 'en'},
-              {label: 'French', value: 'fr'},
-              {label: 'Spanish', value: 'es'},
-              {label: 'German', value: 'de'},
-              {label: 'Italian', value: 'it'},
+              {label: 'Urdu', value: 'ur'},
+              {label: 'Bangla', value: 'bn'},
             ]}
             onSelect={value => setSelectLanguage(value)}
           />

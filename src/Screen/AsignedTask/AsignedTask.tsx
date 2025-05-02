@@ -10,36 +10,40 @@ import {PADDING_SCREEN_HORIZONTAL} from '../../config';
 // data.ts
 export const completedTasks = [
   {
-    id: '1',
-    maker: 'Toyota',
+    id: 'Val534624vvv',
+    brand: 'Toyota',
     model: 'Corolla',
     plate: '3A456W',
     duration: '4 m',
     action: 'PARK',
+    status: 'Completed',
   },
   {
     id: '2',
-    maker: 'Nissan',
+    brand: 'Nissan',
     model: 'Altima',
     plate: '3A456W',
     duration: '10 m',
     action: 'RETRIEVE',
+    status: 'Cancelled',
   },
   {
     id: '3',
-    maker: 'Honda',
+    brand: 'Honda',
     model: 'Civic',
     plate: '3A456W',
     duration: '5 m',
     action: 'PARK',
+    status: 'Ongoing',
   },
   {
     id: '4',
-    maker: 'Ford',
+    brand: 'Ford',
     model: 'Focus',
     plate: '3A456W',
     duration: '7 m',
     action: 'RETRIEVE',
+    status: 'Completed',
   },
 ];
 
@@ -55,19 +59,22 @@ const CompletedTask = ({...props}) => {
         style={{
           paddingHorizontal: PADDING_SCREEN_HORIZONTAL,
           paddingBottom: 40,
-          marginTop: 20,
         }}>
-        <TextWrapper style={styles.header}>Completed Tasks</TextWrapper>
+        <TextWrapper style={styles.header}> {title} Tasks</TextWrapper>
         <FlatList
           data={completedTasks}
           keyExtractor={item => item.id}
+          showsVerticalScrollIndicator={false}
           renderItem={({item, index}) => (
             <Animated.View entering={FadeInUp.delay(index * 200)}>
               <Card style={styles.card}>
                 <Card.Content style={styles.content}>
                   <View style={styles.info}>
                     <TextWrapper style={styles.title}>
-                      Car Maker: {item.maker}
+                      Task Id: {item.id}
+                    </TextWrapper>
+                    <TextWrapper style={styles.title}>
+                      Brand: {item.brand}
                     </TextWrapper>
                     <TextWrapper>Model: {item.model}</TextWrapper>
                     <TextWrapper>Plate No.: {item.plate}</TextWrapper>
@@ -87,9 +94,15 @@ const CompletedTask = ({...props}) => {
                 </Card.Content>
                 {/* //line horizontal */}
                 <View style={styles.line} />
-                <Card.Content>
+
+                <Card.Content style={styles.cardFooterContent}>
                   <TextWrapper style={styles.actionText}>
                     {item.action}
+                  </TextWrapper>
+
+                  {/* //status  */}
+                  <TextWrapper style={styles.statusText}>
+                    {item.status}
                   </TextWrapper>
                 </Card.Content>
               </Card>
@@ -147,5 +160,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#dfdfdf',
     marginVertical: 8,
     marginHorizontal: 16,
+  },
+
+  cardFooterContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
+  statusText: {
+    color: '#D9FF00',
+    fontWeight: 'bold',
   },
 });
