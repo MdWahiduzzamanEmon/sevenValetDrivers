@@ -1,97 +1,218 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Samarabiz Native
 
-# Getting Started
+## Step 1: Start the Metro Server
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+First, you will need to start **Metro**, the JavaScript _bundler_ that ships _with_ React Native.
 
-## Step 1: Start Metro
+To start Metro, run the following command from the _root_ of your React Native project:
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
-
-To start the Metro dev server, run the following command from the root of your React Native project:
-
-```sh
-# Using npm
+```bash
+# using npm
 npm start
 
 # OR using Yarn
 yarn start
 ```
 
-## Step 2: Build and run your app
+## Step 2: Start your Application
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### For Android
 
-### Android
-
-```sh
-# Using npm
+```bash
+# using npm
 npm run android
 
 # OR using Yarn
 yarn android
 ```
 
-### iOS
+### For iOS
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+```bash
+# using npm
 npm run ios
 
 # OR using Yarn
 yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+```bash
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+cd ~/Library/Android/sdk
+npx kill-port 8081
+npm cache clean --force
+npm start -- --reset-cache
+```
 
-## Step 3: Modify your app
+# build -(ANDROID-apk) with mac
 
-Now that you have successfully run the app, let's make changes!
+## Step 1: find JDK path
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+```bash
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+/usr/libexec/java_home
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+```
 
-## Congratulations! :tada:
+## Step 2: use Keytool to generate a keystore
 
-You've successfully run and modified your React Native App. :partying_face:
+```bash
 
-### Now what?
+sudo keytool -genkey -v -keystore samarabizinvest.keystore -alias bytebridge -keyalg RSA -keysize 2048 -validity 10000
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
 
-# Troubleshooting
+## Firstly, you need to copy the file your_key_name.keystore and paste it under the android/app directory in your React Native project folder.
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+mv my-release-key.keystore /android/app
 
-# Learn More
+```
 
-To learn more about React Native, take a look at the following resources:
+## Step 3: Setting up Gradle variables
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+** Place the my-upload-key.keystore file under the android/app directory
+** Edit the file android/gradle.properties and add the following (replace **\*** with the correct keystore password, alias and key password),
+
+```bash
+
+MYAPP_UPLOAD_STORE_FILE=my-upload-key.keystore
+MYAPP_UPLOAD_KEY_ALIAS=my-key-alias
+MYAPP_UPLOAD_STORE_PASSWORD=***** // keystore password
+MYAPP_UPLOAD_KEY_PASSWORD=***** // key password
+
+```
+
+## Step 4: Add signing config to your app's gradle config
+
+Edit the file android/app/build.gradle in your project folder and add the signing config,
+
+```bash
+signingConfigs {
+        release {
+            if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
+                storeFile file(MYAPP_UPLOAD_STORE_FILE)
+                storePassword MYAPP_UPLOAD_STORE_PASSWORD
+                keyAlias MYAPP_UPLOAD_KEY_ALIAS
+                keyPassword MYAPP_UPLOAD_KEY_PASSWORD
+            }
+        }
+    }
+      buildTypes {
+         release {
+               signingConfig signingConfigs.release
+         }
+      }
+```
+
+## Step 5: Generate the release APK
+
+```bash
+cd android
+gradlew clean
+gradlew assembleRelease
+cd ..
+```
+
+## OR: Generate the release bundle (recommended)
+
+```bash
+cd android
+gradlew clean
+gradlew bundleRelease
+
+```
+
+## Build with bash file
+
+```bash
+
+bash androidBuild.sh
+
+```
+
+## Step 6: Find the APK
+
+```bash
+cd app/build/outputs/apk/release
+```
+
+## Step 7: Install the APK
+
+```bash
+adb install app-release.apk
+```
+
+## Step 8: Run the APK
+
+```bash
+adb shell am start -n com.uparts_native/com.uparts_native.MainActivity
+```
+
+## Step 9: Uninstall the APK
+
+```bash
+adb uninstall com.uparts_native
+```
+
+<!-- //build -(apk) with mac  -->
+
+## open iphone simulator
+
+```bash
+ open -a Simulator
+```
+
+<!-- // For http api call in release build  -->
+
+## android->app->src->main->AndroidManifest.xml
+
+```bash
+   <application
+        .....others
+         android:usesCleartextTraffic="true"
+    >
+     <activity
+        ....others
+        android:usesCleartextTraffic="true"
+    >
+```
+
+<!-- npx react-native-asset  -->
+
+## npx react-native-asset
+
+```bash
+npx react-native-asset
+```
+
+## Get signing report from gradle - SHA1, SHA256 (Android 8.0+ only)
+
+```bash
+cd android && ./gradlew signingReport && cd ..
+```
+
+```bash
+ npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
+
+```
+
+```bash
+
+keytool -export -rfc -keystore "/Users/emon/All Files/Work/Cellco/SAMARABIZ/samarabizinvest/android/app/samarabizinvest.keystore" -alias bytebridge -file upload_certificate.pem
+
+```
+
+
+## Get SHA1, SHA256 from pem file
+
+```bash
+cd android/app
+
+keytool -list -v -keystore upartsnative.keystore -alias uparts
+
+```
+
+```bash
+
+sudo rm -rf ~/Library/Developer/Xcode/DerivedData
+
+```

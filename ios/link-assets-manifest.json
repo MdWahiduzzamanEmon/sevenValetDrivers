@@ -1,0 +1,21 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/car.png",
+      "sha1": "29d23469715ff69b22f8d5fcf35ab027aad5e5d3"
+    },
+    {
+      "path": "src/assets/completed_task.png",
+      "sha1": "96b3440b5652fd9f58f6eba6d1c8534e35947c07"
+    },
+    {
+      "path": "src/assets/settings_icon.png",
+      "sha1": "490c71f669d3e91a323d34984a515ecc6a5a76b4"
+    },
+    {
+      "path": "src/assets/task_ongoing.png",
+      "sha1": "efdf8c3e4e5f96d752f894f54a74349c10f7171f"
+    }
+  ]
+}
