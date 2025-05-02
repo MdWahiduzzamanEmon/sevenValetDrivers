@@ -1,62 +1,50 @@
 import React from 'react';
 import Container from '../../components/Container/Container';
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
+import {PADDING_SCREEN_HORIZONTAL} from '../../config';
+import {StyleSheet, View} from 'react-native';
+import TaskCard, {TaskData} from '../../components/TaskCard/TaskCard';
 
-export const ongoingTasks = [
-  {
-    id: 'Val534624vvv',
-    brand: 'Toyota',
-    model: 'Corolla',
-    plate: '3A456W',
-    duration: '4 m',
-    action: 'PARK',
-    status: 'Completed',
-  },
-  {
-    id: '2',
-    brand: 'Nissan',
-    model: 'Altima',
-    plate: '3A456W',
-    duration: '10 m',
-    action: 'RETRIEVE',
-    status: 'Cancelled',
-  },
-  {
-    id: '3',
-    brand: 'Honda',
-    model: 'Civic',
-    plate: '3A456W',
-    duration: '5 m',
-    action: 'PARK',
-    status: 'Ongoing',
-  },
-  {
-    id: '4',
-    brand: 'Ford',
-    model: 'Focus',
-    plate: '3A456W',
-    duration: '7 m',
-    action: 'RETRIEVE',
-    status: 'Completed',
-  },
-];
+// taskData.ts
+export const taskData: TaskData = {
+  type: 'PARK', // or 'RETRIEVE' or 'PARK'
+  description: 'PARK',
+  name: 'Mr ABC',
+  phone: '5501231232131',
+  brand: 'Toyota',
+  model: 'Corolla',
+  plate: 'QW1212121',
+  location: 'Main Gate, Dubai.',
+  startTime: '2025-05-02T09:02:00Z',
+  duration: 30, // in minutes
+  instructions: 'Please park in the designated area.',
+};
 
 const OngoinTask = ({...props}) => {
   const title = props.route.name;
   console.log('title', props);
+
   return (
     <Container>
-      <TextWrapper
+      <View
         style={{
-          fontSize: 20,
-          fontWeight: 'bold',
-          textAlign: 'center',
-          marginTop: 20,
+          paddingHorizontal: PADDING_SCREEN_HORIZONTAL,
+          paddingBottom: 40,
         }}>
-        {title}
-      </TextWrapper>
+        <TextWrapper style={styles.header}> {title} Tasks</TextWrapper>
+
+        <TaskCard data={taskData} />
+      </View>
     </Container>
   );
 };
 
 export default OngoinTask;
+
+const styles = StyleSheet.create({
+  header: {
+    fontSize: 22,
+    marginBottom: 16,
+    fontWeight: 'bold',
+  },
+});

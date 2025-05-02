@@ -6,6 +6,8 @@
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
 	<string>sevenValetDrivers</string>
+	<key>NSCameraUsageDescription</key>
+	<string>App needs access to the camera to use the flashlight</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

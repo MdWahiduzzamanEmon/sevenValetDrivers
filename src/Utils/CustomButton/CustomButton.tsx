@@ -13,11 +13,13 @@ interface Props {
   mode?: 'text' | 'outlined' | 'contained';
   [key: string]: any; // Allow additional props
   style?: ViewStyle;
+  disabled?: boolean;
 }
 
 const CustomButton: React.FC<Props> = ({
   label,
   onPress,
+  disabled,
   mode = 'contained',
   ...props
 }) => {
@@ -30,8 +32,15 @@ const CustomButton: React.FC<Props> = ({
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.8}
+      disabled={disabled}
       {...props}
-      style={[styles.button, {backgroundColor}, borderStyle, props.style]}>
+      style={[
+        styles.button,
+        {backgroundColor},
+        borderStyle,
+        props.style,
+        {opacity: disabled ? 0.5 : 1},
+      ]}>
       <Text style={[styles.label, {color: textColor}]}>{label}</Text>
     </TouchableOpacity>
   );
