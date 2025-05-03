@@ -35,7 +35,7 @@ const OngoinTask = ({...props}) => {
         style={{
           flex: 1,
           paddingHorizontal: PADDING_SCREEN_HORIZONTAL,
-          paddingBottom: 40,
+          // paddingBottom: 40,
         }}>
         {/* <TextWrapper style={styles.header}> {title} Tasks</TextWrapper> */}
 

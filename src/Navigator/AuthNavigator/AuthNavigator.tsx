@@ -45,8 +45,6 @@ export default function AuthNavigator() {
       initialRouteName={'driver-login'}
       screenOptions={{
         headerShown: false,
-        // headerBackTitleVisible: false,
-        headerTitleAlign: 'left',
       }}>
       <Stack.Screen name="driver-login" component={LoginSuspense} />
       <Stack.Screen name="driver-register" component={RegisterSuspense} />

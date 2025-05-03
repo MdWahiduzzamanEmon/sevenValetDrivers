@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {useEffect, useState} from 'react';
 import {StatusBar, StyleSheet} from 'react-native';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
@@ -22,32 +23,39 @@ const Root = () => {
   //   ===================================  state for splash screen end =========================
 
   return (
-    <GestureHandlerRootView style={styles.root}>
+    <GestureHandlerRootView
+      style={[
+        styles.root,
+
+        {
+          // ...StyleSheet.absoluteFillObject,
+          backgroundColor: '#000',
+          paddingTop: insets.top,
+          paddingBottom: insets.bottom,
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
+        },
+      ]}>
+      <StatusBar
+        animated={true}
+        backgroundColor="#000"
+        barStyle="light-content"
+        showHideTransition="fade"
+        hidden={false}
+      />
       <LinearGradient
         colors={GRADIENT_THEME_COLORS} // black to brown
-        style={[
-          styles.gradient,
-          {
-            paddingTop: insets.top,
-            paddingBottom: insets.bottom,
-            paddingLeft: insets.left,
-            paddingRight: insets.right,
-          },
-        ]}>
-        <StatusBar
-          animated={true}
-          backgroundColor={'#000'}
-          barStyle="light-content"
-          showHideTransition="fade"
-          hidden={false}
-        />
-
+        style={{
+          flex: 1,
+        }}>
         {showSplash ? (
           <SplashFallback />
         ) : (
           <Animated.View
             entering={LightSpeedInRight.duration(500)}
-            style={StyleSheet.absoluteFill}>
+            style={{
+              flex: 1,
+            }}>
             <ParentNavigator />
           </Animated.View>
         )}
@@ -65,12 +73,5 @@ export default Root;
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-  },
-  gradient: {
-    flex: 1,
-  },
-  text: {
-    color: '#fff',
-    fontSize: 18,
   },
 });

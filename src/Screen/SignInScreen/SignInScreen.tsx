@@ -30,8 +30,26 @@ const SignInScreen = () => {
   // };
 
   return (
+    // <SafeAreaView
+    //   style={{
+    //     flex: 1,
+    //     backgroundColor: '#000',
+    //     borderWidth: 1,
+    //     borderColor: 'gray',
+    //   }}>
+    // {/* <StatusBar
+    //   animated={true}
+    //   backgroundColor="transparent"
+    //   barStyle="light-content"
+    //   showHideTransition="fade"
+    //   hidden={false}
+    // /> */}
     <Container>
-      <View style={{padding: 16, alignItems: 'flex-start'}}>
+      <View
+        style={{
+          padding: 16,
+          alignItems: 'flex-start',
+        }}>
         <TextWrapper style={{fontSize: 18}}>{t('sign_in')}</TextWrapper>
         <TextWrapper style={{fontSize: 14, color: 'gray'}}>
           {t('sign_in_description')}
@@ -106,6 +124,7 @@ const SignInScreen = () => {
         </TouchableOpacity> */}
       </View>
     </Container>
+    // </SafeAreaView>
   );
 };
 

@@ -304,14 +304,21 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
           </View>
         </View>
 
-        <View style={{marginVertical: 10}}>
+        <View
+          style={{
+            marginVertical: 8,
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}>
           <View style={styles.row}>
             <Avatar.Icon
               icon="calendar"
               size={ICON_SIZE}
               backgroundColor={BG_COLOR_BUTTON}
             />
-            <TextWrapper>{start.format('DD-MMM-YYYY HH:mm')}</TextWrapper>
+            <TextWrapper>{start.format('DD,MMM,YYYY HH:mm')}</TextWrapper>
           </View>
           <View style={styles.row}>
             <Avatar.Icon
@@ -321,47 +328,46 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
             />
             <TextWrapper>{data.duration} min</TextWrapper>
           </View>
-
-          <View style={styles.progressBarContainer}>
-            <Animated.View
-              style={[
-                styles.progressBarFill,
-                progressColor,
-                {width: `${progress.value * 100}%`},
-              ]}
-            />
-          </View>
-
-          <View style={styles.row}>
-            <Avatar.Icon
-              icon="information-outline"
-              size={ICON_SIZE}
-              backgroundColor={BG_COLOR_BUTTON}
-            />
-            <TextWrapper
-              style={{
-                ...styles.status,
-                backgroundColor:
-                  status === 'COMPLETED'
-                    ? '#4CAF50'
-                    : status === 'ONGOING'
-                    ? '#87CEEB'
-                    : '#FFA500',
-                color: '#fff',
-                padding: 4,
-                borderRadius: 4,
-                fontWeight: 'bold',
-              }}>
-              {getStatusLabel()}
-            </TextWrapper>
-          </View>
-          <CustomButton
-            disabled={status === 'COMPLETED'}
-            style={styles.button}
-            label={getButtonLabel()}
-            onPress={handleStatusChange}
+        </View>
+        <View style={styles.progressBarContainer}>
+          <Animated.View
+            style={[
+              styles.progressBarFill,
+              progressColor,
+              {width: `${progress.value * 100}%`},
+            ]}
           />
         </View>
+
+        <View style={styles.row}>
+          <Avatar.Icon
+            icon="information-outline"
+            size={ICON_SIZE}
+            backgroundColor={BG_COLOR_BUTTON}
+          />
+          <TextWrapper
+            style={{
+              ...styles.status,
+              backgroundColor:
+                status === 'COMPLETED'
+                  ? '#4CAF50'
+                  : status === 'ONGOING'
+                  ? '#87CEEB'
+                  : '#FFA500',
+              color: '#fff',
+              padding: 4,
+              borderRadius: 4,
+              fontWeight: 'bold',
+            }}>
+            {getStatusLabel()}
+          </TextWrapper>
+        </View>
+        <CustomButton
+          disabled={status === 'COMPLETED'}
+          style={styles.button}
+          label={getButtonLabel()}
+          onPress={handleStatusChange}
+        />
       </View>
     </Animated.View>
     // </Animated.View>
@@ -379,12 +385,13 @@ const styles = StyleSheet.create({
   titleContiner: {
     borderWidth: 1,
     borderColor: '#ccc',
-    padding: 8,
+    paddingTop: 10,
+    paddingBottom: 5,
     borderRadius: 8,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SCREEN_HEIGHT * 0.03,
+    marginBottom: SCREEN_HEIGHT * 0.01,
   },
   title: {
     fontWeight: 'bold',
@@ -404,7 +411,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 0, 0, 0.2)',
     fontWeight: 'bold',
     marginTop: 8,
-    marginBottom: 5,
+    marginBottom: 0,
   },
   row: {
     flexDirection: 'row',
@@ -413,7 +420,7 @@ const styles = StyleSheet.create({
     marginVertical: 3,
   },
   progressBarContainer: {
-    height: 8,
+    height: 5,
     backgroundColor: '#eee',
     borderRadius: 4,
     overflow: 'hidden',
