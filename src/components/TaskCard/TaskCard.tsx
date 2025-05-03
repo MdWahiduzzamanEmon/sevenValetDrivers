@@ -4,16 +4,20 @@ import React, {useState, useEffect, useCallback} from 'react';
 import {View, StyleSheet, Platform, Vibration} from 'react-native';
 import {Avatar, useTheme} from 'react-native-paper';
 import moment from 'moment';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  Easing,
-} from 'react-native-reanimated';
+
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
 import {BG_COLOR_BUTTON, SCREEN_HEIGHT} from '../../config';
 import CustomButton from '../../Utils/CustomButton/CustomButton';
 import {startBlinkingFlashlight} from '../../Utils/toggleFlashlight';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+  Easing,
+  interpolateColor,
+} from 'react-native-reanimated';
+// import {stopSound} from '../../Utils/Sound/Sound';
 
 export interface TaskData {
   type: 'PARK' | 'RETRIEVE';
@@ -29,7 +33,7 @@ export interface TaskData {
   instructions: string;
 }
 
-const ICON_SIZE = 28;
+const ICON_SIZE = SCREEN_HEIGHT * 0.035;
 
 const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
   const [isBlinking, setIsBlinking] = useState(false);
@@ -82,18 +86,6 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
   //     };
   //   }, [data, handleStartStopBlinking, triggerAlertEffects]);
 
-  const fadeInSlide = useAnimatedStyle(() => ({
-    opacity: withTiming(1, {duration: 600}),
-    transform: [
-      {
-        translateY: withTiming(0, {
-          duration: 600,
-          easing: Easing.out(Easing.exp),
-        }),
-      },
-    ],
-  }));
-
   const progressColor = useAnimatedStyle(() => {
     const color =
       progress.value < 0.6
@@ -103,11 +95,6 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
         : theme.colors.error;
     return {backgroundColor: color};
   });
-
-  const buttonScale = useSharedValue(1);
-  const animatedButtonStyle = useAnimatedStyle(() => ({
-    transform: [{scale: withTiming(buttonScale.value, {duration: 150})}],
-  }));
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -119,7 +106,8 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
     return () => clearInterval(interval);
   }, [data.startTime, data.duration, end, start, progress]);
 
-  const handleStatusChange = () => {
+  const handleStatusChange = async () => {
+    // await stopSound();
     if (status === 'NOT_STARTED') setStatus('ONGOING');
     else if (status === 'ONGOING') setStatus('COMPLETED');
     Vibration.cancel(); // Stop vibration when status changes
@@ -137,146 +125,245 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
     return 'Task Completed';
   };
 
+  const headerAnim = useSharedValue(0);
+
+  useEffect(() => {
+    headerAnim.value = withTiming(1, {
+      duration: 800,
+      easing: Easing.out(Easing.exp),
+    });
+  }, []);
+
+  const animatedHeaderStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          scale: headerAnim.value,
+        },
+      ],
+    };
+  });
+
+  //if not data then
+
+  const pulse = useSharedValue(1);
+
+  useEffect(() => {
+    pulse.value = withRepeat(
+      withTiming(1.2, {
+        duration: 800,
+        easing: Easing.inOut(Easing.ease),
+      }),
+      -1,
+      true,
+    );
+  }, []);
+
+  //animate border color
+  const animatedBorderStyle = useAnimatedStyle(() => {
+    const borderColor = interpolateColor(
+      pulse.value,
+      [1, 1.2],
+      //orange and primary
+      ['#FFA500', theme.colors.primary],
+    );
+
+    return {
+      borderColor,
+      borderWidth: withTiming(pulse.value > 1 ? 2 : 1),
+    };
+  });
+  const pulsingStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{scale: pulse.value}],
+      backgroundColor: theme.colors.primary,
+      borderRadius: 100,
+      padding: 10,
+      opacity: 0.8,
+      marginBottom: 10,
+    };
+  });
+
+  if (!data) {
+    // {
+    //   /* //text : waiting for new task ,and waiting icon and content will be in center */
+    // }
+    return (
+      <>
+        <Animated.View
+          style={[
+            animatedBorderStyle,
+            styles.cardContainer,
+            {
+              justifyContent: 'center',
+              alignItems: 'center',
+            },
+          ]}>
+          <Animated.View style={[pulsingStyle, {padding: 10}]}>
+            <Avatar.Icon
+              icon="car"
+              size={SCREEN_HEIGHT * 0.1}
+              backgroundColor={theme.colors.primary}
+              style={{borderRadius: 100}}
+            />
+          </Animated.View>
+          <TextWrapper variant="titleMedium" style={{marginVertical: 10}}>
+            Waiting for new task...
+          </TextWrapper>
+        </Animated.View>
+      </>
+    );
+  }
+
   return (
-    <Animated.View style={[styles.animatedContainer, fadeInSlide]}>
-      <View style={styles.cardContainer}>
-        <View style={styles.titleContiner}>
-          <TextWrapper variant="titleLarge" style={styles.title}>
-            {data.type === 'PARK' ? 'Park the Car' : 'Retrieve the Car'}
-          </TextWrapper>
+    // <Animated.View style={[styles.animatedContainer, fadeInSlide]}>
+    <Animated.View
+      style={[animatedBorderStyle, styles.cardContainer, {padding: 15}]}>
+      <Animated.View style={[styles.titleContiner, animatedHeaderStyle]}>
+        <Animated.View style={[pulsingStyle]}>
+          <Avatar.Icon
+            icon="car"
+            size={SCREEN_HEIGHT * 0.06}
+            backgroundColor={theme.colors.primary}
+            style={{borderRadius: 100}}
+          />
+        </Animated.View>
+
+        <TextWrapper
+          variant="titleLarge"
+          style={{
+            ...styles.title,
+            color: '#fff',
+            fontSize: 20,
+            fontStyle: 'italic',
+          }}>
+          {data.type === 'PARK' ? 'Park the Car' : 'Retrieve the Car'}
+        </TextWrapper>
+      </Animated.View>
+      <TextWrapper variant="titleSmall">{data.description}</TextWrapper>
+
+      <View>
+        {/* <TextWrapper variant="labelLarge">Special Instruction:</TextWrapper> */}
+        <TextWrapper style={styles.instructions}>
+          {data.instructions}
+        </TextWrapper>
+      </View>
+
+      <View style={styles.content}>
+        <View style={{marginBottom: 5}}>
+          <View style={styles.row}>
+            <Avatar.Icon
+              icon="account"
+              size={ICON_SIZE}
+              backgroundColor={BG_COLOR_BUTTON}
+            />
+            <TextWrapper>{data.name}</TextWrapper>
+          </View>
+          <View style={styles.row}>
+            <Avatar.Icon
+              icon="phone"
+              size={ICON_SIZE}
+              backgroundColor={BG_COLOR_BUTTON}
+            />
+            <TextWrapper>{data.phone}</TextWrapper>
+          </View>
         </View>
-        <TextWrapper variant="titleMedium">{data.description}</TextWrapper>
 
-        <View>
-          {/* <TextWrapper variant="labelLarge">Special Instruction:</TextWrapper> */}
-          <TextWrapper style={styles.instructions}>
-            {data.instructions}
-          </TextWrapper>
+        <View style={{marginVertical: 5}}>
+          <View style={styles.row}>
+            <Avatar.Icon
+              icon="car"
+              size={ICON_SIZE}
+              backgroundColor={BG_COLOR_BUTTON}
+            />
+            <TextWrapper>{`${data.brand}, ${data.model}`}</TextWrapper>
+          </View>
+          <View style={styles.row}>
+            <Avatar.Icon
+              icon="numeric"
+              size={ICON_SIZE}
+              backgroundColor={BG_COLOR_BUTTON}
+            />
+            <TextWrapper>{data.plate}</TextWrapper>
+          </View>
+          <View style={styles.row}>
+            <Avatar.Icon
+              icon="map-marker"
+              size={ICON_SIZE}
+              backgroundColor={BG_COLOR_BUTTON}
+            />
+            <TextWrapper>{data.location}</TextWrapper>
+          </View>
         </View>
 
-        <View style={styles.content}>
-          <View style={{marginVertical: 10}}>
-            <View style={styles.row}>
-              <Avatar.Icon
-                icon="account"
-                size={ICON_SIZE}
-                backgroundColor={BG_COLOR_BUTTON}
-              />
-              <TextWrapper>{data.name}</TextWrapper>
-            </View>
-            <View style={styles.row}>
-              <Avatar.Icon
-                icon="phone"
-                size={ICON_SIZE}
-                backgroundColor={BG_COLOR_BUTTON}
-              />
-              <TextWrapper>{data.phone}</TextWrapper>
-            </View>
+        <View style={{marginVertical: 10}}>
+          <View style={styles.row}>
+            <Avatar.Icon
+              icon="calendar"
+              size={ICON_SIZE}
+              backgroundColor={BG_COLOR_BUTTON}
+            />
+            <TextWrapper>{start.format('DD-MMM-YYYY HH:mm')}</TextWrapper>
+          </View>
+          <View style={styles.row}>
+            <Avatar.Icon
+              icon="clock-outline"
+              size={ICON_SIZE}
+              backgroundColor={BG_COLOR_BUTTON}
+            />
+            <TextWrapper>{data.duration} min</TextWrapper>
           </View>
 
-          <View style={{marginVertical: 5}}>
-            <View style={styles.row}>
-              <Avatar.Icon
-                icon="car"
-                size={ICON_SIZE}
-                backgroundColor={BG_COLOR_BUTTON}
-              />
-              <TextWrapper>{`${data.brand}, ${data.model}`}</TextWrapper>
-            </View>
-            <View style={styles.row}>
-              <Avatar.Icon
-                icon="numeric"
-                size={ICON_SIZE}
-                backgroundColor={BG_COLOR_BUTTON}
-              />
-              <TextWrapper>{data.plate}</TextWrapper>
-            </View>
-            <View style={styles.row}>
-              <Avatar.Icon
-                icon="map-marker"
-                size={ICON_SIZE}
-                backgroundColor={BG_COLOR_BUTTON}
-              />
-              <TextWrapper>{data.location}</TextWrapper>
-            </View>
+          <View style={styles.progressBarContainer}>
+            <Animated.View
+              style={[
+                styles.progressBarFill,
+                progressColor,
+                {width: `${progress.value * 100}%`},
+              ]}
+            />
           </View>
 
-          <View style={{marginVertical: 10}}>
-            <View style={styles.row}>
-              <Avatar.Icon
-                icon="calendar"
-                size={ICON_SIZE}
-                backgroundColor={BG_COLOR_BUTTON}
-              />
-              <TextWrapper>{start.format('DD-MMM-YYYY HH:mm')}</TextWrapper>
-            </View>
-            <View style={styles.row}>
-              <Avatar.Icon
-                icon="clock-outline"
-                size={ICON_SIZE}
-                backgroundColor={BG_COLOR_BUTTON}
-              />
-              <TextWrapper>{data.duration} min</TextWrapper>
-            </View>
-
-            <View style={styles.progressBarContainer}>
-              <Animated.View
-                style={[
-                  styles.progressBarFill,
-                  progressColor,
-                  {width: `${progress.value * 100}%`},
-                ]}
-              />
-            </View>
-
-            <View style={styles.row}>
-              <Avatar.Icon
-                icon="information-outline"
-                size={ICON_SIZE}
-                backgroundColor={BG_COLOR_BUTTON}
-              />
-              <TextWrapper
-                style={{
-                  ...styles.status,
-                  backgroundColor:
-                    status === 'COMPLETED'
-                      ? '#4CAF50'
-                      : status === 'ONGOING'
-                      ? '#87CEEB'
-                      : '#FFA500',
-                  color: '#fff',
-                  padding: 4,
-                  borderRadius: 4,
-                  fontWeight: 'bold',
-                }}>
-                {getStatusLabel()}
-              </TextWrapper>
-            </View>
-
-            <Animated.View style={[animatedButtonStyle]}>
-              <CustomButton
-                disabled={status === 'COMPLETED'}
-                style={styles.button}
-                label={getButtonLabel()}
-                onPress={handleStatusChange}
-              />
-            </Animated.View>
+          <View style={styles.row}>
+            <Avatar.Icon
+              icon="information-outline"
+              size={ICON_SIZE}
+              backgroundColor={BG_COLOR_BUTTON}
+            />
+            <TextWrapper
+              style={{
+                ...styles.status,
+                backgroundColor:
+                  status === 'COMPLETED'
+                    ? '#4CAF50'
+                    : status === 'ONGOING'
+                    ? '#87CEEB'
+                    : '#FFA500',
+                color: '#fff',
+                padding: 4,
+                borderRadius: 4,
+                fontWeight: 'bold',
+              }}>
+              {getStatusLabel()}
+            </TextWrapper>
           </View>
+          <CustomButton
+            disabled={status === 'COMPLETED'}
+            style={styles.button}
+            label={getButtonLabel()}
+            onPress={handleStatusChange}
+          />
         </View>
       </View>
     </Animated.View>
+    // </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
-  animatedContainer: {
-    flex: 1,
-    opacity: 0,
-    transform: [{translateY: 40}],
-  },
   cardContainer: {
-    margin: 10,
-    height: SCREEN_HEIGHT - 30,
+    marginVertical: 10,
+    flex: 1,
     borderRadius: 12,
     justifyContent: 'space-between',
     // alignItems: 'center',
@@ -289,7 +376,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: SCREEN_HEIGHT * 0.03,
   },
   title: {
     fontWeight: 'bold',
@@ -305,10 +392,11 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: 'red',
+    borderColor: 'rgba(255, 0, 0, 0.7)', //light red
+    backgroundColor: 'rgba(255, 0, 0, 0.2)',
     fontWeight: 'bold',
-    marginTop: 10,
-    marginBottom: 10,
+    marginTop: 8,
+    marginBottom: 5,
   },
   row: {
     flexDirection: 'row',

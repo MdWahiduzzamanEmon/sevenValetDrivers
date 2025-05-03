@@ -1,9 +1,9 @@
 import React from 'react';
 import Container from '../../components/Container/Container';
-import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
 import {PADDING_SCREEN_HORIZONTAL} from '../../config';
 import {StyleSheet, View} from 'react-native';
 import TaskCard, {TaskData} from '../../components/TaskCard/TaskCard';
+import {playSound, stopSound} from '../../Utils/Sound/Sound';
 
 // taskData.ts
 export const taskData: TaskData = {
@@ -24,10 +24,16 @@ const OngoinTask = ({...props}) => {
   const title = props.route.name;
   console.log('title', props);
 
+  React.useEffect(() => {
+    stopSound();
+    // playSound();
+  }, []);
+
   return (
     <Container>
       <View
         style={{
+          flex: 1,
           paddingHorizontal: PADDING_SCREEN_HORIZONTAL,
           paddingBottom: 40,
         }}>

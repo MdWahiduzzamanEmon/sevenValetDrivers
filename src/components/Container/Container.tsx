@@ -91,11 +91,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-    height: SCREEN_HEIGHT,
-    width: SCREEN_WIDTH,
   },
   gradient: {
     flex: 1,
-    width: SCREEN_WIDTH,
+    // width: SCREEN_WIDTH,
   },
 });

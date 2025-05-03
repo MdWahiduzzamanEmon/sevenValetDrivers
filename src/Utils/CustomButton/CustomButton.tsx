@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
   button: {
     marginVertical: 10,
     borderRadius: 50,
-    paddingVertical: 14,
+    paddingVertical: 10,
     alignItems: 'center',
     justifyContent: 'center',
   } as ViewStyle,
