@@ -25,8 +25,8 @@ const OngoinTask = ({...props}) => {
   console.log('title', props);
 
   React.useEffect(() => {
-    stopSound();
-    // playSound();
+    // stopSound();
+    playSound();
   }, []);
 
   return (
@@ -46,11 +46,3 @@ const OngoinTask = ({...props}) => {
 };
 
 export default OngoinTask;
-
-const styles = StyleSheet.create({
-  header: {
-    fontSize: 22,
-    marginBottom: 16,
-    fontWeight: 'bold',
-  },
-});

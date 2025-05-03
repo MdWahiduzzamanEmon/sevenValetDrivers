@@ -26,7 +26,7 @@ const Header = ({...props}) => {
       <TouchableOpacity
         onPress={onLogout}
         activeOpacity={0.8}
-        style={{flexDirection: 'row', alignItems: 'center'}}>
+        style={{flexDirection: 'row', alignItems: 'center', padding: 10}}>
         <Image
           source={logout}
           style={{width: 24, height: 24}} // adjust size as needed

@@ -11,10 +11,13 @@ import {
 } from 'react-native';
 import Container from '../../components/Container/Container';
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
-import CustomDropdown from '../../Utils/CustomDropdown/CustomDropdown';
 import CustomTextInput from '../../Utils/CustomTextInput/CustomTextInput';
 import CustomButton from '../../Utils/CustomButton/CustomButton';
 import {PADDING_SCREEN_HORIZONTAL} from '../../config';
+import {LANGUAGES_LIST} from '../../constant';
+import {useTranslation} from 'react-i18next';
+import CustomDropdown from '../../Utils/CustomDropdown/CustomDropdown';
+// import i18n from '../../../i18n';
 
 if (Platform.OS === 'android') {
   UIManager.setLayoutAnimationEnabledExperimental &&
@@ -22,7 +25,8 @@ if (Platform.OS === 'android') {
 }
 
 const Profile = ({route}: any) => {
-  const title = route?.name || 'Profile';
+  const {t, i18n} = useTranslation();
+  // const title = route?.name || 'Profile';
   const [selectLanguage, setSelectLanguage] = useState('en');
   const [showPasswordSection, setShowPasswordSection] = useState(false);
 
@@ -44,6 +48,11 @@ const Profile = ({route}: any) => {
     });
   };
 
+  const handleSelectLanguage = (value: string) => {
+    i18n.changeLanguage(value);
+    setSelectLanguage(value);
+  };
+
   return (
     <Container>
       <KeyboardAvoidingView
@@ -52,43 +61,39 @@ const Profile = ({route}: any) => {
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled">
-          <TextWrapper style={styles.header}>{title}</TextWrapper>
+          <TextWrapper style={styles.header}>{t('profile')}</TextWrapper>
 
           <CustomDropdown
-            label="Language"
+            label={t('select_language')}
             value={selectLanguage}
-            options={[
-              {label: 'English', value: 'en'},
-              {label: 'Urdu', value: 'ur'},
-              {label: 'Bangla', value: 'bn'},
-            ]}
-            onSelect={value => setSelectLanguage(value)}
+            options={LANGUAGES_LIST}
+            onSelect={handleSelectLanguage}
           />
 
           <TouchableOpacity
             onPress={togglePasswordSection}
             style={styles.collapseHeader}>
             <TextWrapper style={styles.collapseHeaderText}>
-              {showPasswordSection ? 'Hide' : 'Change Password'}
+              {showPasswordSection ? t('hide') : t('change_password')}
             </TextWrapper>
           </TouchableOpacity>
 
           {showPasswordSection && (
             <View style={styles.passwordSection}>
               <CustomTextInput
-                label="Old Password"
+                label={t('old_password')}
                 value={oldPassword}
                 onChangeText={setOldPassword}
                 secureTextEntry
               />
               <CustomTextInput
-                label="New Password"
+                label={t('new_password')}
                 value={newPassword}
                 onChangeText={setNewPassword}
                 secureTextEntry
               />
               <CustomTextInput
-                label="Confirm Password"
+                label={t('confirm_password')}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry
@@ -97,7 +102,7 @@ const Profile = ({route}: any) => {
           )}
           <CustomButton
             style={{marginTop: 16}}
-            label="Update"
+            label={t('update')}
             onPress={handleChangePassword}
           />
         </ScrollView>

@@ -7,7 +7,7 @@ import Header from '../components/Header/Header';
 const Stack = createNativeStackNavigator();
 
 const ParentNavigator = () => {
-  const letUserAuthenticate = true; // Replace with your authentication logic
+  const letUserAuthenticate = false; // Replace with your authentication logic
 
   return (
     <Stack.Navigator

@@ -10,6 +10,7 @@ import {PaperProvider} from 'react-native-paper';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import 'react-native-reanimated';
 import 'react-native-gesture-handler';
+import './i18n';
 export default function Main() {
   return (
     <PaperProvider theme={theme}>

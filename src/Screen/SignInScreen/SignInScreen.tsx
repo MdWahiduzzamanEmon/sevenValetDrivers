@@ -7,8 +7,10 @@ import CustomButton from '../../Utils/CustomButton/CustomButton';
 import Container from '../../components/Container/Container';
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
 import {APP_NAME} from '../../config';
+import {useTranslation} from 'react-i18next';
 
 const SignInScreen = () => {
+  const {t} = useTranslation();
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -30,9 +32,9 @@ const SignInScreen = () => {
   return (
     <Container>
       <View style={{padding: 16, alignItems: 'flex-start'}}>
-        <TextWrapper style={{fontSize: 18}}>Sign In</TextWrapper>
+        <TextWrapper style={{fontSize: 18}}>{t('sign_in')}</TextWrapper>
         <TextWrapper style={{fontSize: 14, color: 'gray'}}>
-          Please enter your user ID and password to sign in.
+          {t('sign_in_description')}
         </TextWrapper>
       </View>
 
@@ -57,14 +59,14 @@ const SignInScreen = () => {
           // backgroundColor: 'rgba(0,0,0,0.5)',
         }}>
         <CustomTextInput
-          label="ID"
+          label={t('id')}
           value={userId}
           onChangeText={setUserId}
           autoCapitalize="none"
           // maxLength={10}
         />
         <CustomTextInput
-          label="Password"
+          label={t('password')}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -91,11 +93,11 @@ const SignInScreen = () => {
           <TextWrapper
             onPress={() => setRememberMe(prev => !prev)}
             style={{color: '#fff'}}>
-            Remember Me
+            {t('remember_me')}
           </TextWrapper>
         </View>
 
-        <CustomButton label="Sign In" onPress={onSignIn} />
+        <CustomButton label={t('sign_in')} onPress={onSignIn} />
 
         {/* <TouchableOpacity onPress={goToSignUp} style={{marginTop: 16}}>
           <TextWrapper style={{color: 'white', textAlign: 'center'}}>

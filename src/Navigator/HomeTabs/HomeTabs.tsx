@@ -6,6 +6,7 @@ import Ongoin from '../../assets/ongoing.png';
 import asignedTask from '../../assets/completed_task.png';
 import profileIcon from '../../assets/profile.png';
 import pendingtask from '../../assets/pendingtask.png';
+import {useTranslation} from 'react-i18next';
 // import Pending from '../../Screen/Pending/Pending';
 
 // Lazy-loaded screens
@@ -36,7 +37,7 @@ const withSuspense = (Component: React.ComponentType<any>) => (props: any) =>
 // Tab screen config array
 const tabScreens = [
   {
-    name: 'Ongoing',
+    name: 'ongoing',
     component: withSuspense(OngoinTask),
     icon: icons.home,
   },
@@ -46,12 +47,12 @@ const tabScreens = [
   //   icon: icons.pending,
   // },
   {
-    name: 'Asigned',
+    name: 'asigned',
     component: withSuspense(AsignedTask),
     icon: icons.asigned,
   },
   {
-    name: 'Profile',
+    name: 'profile',
     component: withSuspense(Profile),
     icon: icons.profile,
   },
@@ -60,7 +61,7 @@ const tabScreens = [
 // =========  render tab bar icon ========== //
 const renderTabBarIcon = (routeName: string) => {
   const matchedTab = tabScreens.find(
-    tabScreen => tabScreen?.name === routeName,
+    tabScreen => tabScreen.name === routeName.toLowerCase(),
   );
   return (
     <Image source={matchedTab?.icon} style={styles.icon} resizeMode="contain" />
@@ -68,9 +69,10 @@ const renderTabBarIcon = (routeName: string) => {
 };
 
 const HomeTabs = () => {
+  const {t} = useTranslation();
   return (
     <Tab.Navigator
-      initialRouteName="Ongoing"
+      initialRouteName="ongoing"
       screenOptions={({route}) => ({
         headerShown: false,
         tabBarStyle: styles.tabBar,
@@ -79,7 +81,14 @@ const HomeTabs = () => {
         tabBarButton: CustomTabBarButton, // 🧠 HERE
       })}>
       {tabScreens.map(({name, component}) => (
-        <Tab.Screen key={name} name={name} component={component} />
+        <Tab.Screen
+          key={name}
+          name={name} // Keep internal name consistent
+          component={component}
+          options={{
+            tabBarLabel: t(name), // Translate only the label
+          }}
+        />
       ))}
     </Tab.Navigator>
   );

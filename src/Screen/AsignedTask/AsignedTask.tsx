@@ -6,6 +6,7 @@ import {FlatList, StyleSheet, View} from 'react-native';
 import {Card} from 'react-native-paper';
 import Animated, {FadeInUp} from 'react-native-reanimated';
 import {PADDING_SCREEN_HORIZONTAL} from '../../config';
+import {useTranslation} from 'react-i18next';
 
 // data.ts
 export const completedTasks = [
@@ -48,8 +49,9 @@ export const completedTasks = [
 ];
 
 const CompletedTask = ({...props}) => {
-  const title = props.route.name;
-  console.log('title', props);
+  const {t} = useTranslation();
+  // const title = props.route.name;
+  // console.log('title', props);
 
   const PARK_COLOR = '#EF4444';
   const RETRIEVE_COLOR = '#FB923C';
@@ -57,10 +59,11 @@ const CompletedTask = ({...props}) => {
     <Container>
       <View
         style={{
+          marginTop: 20,
           paddingHorizontal: PADDING_SCREEN_HORIZONTAL,
-          paddingBottom: 40,
+          // paddingBottom: 40,
         }}>
-        <TextWrapper style={styles.header}> {title} Tasks</TextWrapper>
+        <TextWrapper style={styles.header}> {t('asigned_tasks')}</TextWrapper>
         <FlatList
           data={completedTasks}
           keyExtractor={item => item.id}
@@ -71,13 +74,17 @@ const CompletedTask = ({...props}) => {
                 <Card.Content style={styles.content}>
                   <View style={styles.info}>
                     <TextWrapper style={styles.title}>
-                      Task Id: {item.id}
+                      {t('task_id')}: {item.id}
                     </TextWrapper>
                     <TextWrapper style={styles.title}>
-                      Brand: {item.brand}
+                      {t('brand')}: {item.brand}
                     </TextWrapper>
-                    <TextWrapper>Model: {item.model}</TextWrapper>
-                    <TextWrapper>Plate No.: {item.plate}</TextWrapper>
+                    <TextWrapper>
+                      {t('model')}: {item.model}
+                    </TextWrapper>
+                    <TextWrapper>
+                      {t('plate_number')}: {item.plate}
+                    </TextWrapper>
                   </View>
                   <View
                     style={[
@@ -97,12 +104,16 @@ const CompletedTask = ({...props}) => {
 
                 <Card.Content style={styles.cardFooterContent}>
                   <TextWrapper style={styles.actionText}>
-                    {item.action}
+                    {item.action === 'PARK' ? t('park') : t('retrieve')}
                   </TextWrapper>
 
                   {/* //status  */}
                   <TextWrapper style={styles.statusText}>
-                    {item.status}
+                    {item.status === 'Completed'
+                      ? t('completed')
+                      : item.status === 'Cancelled'
+                      ? t('cancelled')
+                      : t('ongoing')}
                   </TextWrapper>
                 </Card.Content>
               </Card>

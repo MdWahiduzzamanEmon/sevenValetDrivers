@@ -17,6 +17,8 @@ import Animated, {
   Easing,
   interpolateColor,
 } from 'react-native-reanimated';
+import {stopSound} from '../../Utils/Sound/Sound';
+import {useTranslation} from 'react-i18next';
 // import {stopSound} from '../../Utils/Sound/Sound';
 
 export interface TaskData {
@@ -36,6 +38,7 @@ export interface TaskData {
 const ICON_SIZE = SCREEN_HEIGHT * 0.035;
 
 const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
+  const {t} = useTranslation();
   const [isBlinking, setIsBlinking] = useState(false);
   let stopBlinking: () => void;
 
@@ -75,16 +78,16 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
   //this section is commented out to avoid triggering the alert effects on every render.
   //will use it when the task is not started.
 
-  //   useEffect(() => {
-  //     if (data) {
-  //       triggerAlertEffects();
-  //     } else {
-  //       Vibration.cancel();
-  //     }
-  //     return () => {
-  //       Vibration.cancel(); // Stop vibration when the component unmounts
-  //     };
-  //   }, [data, handleStartStopBlinking, triggerAlertEffects]);
+  useEffect(() => {
+    if (data) {
+      triggerAlertEffects();
+    } else {
+      Vibration.cancel();
+    }
+    return () => {
+      Vibration.cancel(); // Stop vibration when the component unmounts
+    };
+  }, [data, handleStartStopBlinking, triggerAlertEffects]);
 
   const progressColor = useAnimatedStyle(() => {
     const color =
@@ -107,22 +110,29 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
   }, [data.startTime, data.duration, end, start, progress]);
 
   const handleStatusChange = async () => {
-    // await stopSound();
-    if (status === 'NOT_STARTED') setStatus('ONGOING');
-    else if (status === 'ONGOING') setStatus('COMPLETED');
+    if (status === 'NOT_STARTED') {
+      setStatus('ONGOING');
+    } else if (status === 'ONGOING') {
+      setStatus('COMPLETED');
+    } else {
+      setStatus('NOT_STARTED');
+    }
+
+    await stopSound(); // Stop the sound when status changes
     Vibration.cancel(); // Stop vibration when status changes
+    handleStartStopBlinking(); // Stop blinking when status changes
   };
 
   const getButtonLabel = () => {
     if (data.type === 'PARK')
-      return status === 'ONGOING' ? 'PARK COMPLETED' : 'PARK';
-    return status === 'ONGOING' ? 'RETRIEVED COMPLETED' : 'RETRIEVED';
+      return status === 'ONGOING' ? t('park_completed') : t('park');
+    return status === 'ONGOING' ? t('retrieve_completed') : t('retrieve');
   };
 
   const getStatusLabel = () => {
-    if (status === 'NOT_STARTED') return 'Task Not Started';
-    if (status === 'ONGOING') return 'Task On Going';
-    return 'Task Completed';
+    if (status === 'NOT_STARTED') return `${t('task')} ${t('not_started')}`;
+    if (status === 'ONGOING') return `${t('task')} ${t('ongoing')}`;
+    return `${t('task')} ${t('completed')}`;
   };
 
   const headerAnim = useSharedValue(0);
@@ -237,7 +247,7 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
             fontSize: 20,
             fontStyle: 'italic',
           }}>
-          {data.type === 'PARK' ? 'Park the Car' : 'Retrieve the Car'}
+          {data.type === 'PARK' ? t('park_the_car') : t('retrieve_the_car')}
         </TextWrapper>
       </Animated.View>
       <TextWrapper variant="titleSmall">{data.description}</TextWrapper>
