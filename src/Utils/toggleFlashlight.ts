@@ -15,8 +15,8 @@ const toggleFlashlight = async (on: boolean) => {
   Torch.switchState(on); // Switch the flashlight on/off based on the `on` parameter
 };
 
-export const startBlinkingFlashlight = () => {
-  let blinkInterval: NodeJS.Timeout;
+let blinkInterval: NodeJS.Timeout;
+export const startBlinkingFlashlight = async () => {
   let isOn = false;
 
   const toggle = async () => {
@@ -32,12 +32,14 @@ export const startBlinkingFlashlight = () => {
   };
 
   toggle(); // Start the blinking
+};
 
-  // Return a function to stop the blinking when needed
-  const stopBlinking = () => {
-    clearInterval(blinkInterval); // Stop the blinking interval
-    toggleFlashlight(false); // Ensure flashlight is off when blinking stops
-  };
+// Return a function to stop the blinking when needed
+const stopBlinking = () => {
+  clearInterval(blinkInterval); // Stop the blinking interval
+  toggleFlashlight(false); // Ensure flashlight is off when blinking stops
+};
 
-  return stopBlinking; // Return the function to stop the blinking
+export const stopBlinkingFlashlight = async () => {
+  stopBlinking(); // Call the function to stop blinking
 };

@@ -8,7 +8,10 @@ import moment from 'moment';
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
 import {BG_COLOR_BUTTON, SCREEN_HEIGHT} from '../../config';
 import CustomButton from '../../Utils/CustomButton/CustomButton';
-import {startBlinkingFlashlight} from '../../Utils/toggleFlashlight';
+import {
+  startBlinkingFlashlight,
+  stopBlinkingFlashlight,
+} from '../../Utils/toggleFlashlight';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -39,8 +42,8 @@ const ICON_SIZE = SCREEN_HEIGHT * 0.035;
 
 const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
   const {t} = useTranslation();
-  const [isBlinking, setIsBlinking] = useState(false);
-  let stopBlinking: () => void;
+  // const [isBlinking, setIsBlinking] = useState(false);
+  // let stopBlinking: () => void;
 
   const [status, setStatus] = useState<'NOT_STARTED' | 'ONGOING' | 'COMPLETED'>(
     'NOT_STARTED',
@@ -59,19 +62,14 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
     }
   };
 
-  const handleStartStopBlinking = () => {
-    if (isBlinking) {
-      stopBlinking(); // Stop the blinking when it's on
-    } else {
-      stopBlinking = startBlinkingFlashlight(); // Start blinking
-    }
-    setIsBlinking(!isBlinking); // Toggle the blinking state
+  const handleStartBlinking = async () => {
+    await startBlinkingFlashlight();
   };
 
   const triggerAlertEffects = useCallback(() => {
     if (status === 'NOT_STARTED') {
       vibrateDevice();
-      handleStartStopBlinking();
+      handleStartBlinking();
     }
   }, [status]);
 
@@ -87,7 +85,7 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
     return () => {
       Vibration.cancel(); // Stop vibration when the component unmounts
     };
-  }, [data, handleStartStopBlinking, triggerAlertEffects]);
+  }, [data, triggerAlertEffects]);
 
   const progressColor = useAnimatedStyle(() => {
     const color =
@@ -119,8 +117,8 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
     }
 
     await stopSound(); // Stop the sound when status changes
+    await stopBlinkingFlashlight(); // Stop blinking when status changes
     Vibration.cancel(); // Stop vibration when status changes
-    handleStartStopBlinking(); // Stop blinking when status changes
   };
 
   const getButtonLabel = () => {

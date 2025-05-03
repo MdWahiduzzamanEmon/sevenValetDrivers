@@ -46,6 +46,33 @@ export const completedTasks = [
     action: 'RETRIEVE',
     status: 'Completed',
   },
+  {
+    id: '2',
+    brand: 'Nissan',
+    model: 'Altima',
+    plate: '3A456W',
+    duration: '10 m',
+    action: 'RETRIEVE',
+    status: 'Cancelled',
+  },
+  {
+    id: '3',
+    brand: 'Honda',
+    model: 'Civic',
+    plate: '3A456W',
+    duration: '5 m',
+    action: 'PARK',
+    status: 'Ongoing',
+  },
+  {
+    id: '4',
+    brand: 'Ford',
+    model: 'Focus',
+    plate: '3A456W',
+    duration: '7 m',
+    action: 'RETRIEVE',
+    status: 'Completed',
+  },
 ];
 
 const CompletedTask = ({...props}) => {
@@ -61,7 +88,7 @@ const CompletedTask = ({...props}) => {
         style={{
           marginTop: 20,
           paddingHorizontal: PADDING_SCREEN_HORIZONTAL,
-          // paddingBottom: 40,
+          flex: 1,
         }}>
         <TextWrapper style={styles.header}> {t('asigned_tasks')}</TextWrapper>
         <FlatList
