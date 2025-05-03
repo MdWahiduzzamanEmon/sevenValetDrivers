@@ -10,7 +10,7 @@ import pendingtask from '../../assets/pendingtask.png';
 
 // Lazy-loaded screens
 const OngoinTask = lazy(() => import('../../Screen/OngoinTask/OngoinTask'));
-const PendingTask = lazy(() => import('../../Screen/Pending/Pending'));
+// const PendingTask = lazy(() => import('../../Screen/Pending/Pending'));
 const AsignedTask = lazy(() => import('../../Screen/AsignedTask/AsignedTask'));
 const Profile = lazy(() => import('../../Screen/Profile/Profile'));
 
@@ -40,11 +40,11 @@ const tabScreens = [
     component: withSuspense(OngoinTask),
     icon: icons.home,
   },
-  {
-    name: 'Pending',
-    component: withSuspense(PendingTask),
-    icon: icons.pending,
-  },
+  // {
+  //   name: 'Pending',
+  //   component: withSuspense(PendingTask),
+  //   icon: icons.pending,
+  // },
   {
     name: 'Asigned',
     component: withSuspense(AsignedTask),

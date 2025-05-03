@@ -29,6 +29,8 @@ export interface TaskData {
   instructions: string;
 }
 
+const ICON_SIZE = 28;
+
 const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
   const [isBlinking, setIsBlinking] = useState(false);
   let stopBlinking: () => void;
@@ -152,7 +154,7 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
           <View style={styles.row}>
             <Avatar.Icon
               icon="account"
-              size={24}
+              size={ICON_SIZE}
               backgroundColor={BG_COLOR_BUTTON}
             />
             <TextWrapper>{data.name}</TextWrapper>
@@ -160,7 +162,7 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
           <View style={styles.row}>
             <Avatar.Icon
               icon="phone"
-              size={24}
+              size={ICON_SIZE}
               backgroundColor={BG_COLOR_BUTTON}
             />
             <TextWrapper>{data.phone}</TextWrapper>
@@ -168,7 +170,7 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
           <View style={styles.row}>
             <Avatar.Icon
               icon="car"
-              size={24}
+              size={ICON_SIZE}
               backgroundColor={BG_COLOR_BUTTON}
             />
             <TextWrapper>{`${data.brand}, ${data.model}`}</TextWrapper>
@@ -176,7 +178,7 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
           <View style={styles.row}>
             <Avatar.Icon
               icon="numeric"
-              size={24}
+              size={ICON_SIZE}
               backgroundColor={BG_COLOR_BUTTON}
             />
             <TextWrapper>{data.plate}</TextWrapper>
@@ -184,7 +186,7 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
           <View style={styles.row}>
             <Avatar.Icon
               icon="map-marker"
-              size={24}
+              size={ICON_SIZE}
               backgroundColor={BG_COLOR_BUTTON}
             />
             <TextWrapper>{data.location}</TextWrapper>
@@ -192,7 +194,7 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
           <View style={styles.row}>
             <Avatar.Icon
               icon="calendar"
-              size={24}
+              size={ICON_SIZE}
               backgroundColor={BG_COLOR_BUTTON}
             />
             <TextWrapper>{start.format('DD-MMM-YYYY HH:mm')}</TextWrapper>
@@ -200,7 +202,7 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
           <View style={styles.row}>
             <Avatar.Icon
               icon="clock-outline"
-              size={24}
+              size={ICON_SIZE}
               backgroundColor={BG_COLOR_BUTTON}
             />
             <TextWrapper>{data.duration} min</TextWrapper>
@@ -219,7 +221,7 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
           <View style={styles.row}>
             <Avatar.Icon
               icon="information-outline"
-              size={24}
+              size={ICON_SIZE}
               backgroundColor={BG_COLOR_BUTTON}
             />
             <TextWrapper
