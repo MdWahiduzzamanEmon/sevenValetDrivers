@@ -8,7 +8,7 @@ import TaskCard, {TaskData} from '../../components/TaskCard/TaskCard';
 // taskData.ts
 export const taskData: TaskData = {
   type: 'PARK', // or 'RETRIEVE' or 'PARK'
-  description: 'PARK',
+  description: 'Task description goes here',
   name: 'Mr ABC',
   phone: '5501231232131',
   brand: 'Toyota',
@@ -31,7 +31,7 @@ const OngoinTask = ({...props}) => {
           paddingHorizontal: PADDING_SCREEN_HORIZONTAL,
           paddingBottom: 40,
         }}>
-        <TextWrapper style={styles.header}> {title} Tasks</TextWrapper>
+        {/* <TextWrapper style={styles.header}> {title} Tasks</TextWrapper> */}
 
         <TaskCard data={taskData} />
       </View>
