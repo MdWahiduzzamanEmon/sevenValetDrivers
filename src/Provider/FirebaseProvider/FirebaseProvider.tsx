@@ -10,6 +10,8 @@ import axios from 'axios';
 // import {notif} from '../../Components/PopUp';
 // import moment from 'moment';
 import apiUrl from '../../Base';
+import {FIREBASE_APP_NAME} from '../../config';
+import {playSound, stopSound} from '../../Utils/Sound/Sound';
 // import {useAppSelector} from '../../Store/Store';
 // import { useUserWiseTokenFCMTokenSendMutation } from '../../Store/feature/globalApiSlice';
 
@@ -30,7 +32,7 @@ export const useFirebase = () => {
   return context;
 };
 
-const APP_NAME = 'Samarabiz';
+const APP_NAME = FIREBASE_APP_NAME;
 
 const FirebaseProvider = ({children}: {children: React.ReactNode}) => {
   // const {loginUserData} = useAppSelector(state => state.authSlice) as any;
@@ -68,6 +70,7 @@ const FirebaseProvider = ({children}: {children: React.ReactNode}) => {
 
         if (isAuthorized) {
           const token = await messaging().getToken();
+
           if (token) {
             // console.log('Get FCM Token:', token);
             await sendFcmTokenToServer(token);
@@ -92,11 +95,12 @@ const FirebaseProvider = ({children}: {children: React.ReactNode}) => {
     };
 
     const sendFcmTokenToServer = async (token: string) => {
+      // console.log('FCM Token:', token);
       try {
         if (!token) return;
         console.log('Sending FCM token to server:', token);
         const body = {appName: APP_NAME, fcmToken: token};
-        // const URL = 'http://192.168.0.100:2400/api/push-service/get-fcm-token?appName=Samarabiz';
+
         const URL = apiUrl?.pushService;
         const config = {
           url: URL,
@@ -131,16 +135,24 @@ const FirebaseProvider = ({children}: {children: React.ReactNode}) => {
       //   body: remoteMessage?.notification?.body,
       //   slideOutTime: 9000,
       // });
+      // playSound();
       Alert.alert(
         remoteMessage?.notification?.title || 'New Task Assigned',
         remoteMessage?.notification?.body,
         [
+          // {
+          //   text: 'Cancel',
+          //   onPress: () => console.log('Cancel Pressed'),
+          //   style: 'cancel',
+          // },
           {
-            text: 'Cancel',
-            onPress: () => console.log('Cancel Pressed'),
-            style: 'cancel',
+            text: 'OK',
+            onPress: () => {
+              // Handle the OK button press
+              console.log('OK Pressed');
+              stopSound();
+            },
           },
-          {text: 'OK', onPress: () => console.log('OK Pressed')},
         ],
       );
     };
@@ -168,7 +180,7 @@ const FirebaseProvider = ({children}: {children: React.ReactNode}) => {
         'A new FCM message arrived in foreground:',
         JSON.stringify(remoteMessage),
       );
-      // showNotification(remoteMessage);
+      showNotification(remoteMessage);
     };
     //forground means - when app is open
 
