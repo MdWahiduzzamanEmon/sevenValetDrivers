@@ -11,12 +11,15 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import 'react-native-reanimated';
 import 'react-native-gesture-handler';
 import './i18n';
+import ReduxProvider from './src/Store/ReduxProvider/ReduxProvider';
 export default function Main() {
   return (
     <PaperProvider theme={theme}>
-      <SafeAreaProvider>
-        <App />
-      </SafeAreaProvider>
+      <ReduxProvider>
+        <SafeAreaProvider>
+          <App />
+        </SafeAreaProvider>
+      </ReduxProvider>
     </PaperProvider>
   );
 }

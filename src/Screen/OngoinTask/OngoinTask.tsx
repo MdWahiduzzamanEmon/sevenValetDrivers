@@ -26,7 +26,7 @@ const OngoinTask = ({...props}) => {
 
   React.useEffect(() => {
     // stopSound();
-    playSound();
+    // playSound();
   }, []);
 
   return (

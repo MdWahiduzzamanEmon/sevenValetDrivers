@@ -201,13 +201,12 @@ keytool -export -rfc -keystore "/Users/emon/All Files/Work/Cellco/SAMARABIZ/sama
 
 ```
 
-
 ## Get SHA1, SHA256 from pem file
 
 ```bash
 cd android/app
 
-keytool -list -v -keystore upartsnative.keystore -alias uparts
+keytool -list -v -keystore sevenvaletDrivers.keystore -alias sevenvaletDrivers
 
 ```
 

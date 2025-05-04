@@ -78,7 +78,7 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
 
   useEffect(() => {
     if (data) {
-      triggerAlertEffects();
+      // triggerAlertEffects();
     } else {
       Vibration.cancel();
     }

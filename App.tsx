@@ -2,6 +2,7 @@ import React from 'react';
 import Root from './src';
 import {NavigationContainer} from '@react-navigation/native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
+import FirebaseProvider from './src/Provider/FirebaseProvider/FirebaseProvider';
 
 function App(): React.JSX.Element {
   // const isDarkMode = useColorScheme() === 'dark';
@@ -9,7 +10,9 @@ function App(): React.JSX.Element {
   return (
     <SafeAreaProvider>
       <NavigationContainer>
-        <Root />
+        <FirebaseProvider>
+          <Root />
+        </FirebaseProvider>
       </NavigationContainer>
     </SafeAreaProvider>
   );
