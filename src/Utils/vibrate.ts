@@ -11,6 +11,10 @@ const vibrateDevice = () => {
 const stopVibration = () => {
   if (Platform.OS === 'android') {
     Vibration.cancel();
+  } else if (Platform.OS === 'ios') {
+    // iOS does not have a direct way to stop vibration
+    // but we can use a short vibration to stop it
+    Vibration.vibrate(0);
   }
 };
 export {vibrateDevice, stopVibration};
