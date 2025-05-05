@@ -1,17 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useEffect, useCallback} from 'react';
-import {View, StyleSheet, Platform, Vibration} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {View, StyleSheet} from 'react-native';
 import {Avatar, useTheme} from 'react-native-paper';
 import moment from 'moment';
 
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
 import {BG_COLOR_BUTTON, SCREEN_HEIGHT} from '../../config';
 import CustomButton from '../../Utils/CustomButton/CustomButton';
-import {
-  startBlinkingFlashlight,
-  stopBlinkingFlashlight,
-} from '../../Utils/toggleFlashlight';
+
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -20,7 +17,6 @@ import Animated, {
   Easing,
   interpolateColor,
 } from 'react-native-reanimated';
-import {stopSound} from '../../Utils/Sound/Sound';
 import {useTranslation} from 'react-i18next';
 // import {stopSound} from '../../Utils/Sound/Sound';
 
@@ -40,7 +36,7 @@ export interface TaskData {
 
 const ICON_SIZE = SCREEN_HEIGHT * 0.035;
 
-const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
+const TaskCard: React.FC<{data: TaskData | null}> = ({data}) => {
   const {t} = useTranslation();
   // const [isBlinking, setIsBlinking] = useState(false);
   // let stopBlinking: () => void;
@@ -51,41 +47,10 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
   const progress = useSharedValue(0);
 
   const theme = useTheme();
-  const start = moment(data.startTime);
-  const end = start.clone().add(data.duration, 'minutes');
-
-  const vibrateDevice = () => {
-    if (Platform.OS === 'android') {
-      Vibration.vibrate([0, 500, 1000], true);
-    } else if (Platform.OS === 'ios') {
-      Vibration.vibrate();
-    }
-  };
-
-  const handleStartBlinking = async () => {
-    await startBlinkingFlashlight();
-  };
-
-  const triggerAlertEffects = useCallback(() => {
-    if (status === 'NOT_STARTED') {
-      vibrateDevice();
-      handleStartBlinking();
-    }
-  }, [status]);
+  const start = data ? moment(data.startTime) : moment();
+  const end = data ? start.clone().add(data.duration, 'minutes') : moment();
 
   //this section is commented out to avoid triggering the alert effects on every render.
-  //will use it when the task is not started.
-
-  useEffect(() => {
-    if (data) {
-      // triggerAlertEffects();
-    } else {
-      Vibration.cancel();
-    }
-    return () => {
-      Vibration.cancel(); // Stop vibration when the component unmounts
-    };
-  }, [data, triggerAlertEffects]);
 
   const progressColor = useAnimatedStyle(() => {
     const color =
@@ -105,7 +70,7 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
       progress.value = Math.min(elapsed / totalDuration, 1);
     }, 1000);
     return () => clearInterval(interval);
-  }, [data.startTime, data.duration, end, start, progress]);
+  }, [data?.startTime, data?.duration, end, start, progress]);
 
   const handleStatusChange = async () => {
     if (status === 'NOT_STARTED') {
@@ -115,14 +80,10 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
     } else {
       setStatus('NOT_STARTED');
     }
-
-    await stopSound(); // Stop the sound when status changes
-    await stopBlinkingFlashlight(); // Stop blinking when status changes
-    Vibration.cancel(); // Stop vibration when status changes
   };
 
   const getButtonLabel = () => {
-    if (data.type === 'PARK')
+    if (data?.type === 'PARK')
       return status === 'ONGOING' ? t('park_completed') : t('park');
     return status === 'ONGOING' ? t('retrieve_completed') : t('retrieve');
   };
@@ -250,15 +211,17 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
       </Animated.View>
       <TextWrapper variant="titleSmall">{data.description}</TextWrapper>
 
-      <View>
-        {/* <TextWrapper variant="labelLarge">Special Instruction:</TextWrapper> */}
-        <TextWrapper style={styles.instructions}>
-          {data.instructions}
-        </TextWrapper>
-      </View>
+      {data?.instructions && (
+        <View>
+          {/* <TextWrapper variant="labelLarge">Special Instruction:</TextWrapper> */}
+          <TextWrapper style={styles.instructions}>
+            {data.instructions}
+          </TextWrapper>
+        </View>
+      )}
 
       <View style={styles.content}>
-        <View style={{marginBottom: 5}}>
+        {/* <View style={{marginBottom: 5}}>
           <View style={styles.row}>
             <Avatar.Icon
               icon="account"
@@ -275,9 +238,9 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
             />
             <TextWrapper>{data.phone}</TextWrapper>
           </View>
-        </View>
+        </View> */}
 
-        <View style={{marginVertical: 5}}>
+        {/* <View style={{marginVertical: 5}}>
           <View style={styles.row}>
             <Avatar.Icon
               icon="car"
@@ -302,9 +265,28 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
             />
             <TextWrapper>{data.location}</TextWrapper>
           </View>
-        </View>
+        </View> */}
 
-        <View
+        <VehicleDetails data={data} />
+
+        {/* <View style={{marginVertical: 5}}>
+          <View style={styles.row}>
+            <Avatar.Icon
+              icon="calendar"
+              size={ICON_SIZE}
+              backgroundColor={BG_COLOR_BUTTON}
+            />
+            <TextWrapper>{start.format('DD,MMM,YYYY HH:mm')}</TextWrapper>
+          </View>
+          <View style={styles.row}>
+            <Avatar.Icon
+              icon="clock-outline"
+              size={ICON_SIZE}
+              backgroundColor={BG_COLOR_BUTTON}
+            />
+            <TextWrapper>{data.duration} min</TextWrapper>
+          </View>
+        {/* <View
           style={{
             marginVertical: 8,
             display: 'flex',
@@ -328,7 +310,7 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
             />
             <TextWrapper>{data.duration} min</TextWrapper>
           </View>
-        </View>
+        </View> */}
         <View style={styles.progressBarContainer}>
           <Animated.View
             style={[
@@ -374,6 +356,57 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
   );
 };
 
+export default TaskCard;
+
+const VehicleDetails = ({data}: any) => {
+  return (
+    <View style={styles.container}>
+      <View style={styles.item}>
+        <Avatar.Icon
+          icon="car"
+          size={ICON_SIZE}
+          style={styles.icon}
+          color="#fff"
+          backgroundColor={BG_COLOR_BUTTON}
+        />
+        <View style={styles.textContainer}>
+          <TextWrapper style={styles.label}>Vehicle</TextWrapper>
+          <TextWrapper
+            style={styles.value}>{`${data.brand}, ${data.model}`}</TextWrapper>
+        </View>
+      </View>
+
+      <View style={styles.item}>
+        <Avatar.Icon
+          icon="numeric"
+          size={ICON_SIZE}
+          style={styles.icon}
+          color="#fff"
+          backgroundColor={BG_COLOR_BUTTON}
+        />
+        <View style={styles.textContainer}>
+          <TextWrapper style={styles.label}>Plate Number</TextWrapper>
+          <TextWrapper style={styles.value}>{data.plate}</TextWrapper>
+        </View>
+      </View>
+
+      <View style={styles.item}>
+        <Avatar.Icon
+          icon="map-marker"
+          size={ICON_SIZE}
+          style={styles.icon}
+          color="#fff"
+          backgroundColor={BG_COLOR_BUTTON}
+        />
+        <View style={styles.textContainer}>
+          <TextWrapper style={styles.label}>Drop Location</TextWrapper>
+          <TextWrapper style={styles.value}>{data.location}</TextWrapper>
+        </View>
+      </View>
+    </View>
+  );
+};
+
 const styles = StyleSheet.create({
   cardContainer: {
     marginVertical: 10,
@@ -387,7 +420,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     paddingTop: 10,
     paddingBottom: 5,
-    borderRadius: 8,
+    borderRadius: 4,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -436,7 +469,32 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 16,
+    marginBottom: 8,
+  },
+
+  container: {
+    marginVertical: 10,
+    gap: 12,
+  },
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  icon: {
+    marginRight: 12,
+  },
+  textContainer: {
+    flex: 1,
+  },
+  label: {
+    fontSize: 13,
+    color: '#777',
+    marginBottom: 2,
+  },
+  value: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
   },
 });
-
-export default TaskCard;

@@ -2,22 +2,27 @@
 
 import React, {useEffect} from 'react';
 import {firebase} from '@react-native-firebase/analytics';
+import {getBrand, getDeviceName} from 'react-native-device-info';
 import messaging, {
   FirebaseMessagingTypes,
 } from '@react-native-firebase/messaging';
-import {Alert, PermissionsAndroid, Platform} from 'react-native';
+import {PermissionsAndroid, Platform} from 'react-native';
 import axios from 'axios';
 // import {notif} from '../../Components/PopUp';
 // import moment from 'moment';
 import apiUrl from '../../Base';
 import {FIREBASE_APP_NAME} from '../../config';
-import {playSound, stopSound} from '../../Utils/Sound/Sound';
+// import {stopSound} from '../../Utils/Sound/Sound';
 // import {useAppSelector} from '../../Store/Store';
 // import { useUserWiseTokenFCMTokenSendMutation } from '../../Store/feature/globalApiSlice';
 
 interface FirebaseContextType {
   firebase: typeof firebase;
   messaging: typeof messaging;
+  newNotification: FirebaseMessagingTypes.RemoteMessage | null;
+  setNewNotification: React.Dispatch<
+    React.SetStateAction<FirebaseMessagingTypes.RemoteMessage | null>
+  >;
 }
 
 export const FirebaseContext = React.createContext<FirebaseContextType | null>(
@@ -35,6 +40,8 @@ export const useFirebase = () => {
 const APP_NAME = FIREBASE_APP_NAME;
 
 const FirebaseProvider = ({children}: {children: React.ReactNode}) => {
+  const [newNotification, setNewNotification] =
+    React.useState<FirebaseMessagingTypes.RemoteMessage | null>(null);
   // const {loginUserData} = useAppSelector(state => state.authSlice) as any;
 
   // const [userWiseTokenFCMTokenSend] = useUserWiseTokenFCMTokenSendMutation();
@@ -99,7 +106,15 @@ const FirebaseProvider = ({children}: {children: React.ReactNode}) => {
       try {
         if (!token) return;
         console.log('Sending FCM token to server:', token);
-        const body = {appName: APP_NAME, fcmToken: token};
+        const userDeviceName = getDeviceName();
+        const getBrandName = getBrand();
+
+        const body = {
+          appName: APP_NAME,
+          fcmToken: token,
+          deviceName: userDeviceName || 'Unknown Device',
+          brand: getBrandName || 'Unknown Brand',
+        };
 
         const URL = apiUrl?.pushService;
         const config = {
@@ -136,25 +151,27 @@ const FirebaseProvider = ({children}: {children: React.ReactNode}) => {
       //   slideOutTime: 9000,
       // });
       // playSound();
-      Alert.alert(
-        remoteMessage?.notification?.title || 'New Task Assigned',
-        remoteMessage?.notification?.body,
-        [
-          // {
-          //   text: 'Cancel',
-          //   onPress: () => console.log('Cancel Pressed'),
-          //   style: 'cancel',
-          // },
-          {
-            text: 'OK',
-            onPress: () => {
-              // Handle the OK button press
-              console.log('OK Pressed');
-              stopSound();
-            },
-          },
-        ],
-      );
+      // Alert.alert(
+      //   remoteMessage?.notification?.title || 'New Task Assigned',
+      //   remoteMessage?.notification?.body,
+      //   [
+      //     // {
+      //     //   text: 'Cancel',
+      //     //   onPress: () => console.log('Cancel Pressed'),
+      //     //   style: 'cancel',
+      //     // },
+      //     {
+      //       text: 'OK',
+      //       onPress: () => {
+      //         // Handle the OK button press
+      //         console.log('OK Pressed');
+      //         stopSound();
+      //       },
+      //     },
+      //   ],
+      // );
+
+      setNewNotification(remoteMessage);
     };
 
     //
@@ -252,6 +269,8 @@ const FirebaseProvider = ({children}: {children: React.ReactNode}) => {
       value={{
         firebase,
         messaging,
+        newNotification,
+        setNewNotification,
       }}>
       {children}
     </FirebaseContext.Provider>

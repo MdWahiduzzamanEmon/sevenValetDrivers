@@ -1,4 +1,4 @@
-import React, {lazy} from 'react';
+import React, {lazy, useCallback} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {Image, StyleSheet, TouchableOpacity} from 'react-native';
 import SuspenseComponent from '../../Provider/Suspense/Suspense';
@@ -7,12 +7,28 @@ import asignedTask from '../../assets/completed_task.png';
 import profileIcon from '../../assets/profile.png';
 import pendingtask from '../../assets/pendingtask.png';
 import {useTranslation} from 'react-i18next';
+import {TaskDialog} from '../../components/TaskDialog/TaskDialog';
+import {useFirebaseData} from '../../Hooks/useFirebaseData';
+import {stopVibration, vibrateDevice} from '../../Utils/vibrate';
+import {playSound, stopSound} from '../../Utils/Sound/Sound';
+import {
+  startBlinkingFlashlight,
+  stopBlinkingFlashlight,
+} from '../../Utils/toggleFlashlight';
+import {useAppDispatch, useAppSelector} from '../../Store/Store';
+import {
+  setNewTaskData,
+  setNewTaskNotification,
+  setTaskToShow,
+} from '../../Store/feature/globalSlice';
+import {PARK_TASK, RETRIEVE_TASK} from '../../Screen/OngoinTask/OngoinTask';
+// import {useNavigation, NavigationProp} from '@react-navigation/native';
 // import Pending from '../../Screen/Pending/Pending';
 
 // Lazy-loaded screens
 const OngoinTask = lazy(() => import('../../Screen/OngoinTask/OngoinTask'));
 // const PendingTask = lazy(() => import('../../Screen/Pending/Pending'));
-const AsignedTask = lazy(() => import('../../Screen/AsignedTask/AsignedTask'));
+// const AsignedTask = lazy(() => import('../../Screen/AsignedTask/AsignedTask'));
 const Profile = lazy(() => import('../../Screen/Profile/Profile'));
 
 // Tab Navigator
@@ -46,11 +62,11 @@ const tabScreens = [
   //   component: withSuspense(PendingTask),
   //   icon: icons.pending,
   // },
-  {
-    name: 'asigned',
-    component: withSuspense(AsignedTask),
-    icon: icons.asigned,
-  },
+  // {
+  //   name: 'asigned',
+  //   component: withSuspense(AsignedTask),
+  //   icon: icons.asigned,
+  // },
   {
     name: 'profile',
     component: withSuspense(Profile),
@@ -68,29 +84,105 @@ const renderTabBarIcon = (routeName: string) => {
   );
 };
 
+// type TaskType = 'PARK' | 'RETRIEVE';
+
+// type RootTabParamList = {
+//   ongoing: undefined;
+//   profile: undefined;
+// };
+
 const HomeTabs = () => {
+  // const navigation = useNavigation<NavigationProp<RootTabParamList>>();
+  const [lastNotificationId, setLastNotificationId] = React.useState<number>(0);
   const {t} = useTranslation();
+  const dispatch = useAppDispatch();
+
+  const {newNotification, setNewNotification} = useFirebaseData() as any;
+
+  // console.log('newNotification', newNotification);
+
+  const handleStartBlinking = async () => {
+    await startBlinkingFlashlight();
+  };
+
+  const triggerAlertEffects = useCallback(() => {
+    handleStartBlinking();
+    vibrateDevice();
+  }, []);
+
+  React.useEffect(() => {
+    const title = newNotification?.notification?.title?.toUpperCase?.();
+
+    // Generate a pseudo-unique ID by timestamp
+    if (title === 'PARK' || title === 'RETRIEVE') {
+      const now = Date.now();
+      setLastNotificationId(now); // trigger new state every time
+    }
+  }, [newNotification]);
+
+  React.useEffect(() => {
+    const title = newNotification?.notification?.title?.toUpperCase?.();
+
+    if (title === 'PARK') {
+      dispatch(setTaskToShow(PARK_TASK));
+      playSound();
+      triggerAlertEffects();
+      dispatch(setNewTaskNotification(true));
+    } else if (title === 'RETRIEVE') {
+      dispatch(setTaskToShow(RETRIEVE_TASK));
+      playSound();
+      triggerAlertEffects();
+      dispatch(setNewTaskNotification(true));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, lastNotificationId, triggerAlertEffects]);
+
+  const {newTaskNotification, taskToShow} = useAppSelector(
+    state => state.globalSlice,
+  ) as {
+    newTaskNotification: boolean;
+    newTaskData: any;
+    taskToShow: any;
+  };
+
   return (
-    <Tab.Navigator
-      initialRouteName="ongoing"
-      screenOptions={({route}) => ({
-        headerShown: false,
-        tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: '#fff',
-        tabBarIcon: ({}) => renderTabBarIcon(route.name),
-        tabBarButton: CustomTabBarButton, // 🧠 HERE
-      })}>
-      {tabScreens.map(({name, component}) => (
-        <Tab.Screen
-          key={name}
-          name={name} // Keep internal name consistent
-          component={component}
-          options={{
-            tabBarLabel: t(name), // Translate only the label
-          }}
-        />
-      ))}
-    </Tab.Navigator>
+    <>
+      <Tab.Navigator
+        initialRouteName="ongoing"
+        screenOptions={({route}) => ({
+          headerShown: false,
+          tabBarStyle: styles.tabBar,
+          tabBarActiveTintColor: '#fff',
+          tabBarIcon: ({}) => renderTabBarIcon(route.name),
+          tabBarButton: CustomTabBarButton, // 🧠 HERE
+        })}>
+        {tabScreens.map(({name, component}) => (
+          <Tab.Screen
+            key={name}
+            name={name} // Keep internal name consistent
+            component={component}
+            options={{
+              tabBarLabel: t(name), // Translate only the label
+            }}
+          />
+        ))}
+      </Tab.Navigator>
+
+      <TaskDialog
+        visible={newTaskNotification && !!taskToShow}
+        taskType={taskToShow?.type || 'PARK'}
+        onAccept={() => {
+          dispatch(setNewTaskNotification(false));
+          dispatch(setNewTaskData(taskToShow));
+          dispatch(setTaskToShow(null));
+          stopSound();
+          stopVibration();
+          stopBlinkingFlashlight();
+          setNewNotification(null);
+        }}
+        theme={{colors: {primary: '#FFA500'}}}
+      />
+    </>
   );
 };
 

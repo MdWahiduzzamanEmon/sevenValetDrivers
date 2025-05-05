@@ -11,12 +11,12 @@ import {
 } from 'react-native';
 import Container from '../../components/Container/Container';
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
-import CustomTextInput from '../../Utils/CustomTextInput/CustomTextInput';
 import CustomButton from '../../Utils/CustomButton/CustomButton';
 import {PADDING_SCREEN_HORIZONTAL} from '../../config';
 import {LANGUAGES_LIST} from '../../constant';
 import {useTranslation} from 'react-i18next';
 import CustomDropdown from '../../Utils/CustomDropdown/CustomDropdown';
+import CustomTextInput from '../../Utils/CustomTextInput/CustomTextInput';
 // import i18n from '../../../i18n';
 
 if (Platform.OS === 'android') {
