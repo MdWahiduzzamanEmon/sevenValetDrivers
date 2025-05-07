@@ -40,5 +40,12 @@
   "sign_in": "Sign In",
   "sign_out": "Sign Out",
   "logout": "Logout",
-  "waiting_for_new_task": "Waiting for new task..."
+  "waiting_for_new_task": "Waiting for new task...",
+  "password_not_match": "Password not match",
+  "password_updated": "Password updated successfully",
+  "all_fields_required": "All fields are required",
+  "update_failed": "Update failed",
+  "success": "Success",
+  "error": "Error",
+  "password_updated_successfully": "Password updated successfully"
 }

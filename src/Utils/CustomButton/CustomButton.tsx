@@ -45,7 +45,7 @@ const CustomButton: React.FC<Props> = ({
         {opacity: disabled ? 0.5 : 1},
       ]}>
       {loading ? (
-        <ActivityIndicator size="small" color="white" />
+        <ActivityIndicator size="small" color="black" />
       ) : (
         <Text style={[styles.label, {color: textColor}]}>{label}</Text>
       )}

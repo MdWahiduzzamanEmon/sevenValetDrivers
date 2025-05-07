@@ -40,5 +40,11 @@
   "sign_in": "سائن ان کریں",
   "sign_out": "سائن آؤٹ کریں",
   "logout": "لاگ آؤٹ",
-  "waiting_for_new_task": "نیا کام انتظار ہے..."
+  "waiting_for_new_task": "نیا کام انتظار ہے...",
+  "password_not_match": "پاس ورڈ متطابق نہیں ہے",
+  "password_updated": "پاس ورڈ موجود ہے",
+  "all_fields_required": "تمام فیلڈ موجود ہیں",
+  "update_failed": "اپ ڈیٹ کرنے میں خطلاب ہوا",
+  "success": "کامیاب",
+  "error": "خطلاب"
 }

@@ -16,7 +16,7 @@ import {
 } from '../../Store/feature/Auth/authSlice';
 import CustomOTPInput from '../../Utils/CustomOTPInput/CustomOTPInput';
 import {useAlert} from '../../Utils/CustomAlert/AlertContext';
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
 
 const SignInScreen = () => {
   const {t} = useTranslation();
@@ -62,8 +62,9 @@ const SignInScreen = () => {
         driverId: userId,
         passcode: password,
       }).unwrap();
-      console.log(response);
+      // console.log(response);
       if (response?.result?.success) {
+        // console.log('response?.result?.data', response?.result?.data);
         dispatch(setUser(response?.result?.data));
         if (rememberMe) {
           dispatch(setSavedCredentials({driverId: userId, passcode: password}));
@@ -72,7 +73,8 @@ const SignInScreen = () => {
       } else {
         showAlert(
           'Login Failed',
-          response.error?.message || 'Something went wrong',
+          response.error?.message ||
+            'Please enter correct username and password',
           'error',
         );
       }

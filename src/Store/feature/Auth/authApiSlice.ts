@@ -1,4 +1,4 @@
-import {PUBLIC_KEY} from '../../../Base';
+import {LOGIN_PUBLIC_KEY, UPDATE_PROFILE_PUBLIC_KEY} from '../../../Base';
 import {apiSlice} from '../../api/apiSlice';
 import type {EndpointBuilder} from '@reduxjs/toolkit/query';
 
@@ -7,11 +7,17 @@ interface LoginRequest {
   passcode: string;
 }
 
+interface UpdateProfileRequest {
+  recId: number;
+  language: string;
+  newPasscode: string;
+}
+
 export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder: EndpointBuilder<any, any, any>) => ({
     login: builder.mutation({
       query: (data: LoginRequest) => ({
-        url: `/authenticateDriver?publickey=${PUBLIC_KEY}`,
+        url: `/authenticateDriver?publickey=${LOGIN_PUBLIC_KEY}`,
         method: 'POST',
         body: {
           driverId: data.driverId,
@@ -19,7 +25,23 @@ export const authApiSlice = apiSlice.injectEndpoints({
         },
       }),
     }),
+
+    //profile update
+    updateProfile: builder.mutation({
+      query: (data: UpdateProfileRequest) => {
+        console.log('data-updateProfile-slice', data);
+        return {
+          url: `/updateProfile?publickey=${UPDATE_PROFILE_PUBLIC_KEY}`,
+          method: 'POST',
+          body: {
+            recId: data.recId,
+            language: data.language,
+            newPasscode: data.newPasscode,
+          },
+        };
+      },
+    }),
   }),
 });
 
-export const {useLoginMutation} = authApiSlice;
+export const {useLoginMutation, useUpdateProfileMutation} = authApiSlice;

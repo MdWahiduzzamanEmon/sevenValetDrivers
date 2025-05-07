@@ -54,6 +54,12 @@ export const globalSlice = createSlice({
     setTaskToShow: (state, action) => {
       state.taskToShow = action.payload;
     },
+
+    setClearTask: state => {
+      state.newTaskData = null;
+      state.newTaskNotification = false;
+      state.taskToShow = null;
+    },
   },
 });
 
@@ -65,6 +71,7 @@ export const {
   setNewTaskData,
   setNewTaskNotification,
   setTaskToShow,
+  setClearTask,
 } = globalSlice.actions;
 
 export default globalSlice.reducer;

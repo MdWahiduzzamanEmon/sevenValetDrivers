@@ -154,15 +154,15 @@ const HomeTabs = () => {
           tabBarStyle: styles.tabBar,
           tabBarActiveTintColor: '#fff',
           tabBarIcon: ({}) => renderTabBarIcon(route.name),
-          tabBarButton: CustomTabBarButton, // 🧠 HERE
+          tabBarButton: CustomTabBarButton,
         })}>
         {tabScreens.map(({name, component}) => (
           <Tab.Screen
             key={name}
-            name={name} // Keep internal name consistent
+            name={name}
             component={component}
             options={{
-              tabBarLabel: t(name), // Translate only the label
+              tabBarLabel: t(name),
             }}
           />
         ))}

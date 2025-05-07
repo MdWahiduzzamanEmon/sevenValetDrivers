@@ -4,11 +4,9 @@ import React, {useState, useEffect} from 'react';
 import {View, StyleSheet} from 'react-native';
 import {Avatar, useTheme} from 'react-native-paper';
 import moment from 'moment';
-
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
-import {BG_COLOR_BUTTON, SCREEN_HEIGHT} from '../../config';
+import {BG_COLOR_BUTTON, SCREEN_HEIGHT, SCREEN_WIDTH} from '../../config';
 import CustomButton from '../../Utils/CustomButton/CustomButton';
-
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -18,6 +16,8 @@ import Animated, {
   interpolateColor,
 } from 'react-native-reanimated';
 import {useTranslation} from 'react-i18next';
+import {useAppDispatch} from '../../Store/Store';
+import {setClearTask} from '../../Store/feature/globalSlice';
 // import {stopSound} from '../../Utils/Sound/Sound';
 
 export interface TaskData {
@@ -27,17 +27,22 @@ export interface TaskData {
   phone: string;
   brand: string;
   model: string;
-  plate: string;
+  plate: string; 
   location: string;
   startTime: string;
   duration: number;
   instructions: string;
 }
 
-const ICON_SIZE = SCREEN_HEIGHT * 0.035;
+// Calculate responsive sizes
+const ICON_SIZE = Math.min(SCREEN_HEIGHT * 0.035, 32);
+const CARD_PADDING = Math.min(SCREEN_WIDTH * 0.04, 16);
+const TITLE_FONT_SIZE = Math.min(SCREEN_WIDTH * 0.05, 20);
+const INSTRUCTION_FONT_SIZE = Math.min(SCREEN_WIDTH * 0.04, 16);
 
 const TaskCard: React.FC<{data: TaskData | null}> = ({data}) => {
   const {t} = useTranslation();
+  const dispatch = useAppDispatch();
   // const [isBlinking, setIsBlinking] = useState(false);
   // let stopBlinking: () => void;
 
@@ -77,6 +82,8 @@ const TaskCard: React.FC<{data: TaskData | null}> = ({data}) => {
       setStatus('ONGOING');
     } else if (status === 'ONGOING') {
       setStatus('COMPLETED');
+      //clear the task from the server
+      dispatch(setClearTask());
     } else {
       setStatus('NOT_STARTED');
     }
@@ -147,9 +154,9 @@ const TaskCard: React.FC<{data: TaskData | null}> = ({data}) => {
       transform: [{scale: pulse.value}],
       backgroundColor: theme.colors.primary,
       borderRadius: 100,
-      padding: 10,
+      padding: Math.min(SCREEN_WIDTH * 0.02, 10),
       opacity: 0.8,
-      marginBottom: 10,
+      marginBottom: Math.min(SCREEN_HEIGHT * 0.01, 10),
     };
   });
 
@@ -158,159 +165,68 @@ const TaskCard: React.FC<{data: TaskData | null}> = ({data}) => {
     //   /* //text : waiting for new task ,and waiting icon and content will be in center */
     // }
     return (
-      <>
+      <Animated.View
+        style={[
+          animatedBorderStyle,
+          styles.cardContainer,
+          styles.emptyContainer,
+        ]}>
         <Animated.View
-          style={[
-            animatedBorderStyle,
-            styles.cardContainer,
-            {
-              justifyContent: 'center',
-              alignItems: 'center',
-            },
-          ]}>
-          <Animated.View style={[pulsingStyle, {padding: 10}]}>
-            <Avatar.Icon
-              icon="car"
-              size={SCREEN_HEIGHT * 0.1}
-              backgroundColor={theme.colors.primary}
-              style={{borderRadius: 100}}
-            />
-          </Animated.View>
-          <TextWrapper variant="titleMedium" style={{marginVertical: 10}}>
-            {t('waiting_for_new_task')}
-          </TextWrapper>
+          style={[pulsingStyle, {padding: Math.min(SCREEN_WIDTH * 0.02, 10)}]}>
+          <Avatar.Icon
+            icon="car"
+            size={Math.min(SCREEN_HEIGHT * 0.1, 80)}
+            backgroundColor={theme.colors.primary}
+            style={styles.avatar}
+          />
         </Animated.View>
-      </>
+        <TextWrapper variant="titleMedium" style={styles.waitingText}>
+          {t('waiting_for_new_task')}
+        </TextWrapper>
+      </Animated.View>
     );
   }
 
   return (
     // <Animated.View style={[styles.animatedContainer, fadeInSlide]}>
     <Animated.View
-      style={[animatedBorderStyle, styles.cardContainer, {padding: 15}]}>
-      <Animated.View style={[styles.titleContiner, animatedHeaderStyle]}>
+      style={[
+        animatedBorderStyle,
+        styles.cardContainer,
+        {padding: CARD_PADDING},
+      ]}>
+      <Animated.View style={[styles.titleContainer, animatedHeaderStyle]}>
         <Animated.View style={[pulsingStyle]}>
           <Avatar.Icon
             icon="car"
-            size={SCREEN_HEIGHT * 0.06}
+            size={Math.min(SCREEN_HEIGHT * 0.06, 48)}
             backgroundColor={theme.colors.primary}
-            style={{borderRadius: 100}}
+            style={styles.avatar}
           />
         </Animated.View>
 
         <TextWrapper
           variant="titleLarge"
-          style={{
-            ...styles.title,
-            color: '#fff',
-            fontSize: 20,
-            fontStyle: 'italic',
-          }}>
+          style={[styles.title, {fontSize: TITLE_FONT_SIZE}]}>
           {data.type === 'PARK' ? t('park_the_car') : t('retrieve_the_car')}
         </TextWrapper>
       </Animated.View>
-      <TextWrapper variant="titleSmall">{data.description}</TextWrapper>
+      <TextWrapper variant="titleSmall" style={styles.description}>
+        {data.description}
+      </TextWrapper>
 
       {data?.instructions && (
-        <View>
-          {/* <TextWrapper variant="labelLarge">Special Instruction:</TextWrapper> */}
-          <TextWrapper style={styles.instructions}>
+        <View style={styles.instructionsContainer}>
+          <TextWrapper
+            style={[styles.instructions, {fontSize: INSTRUCTION_FONT_SIZE}]}>
             {data.instructions}
           </TextWrapper>
         </View>
       )}
 
       <View style={styles.content}>
-        {/* <View style={{marginBottom: 5}}>
-          <View style={styles.row}>
-            <Avatar.Icon
-              icon="account"
-              size={ICON_SIZE}
-              backgroundColor={BG_COLOR_BUTTON}
-            />
-            <TextWrapper>{data.name}</TextWrapper>
-          </View>
-          <View style={styles.row}>
-            <Avatar.Icon
-              icon="phone"
-              size={ICON_SIZE}
-              backgroundColor={BG_COLOR_BUTTON}
-            />
-            <TextWrapper>{data.phone}</TextWrapper>
-          </View>
-        </View> */}
-
-        {/* <View style={{marginVertical: 5}}>
-          <View style={styles.row}>
-            <Avatar.Icon
-              icon="car"
-              size={ICON_SIZE}
-              backgroundColor={BG_COLOR_BUTTON}
-            />
-            <TextWrapper>{`${data.brand}, ${data.model}`}</TextWrapper>
-          </View>
-          <View style={styles.row}>
-            <Avatar.Icon
-              icon="numeric"
-              size={ICON_SIZE}
-              backgroundColor={BG_COLOR_BUTTON}
-            />
-            <TextWrapper>{data.plate}</TextWrapper>
-          </View>
-          <View style={styles.row}>
-            <Avatar.Icon
-              icon="map-marker"
-              size={ICON_SIZE}
-              backgroundColor={BG_COLOR_BUTTON}
-            />
-            <TextWrapper>{data.location}</TextWrapper>
-          </View>
-        </View> */}
-
         <VehicleDetails data={data} />
 
-        {/* <View style={{marginVertical: 5}}>
-          <View style={styles.row}>
-            <Avatar.Icon
-              icon="calendar"
-              size={ICON_SIZE}
-              backgroundColor={BG_COLOR_BUTTON}
-            />
-            <TextWrapper>{start.format('DD,MMM,YYYY HH:mm')}</TextWrapper>
-          </View>
-          <View style={styles.row}>
-            <Avatar.Icon
-              icon="clock-outline"
-              size={ICON_SIZE}
-              backgroundColor={BG_COLOR_BUTTON}
-            />
-            <TextWrapper>{data.duration} min</TextWrapper>
-          </View>
-        {/* <View
-          style={{
-            marginVertical: 8,
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}>
-          <View style={styles.row}>
-            <Avatar.Icon
-              icon="calendar"
-              size={ICON_SIZE}
-              backgroundColor={BG_COLOR_BUTTON}
-            />
-            <TextWrapper>{start.format('DD,MMM,YYYY HH:mm')}</TextWrapper>
-          </View>
-          <View style={styles.row}>
-            <Avatar.Icon
-              icon="clock-outline"
-              size={ICON_SIZE}
-              backgroundColor={BG_COLOR_BUTTON}
-            />
-            <TextWrapper>{data.duration} min</TextWrapper>
-          </View>
-        </View> */}
         <View style={styles.progressBarContainer}>
           <Animated.View
             style={[
@@ -321,26 +237,24 @@ const TaskCard: React.FC<{data: TaskData | null}> = ({data}) => {
           />
         </View>
 
-        <View style={styles.row}>
+        <View style={styles.statusContainer}>
           <Avatar.Icon
             icon="information-outline"
             size={ICON_SIZE}
             backgroundColor={BG_COLOR_BUTTON}
           />
           <TextWrapper
-            style={{
-              ...styles.status,
-              backgroundColor:
-                status === 'COMPLETED'
-                  ? '#4CAF50'
-                  : status === 'ONGOING'
-                  ? '#87CEEB'
-                  : '#FFA500',
-              color: '#fff',
-              padding: 4,
-              borderRadius: 4,
-              fontWeight: 'bold',
-            }}>
+            style={[
+              styles.status,
+              {
+                backgroundColor:
+                  status === 'COMPLETED'
+                    ? '#4CAF50'
+                    : status === 'ONGOING'
+                    ? '#87CEEB'
+                    : '#FFA500',
+              },
+            ]}>
             {getStatusLabel()}
           </TextWrapper>
         </View>
@@ -360,8 +274,8 @@ export default TaskCard;
 
 const VehicleDetails = ({data}: any) => {
   return (
-    <View style={styles.container}>
-      <View style={styles.item}>
+    <View style={styles.vehicleDetailsContainer}>
+      <View style={styles.detailItem}>
         <Avatar.Icon
           icon="car"
           size={ICON_SIZE}
@@ -376,7 +290,7 @@ const VehicleDetails = ({data}: any) => {
         </View>
       </View>
 
-      <View style={styles.item}>
+      <View style={styles.detailItem}>
         <Avatar.Icon
           icon="numeric"
           size={ICON_SIZE}
@@ -390,7 +304,7 @@ const VehicleDetails = ({data}: any) => {
         </View>
       </View>
 
-      <View style={styles.item}>
+      <View style={styles.detailItem}>
         <Avatar.Icon
           icon="map-marker"
           size={ICON_SIZE}
@@ -409,92 +323,111 @@ const VehicleDetails = ({data}: any) => {
 
 const styles = StyleSheet.create({
   cardContainer: {
-    marginVertical: 10,
+    marginVertical: Math.min(SCREEN_HEIGHT * 0.01, 10),
     flex: 1,
     borderRadius: 12,
     justifyContent: 'space-between',
     // alignItems: 'center',
   },
-  titleContiner: {
+  emptyContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  titleContainer: {
     borderWidth: 1,
     borderColor: '#ccc',
-    paddingTop: 10,
-    paddingBottom: 5,
-    borderRadius: 4,
+    paddingTop: Math.min(SCREEN_HEIGHT * 0.01, 10),
+    paddingBottom: Math.min(SCREEN_HEIGHT * 0.005, 5),
+    borderRadius: 2,
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: SCREEN_HEIGHT * 0.01,
+    marginBottom: Math.min(SCREEN_HEIGHT * 0.01, 10),
   },
   title: {
     fontWeight: 'bold',
     textTransform: 'uppercase',
+    color: '#fff',
+    fontStyle: 'italic',
+    textAlign: 'center',
+  },
+  description: {
+    marginBottom: Math.min(SCREEN_HEIGHT * 0.01, 10),
   },
   content: {
     flexDirection: 'column',
     flex: 1,
-    marginTop: 20,
+    marginTop: Math.min(SCREEN_HEIGHT * 0.02, 20),
+  },
+  instructionsContainer: {
+    marginVertical: Math.min(SCREEN_HEIGHT * 0.01, 10),
   },
   instructions: {
     color: '#fff',
-    padding: 8,
+    padding: Math.min(SCREEN_WIDTH * 0.02, 8),
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255, 0, 0, 0.7)', //light red
+    borderColor: 'rgba(255, 0, 0, 0.7)',
     backgroundColor: 'rgba(255, 0, 0, 0.2)',
     fontWeight: 'bold',
-    marginTop: 8,
-    marginBottom: 0,
   },
-  row: {
+  vehicleDetailsContainer: {
+    marginVertical: Math.min(SCREEN_HEIGHT * 0.01, 10),
+    gap: Math.min(SCREEN_HEIGHT * 0.015, 12),
+  },
+  detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginVertical: 3,
+    paddingVertical: Math.min(SCREEN_HEIGHT * 0.007, 6),
+  },
+  icon: {
+    marginRight: Math.min(SCREEN_WIDTH * 0.03, 12),
+  },
+  textContainer: {
+    flex: 1,
+  },
+  label: {
+    fontSize: Math.min(SCREEN_WIDTH * 0.035, 13),
+    color: '#777',
+    marginBottom: 2,
+  },
+  value: {
+    fontSize: Math.min(SCREEN_WIDTH * 0.04, 16),
+    fontWeight: '600',
+    color: '#fff',
   },
   progressBarContainer: {
     height: 5,
     backgroundColor: '#eee',
     borderRadius: 4,
     overflow: 'hidden',
-    marginVertical: 12,
+    marginVertical: Math.min(SCREEN_HEIGHT * 0.015, 12),
   },
   progressBarFill: {
     height: '100%',
     borderRadius: 4,
   },
-  status: {
-    marginLeft: 8,
-    fontWeight: 'bold',
-  },
-  button: {
-    marginTop: 16,
-    marginBottom: 8,
-  },
-
-  container: {
-    marginVertical: 10,
-    gap: 12,
-  },
-  item: {
+  statusContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 6,
+    marginBottom: Math.min(SCREEN_HEIGHT * 0.015, 12),
   },
-  icon: {
-    marginRight: 12,
-  },
-  textContainer: {
-    flex: 1,
-  },
-  label: {
-    fontSize: 13,
-    color: '#777',
-    marginBottom: 2,
-  },
-  value: {
-    fontSize: 16,
-    fontWeight: '600',
+  status: {
+    marginLeft: Math.min(SCREEN_WIDTH * 0.02, 8),
+    fontWeight: 'bold',
     color: '#fff',
+    padding: Math.min(SCREEN_WIDTH * 0.01, 4),
+    borderRadius: 4,
+  },
+  button: {
+    marginTop: Math.min(SCREEN_HEIGHT * 0.02, 16),
+    marginBottom: Math.min(SCREEN_HEIGHT * 0.01, 8),
+  },
+  avatar: {
+    borderRadius: 100,
+  },
+  waitingText: {
+    marginVertical: Math.min(SCREEN_HEIGHT * 0.01, 10),
+    textAlign: 'center',
   },
 });

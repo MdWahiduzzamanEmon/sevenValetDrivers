@@ -17,35 +17,96 @@ import {LANGUAGES_LIST} from '../../constant';
 import {useTranslation} from 'react-i18next';
 import CustomDropdown from '../../Utils/CustomDropdown/CustomDropdown';
 import CustomTextInput from '../../Utils/CustomTextInput/CustomTextInput';
-// import i18n from '../../../i18n';
+import {useUpdateProfileMutation} from '../../Store/feature/Auth/authApiSlice';
+import {useAlert} from '../../Utils/CustomAlert/AlertContext';
+import {useAppSelector} from '../../Store/Store';
 
 if (Platform.OS === 'android') {
   UIManager.setLayoutAnimationEnabledExperimental &&
     UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const Profile = ({route}: any) => {
+const Profile = () => {
   const {t, i18n} = useTranslation();
-  // const title = route?.name || 'Profile';
   const [selectLanguage, setSelectLanguage] = useState('en');
   const [showPasswordSection, setShowPasswordSection] = useState(false);
+
+  const {showAlert} = useAlert();
 
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  // Add state for password visibility
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const {user} = useAppSelector(state => state.authSlice);
+
+  const [updateProfile, {isLoading}] = useUpdateProfileMutation();
 
   const togglePasswordSection = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setShowPasswordSection(prev => !prev);
   };
 
-  const handleChangePassword = () => {
-    // Add validation or API call here
-    console.log('Changing password:', {
-      oldPassword,
-      newPassword,
-      confirmPassword,
-    });
+  const selectLanguageFullName = (lan: string) => {
+    if (lan === 'en') {
+      return 'English';
+    } else if (lan === 'ur') {
+      return 'Urdu';
+    } else if (lan === 'bn') {
+      return 'Bangla';
+    }
+  };
+
+  const handleChangePassword = async () => {
+    // Validate inputs
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      showAlert(t('error'), t('all_fields_required'), 'error');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      showAlert(t('error'), t('password_not_match'), 'error');
+      return;
+    }
+
+    try {
+      console.log('user', user);
+      const body = {
+        recId: Number(user?.id),
+        language: selectLanguageFullName(selectLanguage),
+        newPasscode: newPassword?.toString(),
+      };
+
+      const response = await updateProfile(body).unwrap();
+      // console.log('response', response);
+
+      if (response?.result?.status) {
+        showAlert(t('success'), t('password_updated'), 'success');
+        // Clear all password fields
+        setOldPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        // Hide password section
+        setShowPasswordSection(false);
+      } else {
+        showAlert(
+          t('error'),
+          response?.result?.message || t('update_failed'),
+          'error',
+        );
+      }
+    } catch (error: any) {
+      console.log('Update profile error:', error);
+      showAlert(
+        t('error'),
+        error?.data?.message || error?.message || t('update_failed'),
+        'error',
+      );
+    }
   };
 
   const handleSelectLanguage = (value: string) => {
@@ -83,20 +144,31 @@ const Profile = ({route}: any) => {
               <CustomTextInput
                 label={t('old_password')}
                 value={oldPassword}
-                onChangeText={setOldPassword}
+                onChangeText={text => setOldPassword(text.trim())}
                 secureTextEntry
+                showPasswordToggle
+                isPasswordVisible={showOldPassword}
+                onTogglePassword={() => setShowOldPassword(!showOldPassword)}
               />
               <CustomTextInput
                 label={t('new_password')}
                 value={newPassword}
-                onChangeText={setNewPassword}
+                onChangeText={text => setNewPassword(text.trim())}
                 secureTextEntry
+                showPasswordToggle
+                isPasswordVisible={showNewPassword}
+                onTogglePassword={() => setShowNewPassword(!showNewPassword)}
               />
               <CustomTextInput
                 label={t('confirm_password')}
                 value={confirmPassword}
-                onChangeText={setConfirmPassword}
+                onChangeText={text => setConfirmPassword(text.trim())}
                 secureTextEntry
+                showPasswordToggle
+                isPasswordVisible={showConfirmPassword}
+                onTogglePassword={() =>
+                  setShowConfirmPassword(!showConfirmPassword)
+                }
               />
             </View>
           )}
@@ -104,6 +176,7 @@ const Profile = ({route}: any) => {
             style={{marginTop: 16}}
             label={t('update')}
             onPress={handleChangePassword}
+            loading={isLoading}
           />
         </ScrollView>
       </KeyboardAvoidingView>

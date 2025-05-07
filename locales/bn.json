@@ -40,5 +40,12 @@
   "sign_in": "সাইন ইন করুন",
   "sign_out": "সাইন আউট করুন",
   "logout": "লগ আউট",
-  "waiting_for_new_task": "নতুন কাজের জন্য অপেক্ষা করছি..."
+  "waiting_for_new_task": "নতুন কাজের জন্য অপেক্ষা করছি...",
+  "password_not_match": "পাসওয়ার্ড মেলে না",
+  "password_updated": "পাসওয়ার্ড সফলভাবে আপডেট হয়েছে",
+  "all_fields_required": "সব ক্ষেত্রগুলি প্রয়োজনীয়",
+  "update_failed": "আপডেট ব্যর্থ",
+  "success": "সফল",
+  "error": "ব্যর্থ",
+  "password_updated_successfully": "পাসওয়ার্ড সফলভাবে আপডেট হয়েছে"
 }

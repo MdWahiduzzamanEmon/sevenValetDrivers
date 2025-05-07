@@ -2,7 +2,7 @@
 
 import React, {useEffect} from 'react';
 import {firebase} from '@react-native-firebase/analytics';
-import {getBrand, getDeviceName} from 'react-native-device-info';
+import {getBrand} from 'react-native-device-info';
 import messaging, {
   FirebaseMessagingTypes,
 } from '@react-native-firebase/messaging';
@@ -12,8 +12,9 @@ import axios from 'axios';
 // import moment from 'moment';
 import apiUrl from '../../Base';
 import {FIREBASE_APP_NAME} from '../../config';
+import {getDeviceName} from '../../Utils/DeviceInfo';
 // import {stopSound} from '../../Utils/Sound/Sound';
-// import {useAppSelector} from '../../Store/Store';
+import {useAppSelector} from '../../Store/Store';
 // import { useUserWiseTokenFCMTokenSendMutation } from '../../Store/feature/globalApiSlice';
 
 interface FirebaseContextType {
@@ -42,7 +43,7 @@ const APP_NAME = FIREBASE_APP_NAME;
 const FirebaseProvider = ({children}: {children: React.ReactNode}) => {
   const [newNotification, setNewNotification] =
     React.useState<FirebaseMessagingTypes.RemoteMessage | null>(null);
-  // const {loginUserData} = useAppSelector(state => state.authSlice) as any;
+  const {user} = useAppSelector(state => state.authSlice);
 
   // const [userWiseTokenFCMTokenSend] = useUserWiseTokenFCMTokenSendMutation();
 
@@ -102,18 +103,24 @@ const FirebaseProvider = ({children}: {children: React.ReactNode}) => {
     };
 
     const sendFcmTokenToServer = async (token: string) => {
-      // console.log('FCM Token:', token);
       try {
         if (!token) return;
         console.log('Sending FCM token to server:', token);
-        const userDeviceName = getDeviceName();
+        const userDeviceName = await getDeviceName();
         const getBrandName = getBrand();
 
         const body = {
           appName: APP_NAME,
           fcmToken: token,
-          deviceName: userDeviceName || 'Unknown Device',
+          deviceName: userDeviceName,
           brand: getBrandName || 'Unknown Brand',
+          user: user
+            ? {
+                driverId: user.driverId,
+                driverName: user.driverName,
+                id: user.id,
+              }
+            : null,
         };
 
         const URL = apiUrl?.pushService;
@@ -262,7 +269,7 @@ const FirebaseProvider = ({children}: {children: React.ReactNode}) => {
         unsubscribe();
       }
     };
-  }, []);
+  }, [user]);
 
   return (
     <FirebaseContext.Provider
