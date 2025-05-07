@@ -1,13 +1,13 @@
 import SoundPlayer from 'react-native-sound-player';
 
-let volumeInterval: string | number | NodeJS.Timeout | null | undefined = null; // store globally so we can clear it later
+let volumeInterval: NodeJS.Timeout | undefined = undefined;
 let currentVolume = 1;
 
 const playSound = async () => {
   try {
     SoundPlayer.setVolume(currentVolume);
 
-    SoundPlayer.playSoundFile('tone', 'mp3');
+    SoundPlayer.playSoundFile('tone2', 'mp3');
     SoundPlayer.setNumberOfLoops(-1); // Loop indefinitely
     console.log('Sound is playing');
 
@@ -17,8 +17,10 @@ const playSound = async () => {
         currentVolume += 0.1; // Increase volume by 0.1
         SoundPlayer.setVolume(currentVolume);
       } else {
-        clearInterval(volumeInterval);
-        volumeInterval = null;
+        if (volumeInterval) {
+          clearInterval(volumeInterval);
+          volumeInterval = undefined;
+        }
       }
     }, 1000); // Adjust the interval time as needed
   } catch (error) {
@@ -32,7 +34,7 @@ const stopSound = async () => {
     SoundPlayer.stop();
     if (volumeInterval) {
       clearInterval(volumeInterval);
-      volumeInterval = null;
+      volumeInterval = undefined;
     }
     currentVolume = 1; // Reset volume to 0
     SoundPlayer.setVolume(currentVolume);

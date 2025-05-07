@@ -5,7 +5,6 @@ import {
   ImageBackground,
   StyleSheet,
   Text,
-  View,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {APP_NAME, GRADIENT_THEME_COLORS} from '../../../config';
@@ -13,10 +12,36 @@ import {APP_NAME, GRADIENT_THEME_COLORS} from '../../../config';
 const SplashFallback = () => {
   const image = require('../../../assets/car.png');
 
-  // Create an animated scale value
+  // Create animated values
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
+    // Start fade-in animation
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+
+    // Start pulse animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.05,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+
+    // Start scale animation
     Animated.loop(
       Animated.sequence([
         Animated.timing(scaleAnim, {
@@ -31,27 +56,38 @@ const SplashFallback = () => {
         }),
       ]),
     ).start();
-  }, [scaleAnim]);
+  }, [fadeAnim, pulseAnim, scaleAnim]);
 
   return (
     <LinearGradient
       colors={GRADIENT_THEME_COLORS}
       style={StyleSheet.absoluteFillObject}>
-      {/* Animated wrapper */}
       <Animated.View
-        style={[styles.animatedWrapper, {transform: [{scale: scaleAnim}]}]}>
+        style={[
+          styles.animatedWrapper,
+          {
+            transform: [{scale: scaleAnim}, {scale: pulseAnim}],
+          },
+        ]}>
         <ImageBackground
           source={image}
           style={styles.background}
           resizeMode="contain">
-          <View style={styles.logoContainer}>
+          <Animated.View
+            style={[
+              styles.logoContainer,
+              {
+                opacity: fadeAnim,
+                transform: [{scale: fadeAnim}],
+              },
+            ]}>
             <Text style={styles.logoText}>{APP_NAME?.split(' ')[0]}</Text>
             <Text style={styles.smallLogoText}>
               {APP_NAME?.split(' ')[1]} {APP_NAME?.split(' ')[2]}
             </Text>
-          </View>
+          </Animated.View>
 
-          <Text style={{color: '#ffffff', fontSize: 12, marginBottom: 30}}>
+          <Text style={styles.loadingText}>
             Please wait... <ActivityIndicator size="small" color="#ffffff" />
           </Text>
         </ImageBackground>
@@ -92,5 +128,10 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontWeight: 'bold',
     letterSpacing: 5,
+  },
+  loadingText: {
+    color: '#ffffff',
+    fontSize: 12,
+    marginBottom: 30,
   },
 });

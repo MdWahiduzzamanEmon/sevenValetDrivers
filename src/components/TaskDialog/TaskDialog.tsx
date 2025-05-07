@@ -92,7 +92,17 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
               style={{borderRadius: 100}}
             />
           </Animated.View>
-          <Text style={styles.title}>{`New ${taskType} Task`}</Text>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>New </Text>
+            <Text
+              style={[
+                styles.title,
+                {color: theme.colors.primary, fontWeight: '700'},
+              ]}>
+              {taskType}
+            </Text>
+            <Text style={styles.title}> Task</Text>
+          </View>
           <Text style={styles.subtitle}>
             {`You have a new ${taskType} task assigned.`}
           </Text>
@@ -124,10 +134,15 @@ const styles = StyleSheet.create({
     padding: 24,
     minWidth: '80%',
   },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
   title: {
     fontSize: 20,
     fontWeight: '600',
-    marginBottom: 4,
   },
   subtitle: {
     fontSize: 14,

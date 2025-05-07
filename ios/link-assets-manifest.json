@@ -116,6 +116,10 @@
     {
       "path": "src/assets/tone.mp3",
       "sha1": "a8e7c934b8459a4a255b39f5020b8dd4ab95aa31"
+    },
+    {
+      "path": "src/assets/tone2.mp3",
+      "sha1": "447fe78e6f4351ca9be3e8d16210d89d4d6b28fa"
     }
   ]
 }
