@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState} from 'react';
-import {View, Alert, StyleSheet, TouchableOpacity} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {View, StyleSheet, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import CustomTextInput from '../../Utils/CustomTextInput/CustomTextInput';
 import CustomButton from '../../Utils/CustomButton/CustomButton';
@@ -9,22 +9,51 @@ import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
 import {APP_NAME} from '../../config';
 import {useTranslation} from 'react-i18next';
 import {useLoginMutation} from '../../Store/feature/Auth/authApiSlice';
-import {useAppDispatch} from '../../Store/Store';
-import {setUser} from '../../Store/feature/Auth/authSlice';
+import {useAppDispatch, useAppSelector} from '../../Store/Store';
+import {
+  setUser,
+  setRememberMe,
+  setSavedCredentials,
+} from '../../Store/feature/Auth/authSlice';
+import CustomOTPInput from '../../Utils/CustomOTPInput/CustomOTPInput';
+import {useAlert} from '../../Utils/CustomAlert/AlertContext';
 
 const SignInScreen = () => {
   const {t} = useTranslation();
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
   const navigation = useNavigation();
   const [login, {isLoading}] = useLoginMutation();
   const dispatch = useAppDispatch();
-  // navigation.navigate('Home' as never); // Replace with your home screen name
+  const {rememberMe, savedCredentials} = useAppSelector(
+    state => state.authSlice,
+  );
+  const {showAlert} = useAlert();
+
+  useEffect(() => {
+    if (savedCredentials) {
+      setUserId(savedCredentials.driverId);
+      setPassword(savedCredentials.passcode);
+    }
+  }, [savedCredentials]);
+
+  const handleRememberMe = (value: boolean) => {
+    dispatch(setRememberMe(value));
+    if (value) {
+      dispatch(setSavedCredentials({driverId: userId, passcode: password}));
+    } else {
+      dispatch(setSavedCredentials(null));
+    }
+  };
 
   const onSignIn = async () => {
     if (!userId || !password) {
-      Alert.alert('Please enter username and password');
+      showAlert('Error', 'Please enter username and password', 'error');
+      return;
+    }
+
+    if (password.length !== 4) {
+      showAlert('Error', 'Password must be 4 digits', 'error');
       return;
     }
 
@@ -36,12 +65,20 @@ const SignInScreen = () => {
       console.log(response);
       if (response?.result?.success) {
         dispatch(setUser(response?.result?.data));
+        if (rememberMe) {
+          dispatch(setSavedCredentials({driverId: userId, passcode: password}));
+        }
         navigation.navigate('Home' as never);
       } else {
-        Alert.alert('Login Failed', JSON.stringify(response.error));
+        showAlert(
+          'Login Failed',
+          response.error?.message || 'Something went wrong',
+          'error',
+        );
       }
     } catch (error) {
       console.log('error', error);
+      showAlert('Error', 'An unexpected error occurred', 'error');
     }
   };
 
@@ -91,6 +128,7 @@ const SignInScreen = () => {
           marginTop: 100,
           flex: 1,
           justifyContent: 'flex-start',
+          gap: 8,
           // borderWidth: 1,
           // borderColor: 'gray',
           // borderRadius: 10,
@@ -103,11 +141,11 @@ const SignInScreen = () => {
           autoCapitalize="none"
           // maxLength={10}
         />
-        <CustomTextInput
+        <CustomOTPInput
           label={t('password')}
+          length={4}
           value={password}
-          onChangeText={setPassword}
-          secureTextEntry
+          onChange={setPassword}
         />
 
         <View
@@ -117,7 +155,7 @@ const SignInScreen = () => {
             marginVertical: 10,
           }}>
           <TouchableOpacity
-            onPress={() => setRememberMe(prev => !prev)}
+            onPress={() => handleRememberMe(!rememberMe)}
             style={{
               height: 20,
               width: 20,
@@ -129,7 +167,7 @@ const SignInScreen = () => {
             }}
           />
           <TextWrapper
-            onPress={() => setRememberMe(prev => !prev)}
+            onPress={() => handleRememberMe(!rememberMe)}
             style={{color: '#fff'}}>
             {t('remember_me')}
           </TextWrapper>
