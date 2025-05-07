@@ -38,5 +38,7 @@
   "sign_in_description": "Please enter your user ID and password to sign in.",
   "remember_me": "Remember me",
   "sign_in": "Sign In",
-  "sign_out": "Sign Out"
+  "sign_out": "Sign Out",
+  "logout": "Logout",
+  "waiting_for_new_task": "Waiting for new task..."
 }

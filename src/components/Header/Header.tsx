@@ -1,15 +1,23 @@
+/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import {View, StyleSheet, TouchableOpacity, Image} from 'react-native';
 import {SCREEN_WIDTH} from '../../config';
 import logout from '../../assets/logout.png';
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
 import {useNavigation} from '@react-navigation/native';
+import {useTranslation} from 'react-i18next';
+import {useAppDispatch} from '../../Store/Store';
+import {setLogout} from '../../Store/feature/Auth/authSlice';
 
-const Header = ({...props}) => {
+const Header = () => {
+  const {t} = useTranslation();
   const navigate = useNavigation() as any;
+  const dispatch = useAppDispatch();
+
   const onLogout = () => {
     // Handle logout logic here
-    console.log('Logout pressed');
+    // console.log('Logout pressed');
+    dispatch(setLogout());
     navigate.navigate('Auth');
   };
   return (
@@ -37,7 +45,7 @@ const Header = ({...props}) => {
             color: '#fff', // adjust color as needed
             textAlign: 'center',
           }}>
-          Logout
+          {t('logout')}
         </TextWrapper>
       </TouchableOpacity>
     </View>

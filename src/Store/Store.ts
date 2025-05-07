@@ -13,6 +13,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {apiSlice} from './api/apiSlice';
 import globalSlice from './feature/globalSlice';
+import authSlice from './feature/Auth/authSlice';
 
 // import {setupListeners} from '@reduxjs/toolkit/query';
 // import storage from 'redux-persist/lib/storage';
@@ -26,6 +27,7 @@ const persistConfig = {
 };
 
 const rootReducer = combineReducers({
+  authSlice,
   globalSlice,
   [apiSlice.reducerPath]: apiSlice.reducer,
 });

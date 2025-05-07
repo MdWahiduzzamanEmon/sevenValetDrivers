@@ -8,6 +8,9 @@ import Container from '../../components/Container/Container';
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
 import {APP_NAME} from '../../config';
 import {useTranslation} from 'react-i18next';
+import {useLoginMutation} from '../../Store/feature/Auth/authApiSlice';
+import {useAppDispatch} from '../../Store/Store';
+import {setUser} from '../../Store/feature/Auth/authSlice';
 
 const SignInScreen = () => {
   const {t} = useTranslation();
@@ -15,13 +18,30 @@ const SignInScreen = () => {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const navigation = useNavigation();
+  const [login, {isLoading}] = useLoginMutation();
+  const dispatch = useAppDispatch();
+  // navigation.navigate('Home' as never); // Replace with your home screen name
 
-  const onSignIn = () => {
-    console.log('Sign In', {userId, password, rememberMe});
-    if (userId === '12345' && password === '12345') {
-      navigation.navigate('Home' as never); // Replace with your home screen name
-    } else {
-      Alert.alert('Login Failed', 'Invalid username or password');
+  const onSignIn = async () => {
+    if (!userId || !password) {
+      Alert.alert('Please enter username and password');
+      return;
+    }
+
+    try {
+      const response = await login({
+        driverId: userId,
+        passcode: password,
+      }).unwrap();
+      console.log(response);
+      if (response?.result?.success) {
+        dispatch(setUser(response?.result?.data));
+        navigation.navigate('Home' as never);
+      } else {
+        Alert.alert('Login Failed', JSON.stringify(response.error));
+      }
+    } catch (error) {
+      console.log('error', error);
     }
   };
 
@@ -115,7 +135,11 @@ const SignInScreen = () => {
           </TextWrapper>
         </View>
 
-        <CustomButton label={t('sign_in')} onPress={onSignIn} />
+        <CustomButton
+          label={t('sign_in')}
+          onPress={onSignIn}
+          loading={isLoading}
+        />
 
         {/* <TouchableOpacity onPress={goToSignUp} style={{marginTop: 16}}>
           <TextWrapper style={{color: 'white', textAlign: 'center'}}>

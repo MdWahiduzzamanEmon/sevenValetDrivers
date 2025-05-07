@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ViewStyle,
   TextStyle,
+  ActivityIndicator,
 } from 'react-native';
 
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
   [key: string]: any; // Allow additional props
   style?: ViewStyle;
   disabled?: boolean;
+  loading?: boolean;
 }
 
 const CustomButton: React.FC<Props> = ({
@@ -21,6 +23,7 @@ const CustomButton: React.FC<Props> = ({
   onPress,
   disabled,
   mode = 'contained',
+  loading,
   ...props
 }) => {
   const backgroundColor = mode === 'contained' ? 'white' : 'transparent';
@@ -41,7 +44,11 @@ const CustomButton: React.FC<Props> = ({
         props.style,
         {opacity: disabled ? 0.5 : 1},
       ]}>
-      <Text style={[styles.label, {color: textColor}]}>{label}</Text>
+      {loading ? (
+        <ActivityIndicator size="small" color="white" />
+      ) : (
+        <Text style={[styles.label, {color: textColor}]}>{label}</Text>
+      )}
     </TouchableOpacity>
   );
 };

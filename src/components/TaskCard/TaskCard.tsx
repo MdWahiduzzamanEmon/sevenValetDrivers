@@ -177,7 +177,7 @@ const TaskCard: React.FC<{data: TaskData | null}> = ({data}) => {
             />
           </Animated.View>
           <TextWrapper variant="titleMedium" style={{marginVertical: 10}}>
-            Waiting for new task...
+            {t('waiting_for_new_task')}
           </TextWrapper>
         </Animated.View>
       </>
