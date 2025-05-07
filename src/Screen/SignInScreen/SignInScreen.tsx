@@ -7,7 +7,6 @@ import CustomButton from '../../Utils/CustomButton/CustomButton';
 import Container from '../../components/Container/Container';
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
 import {APP_NAME} from '../../config';
-import {useTranslation} from 'react-i18next';
 import {useLoginMutation} from '../../Store/feature/Auth/authApiSlice';
 import {useAppDispatch, useAppSelector} from '../../Store/Store';
 import {
@@ -17,6 +16,7 @@ import {
 } from '../../Store/feature/Auth/authSlice';
 import CustomOTPInput from '../../Utils/CustomOTPInput/CustomOTPInput';
 import {useAlert} from '../../Utils/CustomAlert/AlertContext';
+import { useTranslation } from 'react-i18next';
 
 const SignInScreen = () => {
   const {t} = useTranslation();
