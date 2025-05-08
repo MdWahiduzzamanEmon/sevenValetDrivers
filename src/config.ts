@@ -10,3 +10,6 @@ export const SCREEN_WIDTH = width;
 export const SCREEN_HEIGHT = height;
 export const PADDING_SCREEN_HORIZONTAL = 10;
 export const BG_COLOR_BUTTON = theme.colors.primary;
+
+export type TASK_TYPE = 'ParkIn' | 'ParkOut';
+export const TASK_TYPES: TASK_TYPE[] = ['ParkIn', 'ParkOut'];

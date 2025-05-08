@@ -1,4 +1,5 @@
 import React, {useEffect} from 'react';
+import {useTranslation} from 'react-i18next';
 import {
   View,
   Text,
@@ -32,6 +33,7 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
   onAccept,
   theme,
 }) => {
+  const {t} = useTranslation();
   const pulse = useSharedValue(1);
 
   useEffect(() => {
@@ -93,7 +95,7 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
             />
           </Animated.View>
           <View style={styles.titleContainer}>
-            <Text style={styles.title}>New </Text>
+            <Text style={styles.title}>{t('new')} </Text>
             <Text
               style={[
                 styles.title,
@@ -101,14 +103,12 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
               ]}>
               {taskType}
             </Text>
-            <Text style={styles.title}> Task</Text>
+            <Text style={styles.title}> {t('task')}</Text>
           </View>
           <Text style={styles.subtitle}>
-            {`You have a new ${taskType} task assigned.`}
+            {`${t('you_have_a_new')} ${taskType} ${t('task')} ${t('asigned')}.`}
           </Text>
-          <Text style={styles.subtitle}>
-            {`Please accept the task to proceed.`}
-          </Text>
+          <Text style={styles.subtitle}>{t('please_accept_task')}</Text>
 
           <TouchableOpacity
             style={[styles.button, {backgroundColor: theme.colors.primary}]}

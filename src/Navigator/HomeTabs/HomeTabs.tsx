@@ -1,4 +1,4 @@
-import React, {lazy, useCallback} from 'react';
+import React, {lazy, useCallback, useEffect} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {Image, StyleSheet, TouchableOpacity} from 'react-native';
 import SuspenseComponent from '../../Provider/Suspense/Suspense';
@@ -21,9 +21,15 @@ import {
   setNewTaskNotification,
   setTaskToShow,
 } from '../../Store/feature/globalSlice';
-import {PARK_TASK, RETRIEVE_TASK} from '../../Screen/OngoinTask/OngoinTask';
-// import {useNavigation, NavigationProp} from '@react-navigation/native';
-// import Pending from '../../Screen/Pending/Pending';
+// import {PARK_TASK, RETRIEVE_TASK} from '../../Screen/OngoinTask/OngoinTask';
+import {
+  useGetUserProfileQuery,
+  useLazyGetAssignedTaskQuery,
+} from '../../Store/feature/globalApiSlice';
+import {setUser} from '../../Store/feature/Auth/authSlice';
+import {revertLanguageFullName} from '../../Utils/selectLanguageFullName';
+import useLocation from '../../Hooks/useLocation';
+import {TASK_TYPE, TASK_TYPES} from '../../config';
 
 // Lazy-loaded screens
 const OngoinTask = lazy(() => import('../../Screen/OngoinTask/OngoinTask'));
@@ -94,10 +100,52 @@ const renderTabBarIcon = (routeName: string) => {
 const HomeTabs = () => {
   // const navigation = useNavigation<NavigationProp<RootTabParamList>>();
   const [lastNotificationId, setLastNotificationId] = React.useState<number>(0);
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const dispatch = useAppDispatch();
 
+  const {startTracking} = useLocation();
+  // console.log('location', location);
+
+  // useEffect(() => {
+  //   startTracking();
+  //   return () => {
+  //     stopTracking();
+  //   };
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
+
   const {newNotification, setNewNotification} = useFirebaseData() as any;
+
+  //gte user profile data
+  const {user} = useAppSelector(state => state.authSlice) as any;
+  // console.log('user', user);
+  const {data: userProfileData, isSuccess} = useGetUserProfileQuery(user?.id, {
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  });
+
+  // console.log('userProfileData', userProfileData);
+
+  useEffect(() => {
+    if (isSuccess) {
+      const userData = {
+        ...user,
+        language:
+          userProfileData?.result?.data?.id === user?.id
+            ? userProfileData?.result?.data?.language
+            : 'en',
+      };
+      dispatch(setUser(userData));
+      i18n.changeLanguage(revertLanguageFullName(userData?.language));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    isSuccess,
+    dispatch,
+    i18n,
+    userProfileData?.result?.data?.id,
+    userProfileData?.result?.data?.language,
+  ]);
 
   // console.log('newNotification', newNotification);
 
@@ -111,29 +159,27 @@ const HomeTabs = () => {
   }, []);
 
   React.useEffect(() => {
-    const title = newNotification?.notification?.title?.toUpperCase?.();
-
+    const title = newNotification?.notification?.title as TASK_TYPE;
+    console.log('title', title);
     // Generate a pseudo-unique ID by timestamp
-    if (title === 'PARK' || title === 'RETRIEVE') {
+    if (TASK_TYPES.includes(title)) {
       const now = Date.now();
       setLastNotificationId(now); // trigger new state every time
     }
   }, [newNotification]);
 
-  React.useEffect(() => {
-    const title = newNotification?.notification?.title?.toUpperCase?.();
+  const [getAssignedTask] = useLazyGetAssignedTaskQuery();
 
-    if (title === 'PARK') {
-      dispatch(setTaskToShow(PARK_TASK));
-      playSound();
-      triggerAlertEffects();
-      dispatch(setNewTaskNotification(true));
-    } else if (title === 'RETRIEVE') {
-      dispatch(setTaskToShow(RETRIEVE_TASK));
+  React.useEffect(() => {
+    const title = newNotification?.notification?.title as TASK_TYPE;
+
+    if (TASK_TYPES.includes(title)) {
+      dispatch(setTaskToShow(title));
       playSound();
       triggerAlertEffects();
       dispatch(setNewTaskNotification(true));
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, lastNotificationId, triggerAlertEffects]);
 
@@ -143,6 +189,18 @@ const HomeTabs = () => {
     newTaskNotification: boolean;
     newTaskData: any;
     taskToShow: any;
+  };
+
+  const handleGetAssignedTask = async () => {
+    try {
+      const response = await getAssignedTask(user?.id).unwrap();
+      // console.log('response', response);
+      if (response?.result?.success) {
+        dispatch(setNewTaskData(response?.result?.data));
+      }
+    } catch (error) {
+      console.error('Error fetching assigned task:', error);
+    }
   };
 
   return (
@@ -170,15 +228,17 @@ const HomeTabs = () => {
 
       <TaskDialog
         visible={newTaskNotification && !!taskToShow}
-        taskType={taskToShow?.type || 'PARK'}
+        taskType={taskToShow || 'ParkIn'}
         onAccept={() => {
           dispatch(setNewTaskNotification(false));
-          dispatch(setNewTaskData(taskToShow));
+          // dispatch(setNewTaskData(taskToShow));
+          handleGetAssignedTask();
           dispatch(setTaskToShow(null));
           stopSound();
           stopVibration();
           stopBlinkingFlashlight();
           setNewNotification(null);
+          startTracking();
         }}
         theme={{colors: {primary: '#FFA500'}}}
       />

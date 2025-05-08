@@ -15,6 +15,7 @@ import {FIREBASE_APP_NAME} from '../../config';
 import {getDeviceName} from '../../Utils/DeviceInfo';
 // import {stopSound} from '../../Utils/Sound/Sound';
 import {useAppSelector} from '../../Store/Store';
+import {useSendFcmTokenToZohoMutation} from '../../Store/feature/globalApiSlice';
 // import { useUserWiseTokenFCMTokenSendMutation } from '../../Store/feature/globalApiSlice';
 
 interface FirebaseContextType {
@@ -46,6 +47,8 @@ const FirebaseProvider = ({children}: {children: React.ReactNode}) => {
   const {user} = useAppSelector(state => state.authSlice);
 
   // const [userWiseTokenFCMTokenSend] = useUserWiseTokenFCMTokenSendMutation();
+
+  const [sendFcmTokenToZoho] = useSendFcmTokenToZohoMutation();
 
   const checkApplicationPermission = async () => {
     if (Platform.OS === 'android') {
@@ -86,14 +89,13 @@ const FirebaseProvider = ({children}: {children: React.ReactNode}) => {
 
           //send token to the another server for push notification
 
-          // if (token && loginUserData?.user?.id) {
-          //   const res = await userWiseTokenFCMTokenSend({
-          //     user: loginUserData?.user?.id,
-          //     token,
-          //     app_name: APP_NAME,
-          //   })?.unwrap();
-          //   console.log('res', res);
-          // }
+          if (token && user?.id) {
+            const res = await sendFcmTokenToZoho({
+              fcmToken: token,
+              driverId: user?.id,
+            })?.unwrap();
+            console.log('res', res);
+          }
         } else {
           console.log('Permission Denied');
         }
@@ -269,7 +271,7 @@ const FirebaseProvider = ({children}: {children: React.ReactNode}) => {
         unsubscribe();
       }
     };
-  }, [user]);
+  }, [sendFcmTokenToZoho, user]);
 
   return (
     <FirebaseContext.Provider

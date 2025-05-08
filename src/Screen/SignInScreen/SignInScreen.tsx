@@ -64,7 +64,7 @@ const SignInScreen = () => {
       }).unwrap();
       // console.log(response);
       if (response?.result?.success) {
-        // console.log('response?.result?.data', response?.result?.data);
+        console.log('response?.result?.data', response?.result?.data);
         dispatch(setUser(response?.result?.data));
         if (rememberMe) {
           dispatch(setSavedCredentials({driverId: userId, passcode: password}));

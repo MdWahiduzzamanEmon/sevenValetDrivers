@@ -22,8 +22,8 @@
   "not_started": "Not Started",
   "in_progress": "In Progress",
   "asigned_tasks": "Asigned Tasks",
-  "park_the_car": "Park the Car",
-  "retrieve_the_car": "Retrieve the Car",
+  "park_in_the_car": "Park in the Car",
+  "park_out_the_car": "Park out the Car",
   "park_completed": "Park Completed",
   "park_cancelled": "Park Cancelled",
   "park_in_progress": "Park In Progress",
@@ -47,5 +47,11 @@
   "update_failed": "Update failed",
   "success": "Success",
   "error": "Error",
-  "password_updated_successfully": "Password updated successfully"
+  "password_updated_successfully": "Password updated successfully",
+  "please_accept_task": "Please accept the task to proceed.",
+  "you_have_a_new": "You have a new",
+  "new": "New",
+  "park_in": "Park In",
+  "park_out": "Park Out",
+  "park_out_completed": "Park Out Completed"
 }

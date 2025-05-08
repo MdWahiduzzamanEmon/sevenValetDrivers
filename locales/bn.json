@@ -22,8 +22,8 @@
   "not_started": "শুরু হয়নি",
   "in_progress": "চলমান",
   "asigned_tasks": "নির্ধারিত কাজ",
-  "park_the_car": "গাড়ি পার্ক করুন",
-  "retrieve_the_car": "গাড়ি পুনরুদ্ধার করুন",
+  "park_in_the_car": "গাড়ি পার্ক করুন",
+  "park_out_the_car": "গাড়ি বের করুন",
   "park_completed": "পার্ক সম্পন্ন হয়েছে",
   "park_cancelled": "পার্ক বাতিল",
   "park_in_progress": "পার্ক চলমান",
@@ -47,5 +47,11 @@
   "update_failed": "আপডেট ব্যর্থ",
   "success": "সফল",
   "error": "ব্যর্থ",
-  "password_updated_successfully": "পাসওয়ার্ড সফলভাবে আপডেট হয়েছে"
+  "password_updated_successfully": "পাসওয়ার্ড সফলভাবে আপডেট হয়েছে",
+  "please_accept_task": "অগ্রসর হতে দয়া করে কাজটি গ্রহণ করুন।",
+  "you_have_a_new": "আপনার একটি নতুন",
+  "new": "নতুন",
+  "park_in": "পার্ক ইন",
+  "park_out": "পার্ক আউট",
+  "park_out_completed": "পার্ক আউট সম্পন্ন হয়েছে"
 }

@@ -28,20 +28,17 @@ export const authApiSlice = apiSlice.injectEndpoints({
 
     //profile update
     updateProfile: builder.mutation({
-      query: (data: UpdateProfileRequest) => {
-        console.log('data-updateProfile-slice', data);
-        return {
-          url: `/updateProfile?publickey=${UPDATE_PROFILE_PUBLIC_KEY}`,
-          method: 'POST',
-          body: {
-            recId: data.recId,
-            language: data.language,
-            newPasscode: data.newPasscode,
-          },
-        };
-      },
+      query: (data: UpdateProfileRequest) => ({
+        url: `/updateProfile?publickey=${UPDATE_PROFILE_PUBLIC_KEY}`,
+        method: 'POST',
+        body: {
+          recId: data.recId,
+          language: data.language,
+          newPasscode: data.newPasscode,
+        },
+      }),
+      invalidatesTags: ['UserProfile'], // Invalidate the UserProfile cache tag
     }),
   }),
 });
-
 export const {useLoginMutation, useUpdateProfileMutation} = authApiSlice;

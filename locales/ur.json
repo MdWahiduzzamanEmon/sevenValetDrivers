@@ -22,8 +22,8 @@
   "not_started": "شروع نہیں ہوا",
   "in_progress": "جاری ہے",
   "asigned_tasks": "تفویض کردہ کام",
-  "park_the_car": "گاڑی پارک کریں",
-  "retrieve_the_car": "گاڑی بازیافت کریں",
+  "park_in_the_car": "گاڑی پارک کریں",
+  "park_out_the_car": "گاڑی باہر نکالیں",
   "park_completed": "پارک مکمل",
   "park_cancelled": "پارک منسوخ",
   "park_in_progress": "پارک جاری ہے",
@@ -46,5 +46,12 @@
   "all_fields_required": "تمام فیلڈ موجود ہیں",
   "update_failed": "اپ ڈیٹ کرنے میں خطلاب ہوا",
   "success": "کامیاب",
-  "error": "خطلاب"
+  "error": "خطلاب",
+  "password_updated_successfully": "پاس ورڈ کامیابی کے ساتھ اپ ڈیٹ ہوا",
+  "please_accept_task": "آگے بڑھنے کے لیے براہ کرم کام قبول کریں۔",
+  "you_have_a_new": "آپ کے پاس ایک نیا",
+  "new": "نیا",
+  "park_in": "پارک ان",
+  "park_out": "پارک اوٹ",
+  "park_out_completed": "پارک اوٹ مکمل"
 }

@@ -8,7 +8,7 @@ interface GlobalState {
   userAllPermissionData: any;
   newTaskData: TaskData | null;
   newTaskNotification: boolean;
-  taskToShow: TaskData | null;
+  taskToShow: null;
 }
 
 export const globalSlice = createSlice({

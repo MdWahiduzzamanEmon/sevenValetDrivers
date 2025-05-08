@@ -3,7 +3,7 @@
 import React, {useState, useEffect} from 'react';
 import {View, StyleSheet} from 'react-native';
 import {Avatar, useTheme} from 'react-native-paper';
-import moment from 'moment';
+// import moment from 'moment';
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
 import {BG_COLOR_BUTTON, SCREEN_HEIGHT, SCREEN_WIDTH} from '../../config';
 import CustomButton from '../../Utils/CustomButton/CustomButton';
@@ -18,21 +18,26 @@ import Animated, {
 import {useTranslation} from 'react-i18next';
 import {useAppDispatch} from '../../Store/Store';
 import {setClearTask} from '../../Store/feature/globalSlice';
+import useLocation from '../../Hooks/useLocation';
 // import {stopSound} from '../../Utils/Sound/Sound';
 
-export interface TaskData {
-  type: 'PARK' | 'RETRIEVE';
+export type TaskData = {
+  taskType: 'ParkIn' | 'ParkOut';
   description: string;
-  name: string;
-  phone: string;
-  brand: string;
-  model: string;
-  plate: string; 
-  location: string;
-  startTime: string;
-  duration: number;
-  instructions: string;
-}
+  // name: string;
+  // phone: string;
+  carBrand: string;
+  carModel: string;
+  plateNumber: string;
+  pickOrDropLocation: string;
+  // startTime: string;
+  // duration: number;
+  specialInstruction: string;
+  parkingId: string;
+  id: string;
+  keyHolderId: string;
+  priority: 'Normal' | 'High';
+};
 
 // Calculate responsive sizes
 const ICON_SIZE = Math.min(SCREEN_HEIGHT * 0.035, 32);
@@ -40,9 +45,11 @@ const CARD_PADDING = Math.min(SCREEN_WIDTH * 0.04, 16);
 const TITLE_FONT_SIZE = Math.min(SCREEN_WIDTH * 0.05, 20);
 const INSTRUCTION_FONT_SIZE = Math.min(SCREEN_WIDTH * 0.04, 16);
 
-const TaskCard: React.FC<{data: TaskData | null}> = ({data}) => {
+const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
+  const {startTracking, stopTracking} = useLocation();
+
   // const [isBlinking, setIsBlinking] = useState(false);
   // let stopBlinking: () => void;
 
@@ -52,8 +59,8 @@ const TaskCard: React.FC<{data: TaskData | null}> = ({data}) => {
   const progress = useSharedValue(0);
 
   const theme = useTheme();
-  const start = data ? moment(data.startTime) : moment();
-  const end = data ? start.clone().add(data.duration, 'minutes') : moment();
+  // const start = data ? moment(data.startTime) : moment();
+  // const end = data ? start.clone().add(data.duration, 'minutes') : moment();
 
   //this section is commented out to avoid triggering the alert effects on every render.
 
@@ -67,15 +74,15 @@ const TaskCard: React.FC<{data: TaskData | null}> = ({data}) => {
     return {backgroundColor: color};
   });
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const now = moment();
-      const totalDuration = end.diff(start);
-      const elapsed = now.diff(start);
-      progress.value = Math.min(elapsed / totalDuration, 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [data?.startTime, data?.duration, end, start, progress]);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     const now = moment();
+  //     const totalDuration = end.diff(start);
+  //     const elapsed = now.diff(start);
+  //     progress.value = Math.min(elapsed / totalDuration, 1);
+  //   }, 1000);
+  //   return () => clearInterval(interval);
+  // }, [data?.startTime, data?.duration, end, start, progress]);
 
   const handleStatusChange = async () => {
     if (status === 'NOT_STARTED') {
@@ -84,15 +91,16 @@ const TaskCard: React.FC<{data: TaskData | null}> = ({data}) => {
       setStatus('COMPLETED');
       //clear the task from the server
       dispatch(setClearTask());
+      stopTracking();
     } else {
       setStatus('NOT_STARTED');
     }
   };
 
   const getButtonLabel = () => {
-    if (data?.type === 'PARK')
-      return status === 'ONGOING' ? t('park_completed') : t('park');
-    return status === 'ONGOING' ? t('retrieve_completed') : t('retrieve');
+    if (data?.taskType === 'ParkIn')
+      return status === 'ONGOING' ? t('park_completed') : t('park_in');
+    return status === 'ONGOING' ? t('park_out_completed') : t('park_out');
   };
 
   const getStatusLabel = () => {
@@ -208,18 +216,20 @@ const TaskCard: React.FC<{data: TaskData | null}> = ({data}) => {
         <TextWrapper
           variant="titleLarge"
           style={[styles.title, {fontSize: TITLE_FONT_SIZE}]}>
-          {data.type === 'PARK' ? t('park_the_car') : t('retrieve_the_car')}
+          {data.taskType === 'ParkIn'
+            ? t('park_in_the_car')
+            : t('park_out_the_car')}
         </TextWrapper>
       </Animated.View>
       <TextWrapper variant="titleSmall" style={styles.description}>
         {data.description}
       </TextWrapper>
 
-      {data?.instructions && (
+      {data?.specialInstruction && (
         <View style={styles.instructionsContainer}>
           <TextWrapper
             style={[styles.instructions, {fontSize: INSTRUCTION_FONT_SIZE}]}>
-            {data.instructions}
+            {data.specialInstruction}
           </TextWrapper>
         </View>
       )}
@@ -227,7 +237,7 @@ const TaskCard: React.FC<{data: TaskData | null}> = ({data}) => {
       <View style={styles.content}>
         <VehicleDetails data={data} />
 
-        <View style={styles.progressBarContainer}>
+        {/* <View style={styles.progressBarContainer}>
           <Animated.View
             style={[
               styles.progressBarFill,
@@ -235,7 +245,7 @@ const TaskCard: React.FC<{data: TaskData | null}> = ({data}) => {
               {width: `${progress.value * 100}%`},
             ]}
           />
-        </View>
+        </View> */}
 
         <View style={styles.statusContainer}>
           <Avatar.Icon
@@ -244,17 +254,15 @@ const TaskCard: React.FC<{data: TaskData | null}> = ({data}) => {
             backgroundColor={BG_COLOR_BUTTON}
           />
           <TextWrapper
-            style={[
-              styles.status,
-              {
-                backgroundColor:
-                  status === 'COMPLETED'
-                    ? '#4CAF50'
-                    : status === 'ONGOING'
-                    ? '#87CEEB'
-                    : '#FFA500',
-              },
-            ]}>
+            style={{
+              ...styles.status,
+              backgroundColor:
+                status === 'COMPLETED'
+                  ? '#4CAF50'
+                  : status === 'ONGOING'
+                  ? '#87CEEB'
+                  : '#FFA500',
+            }}>
             {getStatusLabel()}
           </TextWrapper>
         </View>
@@ -272,7 +280,7 @@ const TaskCard: React.FC<{data: TaskData | null}> = ({data}) => {
 
 export default TaskCard;
 
-const VehicleDetails = ({data}: any) => {
+const VehicleDetails: React.FC<{data: TaskData}> = ({data}) => {
   return (
     <View style={styles.vehicleDetailsContainer}>
       <View style={styles.detailItem}>
@@ -286,7 +294,9 @@ const VehicleDetails = ({data}: any) => {
         <View style={styles.textContainer}>
           <TextWrapper style={styles.label}>Vehicle</TextWrapper>
           <TextWrapper
-            style={styles.value}>{`${data.brand}, ${data.model}`}</TextWrapper>
+            style={
+              styles.value
+            }>{`${data.carBrand}, ${data.carModel}`}</TextWrapper>
         </View>
       </View>
 
@@ -300,23 +310,27 @@ const VehicleDetails = ({data}: any) => {
         />
         <View style={styles.textContainer}>
           <TextWrapper style={styles.label}>Plate Number</TextWrapper>
-          <TextWrapper style={styles.value}>{data.plate}</TextWrapper>
+          <TextWrapper style={styles.value}>{data.plateNumber}</TextWrapper>
         </View>
       </View>
 
-      <View style={styles.detailItem}>
-        <Avatar.Icon
-          icon="map-marker"
-          size={ICON_SIZE}
-          style={styles.icon}
-          color="#fff"
-          backgroundColor={BG_COLOR_BUTTON}
-        />
-        <View style={styles.textContainer}>
-          <TextWrapper style={styles.label}>Drop Location</TextWrapper>
-          <TextWrapper style={styles.value}>{data.location}</TextWrapper>
+      {data.pickOrDropLocation && (
+        <View style={styles.detailItem}>
+          <Avatar.Icon
+            icon="map-marker"
+            size={ICON_SIZE}
+            style={styles.icon}
+            color="#fff"
+            backgroundColor={BG_COLOR_BUTTON}
+          />
+          <View style={styles.textContainer}>
+            <TextWrapper style={styles.label}>Drop Location</TextWrapper>
+            <TextWrapper style={styles.value}>
+              {data.pickOrDropLocation}
+            </TextWrapper>
+          </View>
         </View>
-      </View>
+      )}
     </View>
   );
 };
@@ -411,9 +425,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: Math.min(SCREEN_HEIGHT * 0.015, 12),
+    gap: Math.min(SCREEN_WIDTH * 0.02, 8),
+    marginTop: Math.min(SCREEN_HEIGHT * 0.01, 8),
   },
   status: {
-    marginLeft: Math.min(SCREEN_WIDTH * 0.02, 8),
+    marginLeft: Math.min(SCREEN_WIDTH * 0.03, 12),
     fontWeight: 'bold',
     color: '#fff',
     padding: Math.min(SCREEN_WIDTH * 0.01, 4),

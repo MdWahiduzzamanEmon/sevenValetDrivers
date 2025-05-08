@@ -20,6 +20,7 @@ import CustomTextInput from '../../Utils/CustomTextInput/CustomTextInput';
 import {useUpdateProfileMutation} from '../../Store/feature/Auth/authApiSlice';
 import {useAlert} from '../../Utils/CustomAlert/AlertContext';
 import {useAppSelector} from '../../Store/Store';
+import {selectLanguageFullName} from '../../Utils/selectLanguageFullName';
 
 if (Platform.OS === 'android') {
   UIManager.setLayoutAnimationEnabledExperimental &&
@@ -33,12 +34,12 @@ const Profile = () => {
 
   const {showAlert} = useAlert();
 
-  const [oldPassword, setOldPassword] = useState('');
+  // const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
   // Add state for password visibility
-  const [showOldPassword, setShowOldPassword] = useState(false);
+  // const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -51,22 +52,10 @@ const Profile = () => {
     setShowPasswordSection(prev => !prev);
   };
 
-  const selectLanguageFullName = (lan: string) => {
-    if (lan === 'en') {
-      return 'English';
-    } else if (lan === 'ur') {
-      return 'Urdu';
-    } else if (lan === 'bn') {
-      return 'Bangla';
-    }
-  };
+  console.log('user', user);
 
   const handleChangePassword = async () => {
     // Validate inputs
-    if (!oldPassword || !newPassword || !confirmPassword) {
-      showAlert(t('error'), t('all_fields_required'), 'error');
-      return;
-    }
 
     if (newPassword !== confirmPassword) {
       showAlert(t('error'), t('password_not_match'), 'error');
@@ -74,20 +63,22 @@ const Profile = () => {
     }
 
     try {
-      console.log('user', user);
       const body = {
-        recId: Number(user?.id),
+        recId: user?.id,
         language: selectLanguageFullName(selectLanguage),
-        newPasscode: newPassword?.toString(),
+        // newPasscode: newPassword?.toString(),
+        ...(newPassword && {
+          newPasscode: newPassword?.toString(),
+        }),
       };
 
       const response = await updateProfile(body).unwrap();
       // console.log('response', response);
 
-      if (response?.result?.status) {
+      if (response?.result?.success) {
         showAlert(t('success'), t('password_updated'), 'success');
         // Clear all password fields
-        setOldPassword('');
+        // setOldPassword('');
         setNewPassword('');
         setConfirmPassword('');
         // Hide password section
@@ -141,7 +132,7 @@ const Profile = () => {
 
           {showPasswordSection && (
             <View style={styles.passwordSection}>
-              <CustomTextInput
+              {/* <CustomTextInput
                 label={t('old_password')}
                 value={oldPassword}
                 onChangeText={text => setOldPassword(text.trim())}
@@ -149,7 +140,7 @@ const Profile = () => {
                 showPasswordToggle
                 isPasswordVisible={showOldPassword}
                 onTogglePassword={() => setShowOldPassword(!showOldPassword)}
-              />
+              /> */}
               <CustomTextInput
                 label={t('new_password')}
                 value={newPassword}

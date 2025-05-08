@@ -1,8 +1,14 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
+export type userType = {
+  driverId: string;
+  driverName: string;
+  id: string;
+  language?: string;
+};
 interface AuthState {
   isAuthenticated: boolean;
-  user: any;
+  user: userType | null;
   rememberMe: boolean;
   savedCredentials: {
     driverId: string;

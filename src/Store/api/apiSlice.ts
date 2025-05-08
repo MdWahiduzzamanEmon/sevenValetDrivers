@@ -23,14 +23,13 @@ let REFRESH_TOKEN = '';
 const baseQuery = fetchBaseQuery({
   baseUrl: apiUrl?.master,
   // credentials: "include",
-  prepareHeaders: async (headers, {getState}: any) => {
-    const token = getState()?.authSlice?.loginUserData?.access_token;
-    REFRESH_TOKEN = getState()?.authSlice?.loginUserData?.refresh_token;
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
-    }
 
-    return headers;
+  prepareHeaders: async (headers, {getState}: any) => {
+    headers.set('Accept', 'application/json');
+    headers.set('Content-Type', 'application/json');
+    headers.set('Access-Control-Allow-Origin', '*');
+    headers.set('Access-Control-Allow-Credentials', 'true');
+    headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   },
   // credentials: 'include', // include, same-origin, omit
 });
@@ -142,20 +141,6 @@ export const apiSlice = createApi({
   baseQuery: baseQueryWithRetry as unknown as BaseQueryFn<unknown, unknown, {}>,
 
   endpoints: () => ({}),
-  tagTypes: [
-    'UNAUTHORIZED',
-    'UNKNOWN_ERROR',
-    'currentUser',
-    'getWithdrawalMethodsBank',
-    'depositDetails',
-    'withdrawDetailsList',
-    'projectsDetails',
-    'myInvestedProjects',
-    'singleProjectsDetails',
-    'userInformationImage',
-    'investorWithdrawLog',
-    'userInvestedProjects',
-    'userPermissionData',
-  ],
+  tagTypes: ['UNAUTHORIZED', 'UNKNOWN_ERROR', 'UserProfile'],
   refetchOnReconnect: true,
 }) as any;

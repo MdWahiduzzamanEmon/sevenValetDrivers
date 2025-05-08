@@ -22,6 +22,10 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need your precise location to provide real-time tracking.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We need your precise location even when the app is in background.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -33,8 +37,7 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>App needs access to the camera to use the flashlight</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string/>
+	
 	<key>UIAppFonts</key>
 	<array>
 		<string>Poppins-Black.ttf</string>

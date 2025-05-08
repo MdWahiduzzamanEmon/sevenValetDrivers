@@ -25,6 +25,7 @@
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		809ACB98F0C347B58211BD90 /* FontAwesome5_Brands.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 434FC119B0E34AC58486C1AA /* FontAwesome5_Brands.ttf */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		83AD861360714E3B980CDA7D /* tone2.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 840A65DD99B640AFBC9996B3 /* tone2.mp3 */; };
 		8405B220762E4F4897E1B8B9 /* car.png in Resources */ = {isa = PBXBuildFile; fileRef = D773EC9F5DEE47208C82F25B /* car.png */; };
 		8461A229A09B4FC69DD25D27 /* ongoing.png in Resources */ = {isa = PBXBuildFile; fileRef = B5B4BD83A0DC4BDAA4329502 /* ongoing.png */; };
 		875BF0C3711E412C815BA829 /* Entypo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5E821A1D64884C0499E4B95D /* Entypo.ttf */; };
@@ -41,7 +42,6 @@
 		F2C73805064E4237B47B6181 /* Fontisto.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F1D9FD92413D49E3BBE4E1FE /* Fontisto.ttf */; };
 		F5479C6B59FF405CA5D93745 /* Foundation.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 283353E6988B4DFBADAE323D /* Foundation.ttf */; };
 		FAD947ED14A540678DD45772 /* FontAwesome5_Solid.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 178C8CE4E0A94A5B955478C7 /* FontAwesome5_Solid.ttf */; };
-		83AD861360714E3B980CDA7D /* tone2.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 840A65DD99B640AFBC9996B3 /* tone2.mp3 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -66,6 +66,7 @@
 		72103018AEB34CB3A754BFE7 /* FontAwesome6_Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome6_Regular.ttf; path = ../src/assets/fonts/Fonts/FontAwesome6_Regular.ttf; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = sevenValetDrivers/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = sevenValetDrivers/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		840A65DD99B640AFBC9996B3 /* tone2.mp3 */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = tone2.mp3; path = ../src/assets/tone2.mp3; sourceTree = "<group>"; };
 		85D7E6031DE64690A0995BF2 /* Feather.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = Feather.ttf; path = ../src/assets/fonts/Fonts/Feather.ttf; sourceTree = "<group>"; };
 		90BAF8925046488096780443 /* Octicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = Octicons.ttf; path = ../src/assets/fonts/Fonts/Octicons.ttf; sourceTree = "<group>"; };
 		ADDA20EF427D441EA134FE42 /* pendingtask.png */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = pendingtask.png; path = ../src/assets/pendingtask.png; sourceTree = "<group>"; };
@@ -84,7 +85,6 @@
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		ED4C9D77F9CF4D59BEA11D9B /* FontAwesome6_Solid.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome6_Solid.ttf; path = ../src/assets/fonts/Fonts/FontAwesome6_Solid.ttf; sourceTree = "<group>"; };
 		F1D9FD92413D49E3BBE4E1FE /* Fontisto.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = Fontisto.ttf; path = ../src/assets/fonts/Fonts/Fontisto.ttf; sourceTree = "<group>"; };
-		840A65DD99B640AFBC9996B3 /* tone2.mp3 */ = {isa = PBXFileReference; name = "tone2.mp3"; path = "../src/assets/tone2.mp3"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
