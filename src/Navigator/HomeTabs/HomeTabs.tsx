@@ -28,7 +28,7 @@ import {
 } from '../../Store/feature/globalApiSlice';
 import {setUser} from '../../Store/feature/Auth/authSlice';
 import {revertLanguageFullName} from '../../Utils/selectLanguageFullName';
-import useLocation from '../../Hooks/useLocation';
+// import useLocation from '../../Hooks/useLocation';
 import {TASK_TYPE, TASK_TYPES} from '../../config';
 
 // Lazy-loaded screens
@@ -103,7 +103,7 @@ const HomeTabs = () => {
   const {t, i18n} = useTranslation();
   const dispatch = useAppDispatch();
 
-  const {startTracking} = useLocation();
+  // const {startTracking} = useLocation();
   // console.log('location', location);
 
   // useEffect(() => {
@@ -238,7 +238,7 @@ const HomeTabs = () => {
           stopVibration();
           stopBlinkingFlashlight();
           setNewNotification(null);
-          startTracking();
+          // startTracking();
         }}
         theme={{colors: {primary: '#FFA500'}}}
       />

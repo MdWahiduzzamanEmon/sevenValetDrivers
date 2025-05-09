@@ -1,7 +1,9 @@
 import {EndpointBuilder} from '@reduxjs/toolkit/query';
 import {
+  COMPLETE_TASK_PUBLIC_KEY,
   GET_ASSIGNED_TASK_PUBLIC_KEY,
   GET_DRIVER_PROFILE_PUBLIC_KEY,
+  START_TASK_PUBLIC_KEY,
   UPDATE_FCM_TOKEN_PUBLIC_KEY,
   UPDATE_LOCATION_PUBLIC_KEY,
 } from '../../Base';
@@ -61,6 +63,36 @@ export const globalApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+    //start_task
+    startNewTask: builder.mutation({
+      query: (data: UpdateLocationData) => ({
+        url: `/start_task?publickey=${START_TASK_PUBLIC_KEY}`,
+        method: 'POST',
+        body: {
+          driverId: data.driverId,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          speed: data.speed,
+          heading: data.heading,
+        },
+      }),
+    }),
+
+    //completed_task
+    completeTask: builder.mutation({
+      query: (data: UpdateLocationData) => ({
+        url: `/completed_task?publickey=${COMPLETE_TASK_PUBLIC_KEY}`,
+        method: 'POST',
+        body: {
+          driverId: data.driverId,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          speed: data.speed,
+          heading: data.heading,
+        },
+      }),
+    }),
+
     //send fcm token to the zoho api
     sendFcmTokenToZoho: builder.mutation({
       query: (data: {fcmToken: string; driverId: string}) => ({
@@ -86,4 +118,9 @@ export const {
 
   // send fcm token to the zoho api
   useSendFcmTokenToZohoMutation,
+
+  // start task
+  useStartNewTaskMutation,
+  // complete task
+  useCompleteTaskMutation,
 } = globalApiSlice;

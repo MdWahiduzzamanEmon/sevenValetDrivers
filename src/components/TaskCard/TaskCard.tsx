@@ -16,9 +16,16 @@ import Animated, {
   interpolateColor,
 } from 'react-native-reanimated';
 import {useTranslation} from 'react-i18next';
-import {useAppDispatch} from '../../Store/Store';
+import {useAppDispatch, useAppSelector} from '../../Store/Store';
 import {setClearTask} from '../../Store/feature/globalSlice';
 import useLocation from '../../Hooks/useLocation';
+import {
+  useCompleteTaskMutation,
+  useStartNewTaskMutation,
+} from '../../Store/feature/globalApiSlice';
+import StartTaskComponent from '../StartTaskComponent/StartTaskComponent';
+import CompleteTaskComponent from '../CompleteTaskComponent/CompleteTaskComponent';
+import {useFirebaseData} from '../../Hooks/useFirebaseData';
 // import {stopSound} from '../../Utils/Sound/Sound';
 
 export type TaskData = {
@@ -46,9 +53,14 @@ const TITLE_FONT_SIZE = Math.min(SCREEN_WIDTH * 0.05, 20);
 const INSTRUCTION_FONT_SIZE = Math.min(SCREEN_WIDTH * 0.04, 16);
 
 const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
+  const {newNotification} = useFirebaseData() as any;
+
+  const [showStartTaskDialog, setShowStartTaskDialog] = useState(false);
+  const [showCompleteTaskDialog, setShowCompleteTaskDialog] = useState(false);
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
-  const {startTracking, stopTracking} = useLocation();
+  const {stopTracking} = useLocation();
+  const {user} = useAppSelector(state => state.authSlice) as any;
 
   // const [isBlinking, setIsBlinking] = useState(false);
   // let stopBlinking: () => void;
@@ -84,15 +96,26 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
   //   return () => clearInterval(interval);
   // }, [data?.startTime, data?.duration, end, start, progress]);
 
+  useEffect(() => {
+    if (newNotification) {
+      setStatus('NOT_STARTED');
+    }
+  }, [newNotification]);
+
+  const [startNewTask, {isLoading: startNewTaskLoading}] =
+    useStartNewTaskMutation();
+  const [completeTask, {isLoading: completeTaskLoading}] =
+    useCompleteTaskMutation();
+
   const handleStatusChange = async () => {
     if (status === 'NOT_STARTED') {
-      setStatus('ONGOING');
+      setShowStartTaskDialog(true);
     } else if (status === 'ONGOING') {
-      setStatus('COMPLETED');
-      //clear the task from the server
+      setShowCompleteTaskDialog(true);
+    } else if (status === 'COMPLETED') {
+      //handle completed task
       dispatch(setClearTask());
       stopTracking();
-    } else {
       setStatus('NOT_STARTED');
     }
   };
@@ -197,6 +220,7 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
 
   return (
     // <Animated.View style={[styles.animatedContainer, fadeInSlide]}>
+
     <Animated.View
       style={[
         animatedBorderStyle,
@@ -267,13 +291,29 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
           </TextWrapper>
         </View>
         <CustomButton
-          disabled={status === 'COMPLETED'}
           style={styles.button}
           label={getButtonLabel()}
           onPress={handleStatusChange}
+          loading={startNewTaskLoading || completeTaskLoading}
         />
       </View>
+      <StartTaskComponent
+        user={user}
+        startNewTask={startNewTask}
+        setStatus={setStatus}
+        setShowDialog={setShowStartTaskDialog}
+        showDialog={showStartTaskDialog}
+      />
+
+      <CompleteTaskComponent
+        user={user}
+        completeTask={completeTask}
+        setStatus={setStatus}
+        setShowDialog={setShowCompleteTaskDialog}
+        showDialog={showCompleteTaskDialog}
+      />
     </Animated.View>
+
     // </Animated.View>
   );
 };
