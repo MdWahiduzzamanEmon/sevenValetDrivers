@@ -122,6 +122,8 @@ const HomeTabs = () => {
   const {data: userProfileData, isSuccess} = useGetUserProfileQuery(user?.id, {
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
+
+    skip: !user?.id,
   });
 
   // console.log('userProfileData', userProfileData);

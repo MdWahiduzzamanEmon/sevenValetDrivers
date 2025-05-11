@@ -111,6 +111,11 @@ const FirebaseProvider = ({children}: {children: React.ReactNode}) => {
         const userDeviceName = await getDeviceName();
         const getBrandName = getBrand();
 
+        if (!user?.id) {
+          console.log('User ID is not available. Skipping FCM token send.');
+          return;
+        }
+
         const body = {
           appName: APP_NAME,
           fcmToken: token,
