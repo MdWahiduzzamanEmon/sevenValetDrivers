@@ -156,8 +156,8 @@ const HomeTabs = () => {
   };
 
   const triggerAlertEffects = useCallback(() => {
-    handleStartBlinking();
-    vibrateDevice();
+    // handleStartBlinking(); // Uncomment if you want to start blinking the flashlight
+    vibrateDevice(); // Uncomment if you want to vibrate the device
   }, []);
 
   React.useEffect(() => {
@@ -193,8 +193,10 @@ const HomeTabs = () => {
     taskToShow: any;
   };
 
-  const handleGetAssignedTask = async () => {
+  const handleGetAssignedTask = useCallback(async () => {
     try {
+      if (!user?.id) return;
+
       const response = await getAssignedTask(user?.id).unwrap();
       // console.log('response', response);
       if (response?.result?.success) {
@@ -203,7 +205,12 @@ const HomeTabs = () => {
     } catch (error) {
       console.error('Error fetching assigned task:', error);
     }
-  };
+  }, [dispatch, getAssignedTask, user?.id]);
+
+  // Fetch assigned task when the component mounts
+  useEffect(() => {
+    handleGetAssignedTask();
+  }, [handleGetAssignedTask]);
 
   return (
     <>

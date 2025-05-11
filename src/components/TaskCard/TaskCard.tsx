@@ -26,9 +26,14 @@ import {
 import StartTaskComponent from '../StartTaskComponent/StartTaskComponent';
 import CompleteTaskComponent from '../CompleteTaskComponent/CompleteTaskComponent';
 import {useFirebaseData} from '../../Hooks/useFirebaseData';
+import formatElapsedTime from '../../Utils/formatElapsedTime';
 // import {stopSound} from '../../Utils/Sound/Sound';
-
+import {
+  activateKeepAwake,
+  deactivateKeepAwake,
+} from '@sayem314/react-native-keep-awake';
 export type TaskData = {
+  taskStatus: string;
   taskType: 'ParkIn' | 'ParkOut';
   description: string;
   // name: string;
@@ -61,6 +66,26 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
   const dispatch = useAppDispatch();
   const {stopTracking} = useLocation();
   const {user} = useAppSelector(state => state.authSlice) as any;
+  const {taskPrgressingTimer, taskStartTime} = useAppSelector(
+    state => state.authSlice,
+  ) as any;
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  useEffect(() => {
+    // Ensure both times exist and are valid
+    if (taskPrgressingTimer > 0 && taskStartTime > 0) {
+      // Calculate immediately
+      const initialElapsed = Date.now() - taskStartTime;
+      setElapsedTime(initialElapsed);
+
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - taskStartTime;
+        setElapsedTime(elapsed);
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [taskPrgressingTimer, taskStartTime]);
 
   // const [isBlinking, setIsBlinking] = useState(false);
   // let stopBlinking: () => void;
@@ -102,6 +127,22 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
     }
   }, [newNotification]);
 
+  useEffect(() => {
+    if (data) {
+      if (data.taskStatus === 'Ongoing') {
+        setStatus('ONGOING');
+        //stopSound();
+      }
+      if (data.taskStatus === 'Completed') {
+        setStatus('COMPLETED');
+        //stopSound();
+      }
+      if (data.taskStatus === 'Assigned') {
+        setStatus('NOT_STARTED');
+      }
+    }
+  }, [data]);
+
   const [startNewTask, {isLoading: startNewTaskLoading}] =
     useStartNewTaskMutation();
   const [completeTask, {isLoading: completeTaskLoading}] =
@@ -119,6 +160,19 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
       setStatus('NOT_STARTED');
     }
   };
+
+  //handle screen lock
+  useEffect(() => {
+    if (status === 'ONGOING') {
+      activateKeepAwake();
+    } else {
+      deactivateKeepAwake();
+    }
+
+    return () => {
+      deactivateKeepAwake();
+    };
+  }, [status]);
 
   const getButtonLabel = () => {
     if (data?.taskType === 'ParkIn')
@@ -271,32 +325,59 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
           />
         </View> */}
 
-        <View style={styles.statusContainer}>
-          <Avatar.Icon
-            icon="information-outline"
-            size={ICON_SIZE}
-            backgroundColor={BG_COLOR_BUTTON}
-          />
-          <TextWrapper
-            style={{
-              ...styles.status,
-              backgroundColor:
-                status === 'COMPLETED'
-                  ? '#4CAF50'
-                  : status === 'ONGOING'
-                  ? '#87CEEB'
-                  : '#FFA500',
-            }}>
-            {getStatusLabel()}
-          </TextWrapper>
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}>
+          <View style={styles.statusContainer}>
+            <Avatar.Icon
+              icon="information-outline"
+              size={ICON_SIZE}
+              backgroundColor={BG_COLOR_BUTTON}
+            />
+            <TextWrapper
+              style={{
+                ...styles.status,
+                backgroundColor:
+                  status === 'COMPLETED'
+                    ? '#4CAF50'
+                    : status === 'ONGOING'
+                    ? '#87CEEB'
+                    : '#FFA500',
+              }}>
+              {getStatusLabel()}
+            </TextWrapper>
+          </View>
+          {/* //show timer */}
+          {status === 'ONGOING' && (
+            <TextWrapper
+              style={{
+                ...styles.status,
+                backgroundColor: '#FFA500',
+                padding: Math.min(SCREEN_WIDTH * 0.01, 4),
+                borderRadius: 4,
+                color: '#fff',
+                fontWeight: 'bold',
+                fontFamily: 'monospace',
+                fontSize: Math.min(SCREEN_WIDTH * 0.04, 12),
+              }}>
+              {formatElapsedTime(elapsedTime)}
+            </TextWrapper>
+          )}
         </View>
         <CustomButton
+          disabled={status === 'COMPLETED'}
           style={styles.button}
           label={getButtonLabel()}
           onPress={handleStatusChange}
           loading={startNewTaskLoading || completeTaskLoading}
         />
       </View>
+
+      {/* //modal for start task */}
       <StartTaskComponent
         user={user}
         startNewTask={startNewTask}
@@ -305,6 +386,7 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
         showDialog={showStartTaskDialog}
       />
 
+      {/* //modal for complete task */}
       <CompleteTaskComponent
         user={user}
         completeTask={completeTask}
@@ -340,17 +422,19 @@ const VehicleDetails: React.FC<{data: TaskData}> = ({data}) => {
         </View>
       </View>
 
-      <View style={styles.detailItem}>
-        <Avatar.Icon
-          icon="numeric"
-          size={ICON_SIZE}
-          style={styles.icon}
-          color="#fff"
-          backgroundColor={BG_COLOR_BUTTON}
-        />
-        <View style={styles.textContainer}>
+      <View style={styles.plateDetailsContainer}>
+        <View style={styles.detailItem}>
+          <Avatar.Icon
+            icon="numeric"
+            size={ICON_SIZE}
+            style={styles.icon}
+            color="#fff"
+            backgroundColor={BG_COLOR_BUTTON}
+          />
           <TextWrapper style={styles.label}>Plate Number</TextWrapper>
-          <TextWrapper style={styles.value}>{data.plateNumber}</TextWrapper>
+        </View>
+        <View style={styles.plateContainer}>
+          <TextWrapper style={styles.plateText}>{data.plateNumber}</TextWrapper>
         </View>
       </View>
 
@@ -434,6 +518,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: Math.min(SCREEN_HEIGHT * 0.007, 6),
   },
+  plateDetailsContainer: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    marginVertical: Math.min(SCREEN_HEIGHT * 0.01, 10),
+  },
   icon: {
     marginRight: Math.min(SCREEN_WIDTH * 0.03, 12),
   },
@@ -446,7 +535,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   value: {
-    fontSize: Math.min(SCREEN_WIDTH * 0.04, 16),
+    fontSize: Math.min(SCREEN_WIDTH * 1, 20),
     fontWeight: '600',
     color: '#fff',
   },
@@ -485,5 +574,29 @@ const styles = StyleSheet.create({
   waitingText: {
     marginVertical: Math.min(SCREEN_HEIGHT * 0.01, 10),
     textAlign: 'center',
+  },
+
+  plateContainer: {
+    backgroundColor: '#fff', // or '#f1c40f' for yellow
+    borderColor: '#e67e22', // or '#e67e22' for orange
+    borderWidth: 3,
+    borderRadius: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 10,
+    elevation: 3, // for Android shadow
+    shadowColor: '#000', // iOS shadow
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+  plateText: {
+    fontSize: 22,
+    letterSpacing: 2,
+    fontWeight: 'bold',
+    color: '#000',
+    fontFamily: 'monospace', // or custom license plate font
   },
 });

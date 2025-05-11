@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import {SCREEN_HEIGHT} from '../../config';
 import useLocation from '../../Hooks/useLocation';
+import {useAppDispatch} from '../../Store/Store';
+import {setTaskPrgressingTimer} from '../../Store/feature/Auth/authSlice';
 
 const StartTaskComponent = ({
   user,
@@ -24,6 +26,8 @@ const StartTaskComponent = ({
   setShowDialog: any;
 }) => {
   const {startTracking, location} = useLocation();
+
+  const dispatch = useAppDispatch();
 
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
@@ -41,6 +45,7 @@ const StartTaskComponent = ({
 
   const confirmStart = async () => {
     setShowDialog(false);
+    dispatch(setTaskPrgressingTimer(Date.now()));
     try {
       const taskData = {
         driverId: user.id,

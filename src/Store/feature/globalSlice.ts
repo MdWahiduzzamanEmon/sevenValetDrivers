@@ -23,6 +23,7 @@ export const globalSlice = createSlice({
     newTaskData: null,
     newTaskNotification: false,
     taskToShow: null,
+    taskPrgressingTimer: 0,
   } as GlobalState,
   reducers: {
     setIpLocation: (state, action) => {

@@ -11,6 +11,7 @@ import {SCREEN_HEIGHT} from '../../config';
 import useLocation from '../../Hooks/useLocation';
 import {setClearTask} from '../../Store/feature/globalSlice';
 import {useAppDispatch} from '../../Store/Store';
+import {setTaskPrgressingTimer} from '../../Store/feature/Auth/authSlice';
 
 const CompleteTaskComponent = ({
   user,
@@ -44,6 +45,7 @@ const CompleteTaskComponent = ({
 
   const confirmStart = async () => {
     setShowDialog(false);
+    dispatch(setTaskPrgressingTimer(0));
     try {
       const taskData = {
         driverId: user.id,

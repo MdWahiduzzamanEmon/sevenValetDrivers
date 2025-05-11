@@ -14,6 +14,9 @@ interface AuthState {
     driverId: string;
     passcode: string;
   } | null;
+  taskStartTime: number | null;
+
+  taskPrgressingTimer: number;
 }
 
 const initialState: AuthState = {
@@ -21,6 +24,8 @@ const initialState: AuthState = {
   user: null,
   rememberMe: false,
   savedCredentials: null,
+  taskPrgressingTimer: 0,
+  taskStartTime: null,
 };
 
 const authSlice = createSlice({
@@ -47,9 +52,19 @@ const authSlice = createSlice({
     ) => {
       state.savedCredentials = action.payload;
     },
+
+    setTaskPrgressingTimer: (state, action) => {
+      state.taskPrgressingTimer = action.payload;
+      state.taskStartTime = action.payload ? Date.now() : null;
+    },
   },
 });
 
-export const {setUser, setLogout, setRememberMe, setSavedCredentials} =
-  authSlice.actions;
+export const {
+  setUser,
+  setLogout,
+  setRememberMe,
+  setSavedCredentials,
+  setTaskPrgressingTimer,
+} = authSlice.actions;
 export default authSlice.reducer;
