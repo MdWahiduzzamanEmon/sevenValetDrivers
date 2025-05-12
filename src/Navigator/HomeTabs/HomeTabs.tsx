@@ -103,19 +103,27 @@ const HomeTabs = () => {
   // const navigation = useNavigation<NavigationProp<RootTabParamList>>();
   const acceptedRef = React.useRef(false);
   const timerRef = React.useRef<NodeJS.Timeout | null>(null);
-  const [countdown, setCountdown] = React.useState(30);
   const countdownIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
-
-  const [lastNotificationId, setLastNotificationId] = React.useState<number>(0);
   const {t, i18n} = useTranslation();
   const dispatch = useAppDispatch();
   const {showAlert, hideAlert} = useAlert();
 
+  const [countdown, setCountdown] = React.useState(30);
+  const [lastNotificationId, setLastNotificationId] = React.useState<number>(0);
   const {newNotification, setNewNotification} = useFirebaseData() as any;
-
   //gte user profile data
   const {user} = useAppSelector(state => state.authSlice) as any;
-  // console.log('user', user);
+
+  //get newNotification from store
+  const {newTaskNotification, taskToShow} = useAppSelector(
+    state => state.globalSlice,
+  ) as {
+    newTaskNotification: boolean;
+    newTaskData: any;
+    taskToShow: any;
+  };
+
+  // get user profile data
   const {data: userProfileData, isSuccess} = useGetUserProfileQuery(user?.id, {
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
@@ -125,6 +133,7 @@ const HomeTabs = () => {
 
   // console.log('userProfileData', userProfileData);
 
+  //if user profile data is success, set user data
   useEffect(() => {
     if (isSuccess) {
       const userData = {
@@ -148,15 +157,18 @@ const HomeTabs = () => {
 
   // console.log('newNotification', newNotification);
 
+  //start blinking flashlight
   const handleStartBlinking = async () => {
     await startBlinkingFlashlight();
   };
 
+  //start blinking flashlight and vibrate
   const triggerAlertEffects = useCallback(() => {
     // handleStartBlinking(); // Uncomment if you want to start blinking the flashlight
     vibrateDevice(); // Uncomment if you want to vibrate the device
   }, []);
 
+  //if newNotification arrives, set lastNotificationId to trigger new state
   React.useEffect(() => {
     const title = newNotification?.notification?.title as TASK_TYPE;
     // console.log('title', title);
@@ -168,6 +180,7 @@ const HomeTabs = () => {
     }
   }, [hideAlert, newNotification]);
 
+  // call api to get assigned task
   const [getAssignedTask] = useLazyGetAssignedTaskQuery();
   const [taskNotAccepted] = useTaskNotAcceptedMutation();
 
@@ -195,6 +208,7 @@ const HomeTabs = () => {
     }
   };
 
+  // Trigger fallback API if task is not accepted
   const triggerFallbackApi = useCallback(async () => {
     try {
       if (!user?.id) return;
@@ -213,6 +227,7 @@ const HomeTabs = () => {
     }
   }, [user?.id, taskNotAccepted, showAlert]);
 
+  //if newNotification arrives, set taskToShow to show the dialog and play sound and show timer
   React.useEffect(() => {
     const title = newNotification?.notification?.title as TASK_TYPE;
 
@@ -255,14 +270,7 @@ const HomeTabs = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, triggerAlertEffects, triggerFallbackApi, lastNotificationId]);
 
-  const {newTaskNotification, taskToShow} = useAppSelector(
-    state => state.globalSlice,
-  ) as {
-    newTaskNotification: boolean;
-    newTaskData: any;
-    taskToShow: any;
-  };
-
+  // Fetch assigned task
   const handleGetAssignedTask = useCallback(async () => {
     try {
       if (!user?.id) return;
@@ -277,6 +285,7 @@ const HomeTabs = () => {
     }
   }, [dispatch, getAssignedTask, user?.id]);
 
+  // Handle task acceptance
   const handleAccept = () => {
     acceptedRef.current = true;
     if (timerRef.current) clearTimeout(timerRef.current);
