@@ -25,6 +25,7 @@ type TaskDialogProps = {
   taskType: string;
   onAccept: () => void;
   theme: {colors: {primary: string}};
+  countdown: number;
 };
 
 export const TaskDialog: React.FC<TaskDialogProps> = ({
@@ -32,6 +33,7 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
   taskType,
   onAccept,
   theme,
+  countdown,
 }) => {
   const {t} = useTranslation();
   const pulse = useSharedValue(1);
@@ -109,6 +111,10 @@ export const TaskDialog: React.FC<TaskDialogProps> = ({
             {`${t('you_have_a_new')} ${taskType} ${t('task')} ${t('asigned')}.`}
           </Text>
           <Text style={styles.subtitle}>{t('please_accept_task')}</Text>
+
+          <Text style={styles.subtitle}>
+            {`You have ${countdown} seconds to accept the task.`}
+          </Text>
 
           <TouchableOpacity
             style={[styles.button, {backgroundColor: theme.colors.primary}]}

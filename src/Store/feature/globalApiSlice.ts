@@ -4,6 +4,7 @@ import {
   GET_ASSIGNED_TASK_PUBLIC_KEY,
   GET_DRIVER_PROFILE_PUBLIC_KEY,
   START_TASK_PUBLIC_KEY,
+  TASK_NOT_ACCEPTED_PUBLIC_KEY,
   UPDATE_FCM_TOKEN_PUBLIC_KEY,
   UPDATE_LOCATION_PUBLIC_KEY,
 } from '../../Base';
@@ -93,6 +94,17 @@ export const globalApiSlice = apiSlice.injectEndpoints({
       }),
     }),
 
+    //task_Not_Accepted
+    taskNotAccepted: builder.mutation({
+      query: (data: {driverId: string}) => ({
+        url: `/task_Not_Accepted?publickey=${TASK_NOT_ACCEPTED_PUBLIC_KEY}`,
+        method: 'POST',
+        body: {
+          driverId: data.driverId,
+        },
+      }),
+    }),
+
     //send fcm token to the zoho api
     sendFcmTokenToZoho: builder.mutation({
       query: (data: {fcmToken: string; driverId: string}) => ({
@@ -123,4 +135,7 @@ export const {
   useStartNewTaskMutation,
   // complete task
   useCompleteTaskMutation,
+
+  // task not accepted
+  useTaskNotAcceptedMutation,
 } = globalApiSlice;

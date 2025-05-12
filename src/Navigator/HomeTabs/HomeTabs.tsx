@@ -25,11 +25,13 @@ import {
 import {
   useGetUserProfileQuery,
   useLazyGetAssignedTaskQuery,
+  useTaskNotAcceptedMutation,
 } from '../../Store/feature/globalApiSlice';
 import {setUser} from '../../Store/feature/Auth/authSlice';
 import {revertLanguageFullName} from '../../Utils/selectLanguageFullName';
 // import useLocation from '../../Hooks/useLocation';
 import {TASK_TYPE, TASK_TYPES} from '../../config';
+import {useAlert} from '../../Utils/CustomAlert/AlertContext';
 
 // Lazy-loaded screens
 const OngoinTask = lazy(() => import('../../Screen/OngoinTask/OngoinTask'));
@@ -99,20 +101,15 @@ const renderTabBarIcon = (routeName: string) => {
 
 const HomeTabs = () => {
   // const navigation = useNavigation<NavigationProp<RootTabParamList>>();
+  const acceptedRef = React.useRef(false);
+  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const [countdown, setCountdown] = React.useState(30);
+  const countdownIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
+
   const [lastNotificationId, setLastNotificationId] = React.useState<number>(0);
   const {t, i18n} = useTranslation();
   const dispatch = useAppDispatch();
-
-  // const {startTracking} = useLocation();
-  // console.log('location', location);
-
-  // useEffect(() => {
-  //   startTracking();
-  //   return () => {
-  //     stopTracking();
-  //   };
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
+  const {showAlert, hideAlert} = useAlert();
 
   const {newNotification, setNewNotification} = useFirebaseData() as any;
 
@@ -162,15 +159,59 @@ const HomeTabs = () => {
 
   React.useEffect(() => {
     const title = newNotification?.notification?.title as TASK_TYPE;
-    console.log('title', title);
+    // console.log('title', title);
     // Generate a pseudo-unique ID by timestamp
     if (TASK_TYPES.includes(title)) {
       const now = Date.now();
       setLastNotificationId(now); // trigger new state every time
+      hideAlert();
     }
-  }, [newNotification]);
+  }, [hideAlert, newNotification]);
 
   const [getAssignedTask] = useLazyGetAssignedTaskQuery();
+  const [taskNotAccepted] = useTaskNotAcceptedMutation();
+
+  // Start countdown timer
+  const startCountdown = () => {
+    setCountdown(30); // reset
+    if (countdownIntervalRef.current)
+      clearInterval(countdownIntervalRef.current);
+
+    countdownIntervalRef.current = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(countdownIntervalRef.current!);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  // Cleanup countdown
+  const stopCountdown = () => {
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+    }
+  };
+
+  const triggerFallbackApi = useCallback(async () => {
+    try {
+      if (!user?.id) return;
+
+      await taskNotAccepted({
+        driverId: user?.id,
+      }).unwrap();
+      //want to show alert that you missed the task and it will go to the supervisor
+      showAlert(
+        'You missed the task',
+        'The task has been sent to the supervisor.',
+        'warning',
+      );
+    } catch (error) {
+      console.error('Error fetching assigned task:', error);
+    }
+  }, [user?.id, taskNotAccepted, showAlert]);
 
   React.useEffect(() => {
     const title = newNotification?.notification?.title as TASK_TYPE;
@@ -180,10 +221,39 @@ const HomeTabs = () => {
       playSound();
       triggerAlertEffects();
       dispatch(setNewTaskNotification(true));
+
+      acceptedRef.current = false;
+
+      // Clear previous timer
+      if (timerRef.current) clearTimeout(timerRef.current);
+      stopCountdown();
+
+      // Start countdown display
+      startCountdown();
+
+      // Set up 30-sec auto-close
+      timerRef.current = setTimeout(() => {
+        if (!acceptedRef.current) {
+          console.log('Auto-closing dialog and triggering fallback API...');
+          dispatch(setNewTaskNotification(false));
+          dispatch(setTaskToShow(null));
+          stopSound();
+          stopVibration();
+          stopBlinkingFlashlight();
+          setNewNotification(null);
+          triggerFallbackApi(); // Call fallback API
+          stopCountdown();
+        }
+      }, 30000);
     }
 
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+
+    // Only rerun on new notifications
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, lastNotificationId, triggerAlertEffects]);
+  }, [dispatch, triggerAlertEffects, triggerFallbackApi, lastNotificationId]);
 
   const {newTaskNotification, taskToShow} = useAppSelector(
     state => state.globalSlice,
@@ -206,6 +276,22 @@ const HomeTabs = () => {
       console.error('Error fetching assigned task:', error);
     }
   }, [dispatch, getAssignedTask, user?.id]);
+
+  const handleAccept = () => {
+    acceptedRef.current = true;
+    if (timerRef.current) clearTimeout(timerRef.current);
+    dispatch(setNewTaskNotification(false));
+    // dispatch(setNewTaskData(taskToShow));
+    handleGetAssignedTask();
+    dispatch(setTaskToShow(null));
+    stopSound();
+    stopVibration();
+    stopBlinkingFlashlight();
+    setNewNotification(null);
+
+    stopCountdown();
+    // startTracking();
+  };
 
   // Fetch assigned task when the component mounts
   useEffect(() => {
@@ -238,16 +324,9 @@ const HomeTabs = () => {
       <TaskDialog
         visible={newTaskNotification && !!taskToShow}
         taskType={taskToShow || 'ParkIn'}
+        countdown={countdown}
         onAccept={() => {
-          dispatch(setNewTaskNotification(false));
-          // dispatch(setNewTaskData(taskToShow));
-          handleGetAssignedTask();
-          dispatch(setTaskToShow(null));
-          stopSound();
-          stopVibration();
-          stopBlinkingFlashlight();
-          setNewNotification(null);
-          // startTracking();
+          handleAccept();
         }}
         theme={{colors: {primary: '#FFA500'}}}
       />
