@@ -96,11 +96,12 @@ export const globalApiSlice = apiSlice.injectEndpoints({
 
     //task_Not_Accepted
     taskNotAccepted: builder.mutation({
-      query: (data: {driverId: string}) => ({
-        url: `/task_Not_Accepted?publickey=${TASK_NOT_ACCEPTED_PUBLIC_KEY}`,
+      query: (data: {driverId: string; isTaskAccepted: boolean}) => ({
+        url: `/notify_task_accepted_status?publickey=${TASK_NOT_ACCEPTED_PUBLIC_KEY}`,
         method: 'POST',
         body: {
           driverId: data.driverId,
+          isTaskAccepted: data.isTaskAccepted,
         },
       }),
     }),

@@ -9,6 +9,7 @@ interface GlobalState {
   newTaskData: TaskData | null;
   newTaskNotification: boolean;
   taskToShow: null;
+  isLoadingTask: boolean;
 }
 
 export const globalSlice = createSlice({
@@ -24,6 +25,7 @@ export const globalSlice = createSlice({
     newTaskNotification: false,
     taskToShow: null,
     taskPrgressingTimer: 0,
+    isLoadingTask: false,
   } as GlobalState,
   reducers: {
     setIpLocation: (state, action) => {
@@ -61,6 +63,10 @@ export const globalSlice = createSlice({
       state.newTaskNotification = false;
       state.taskToShow = null;
     },
+
+    setLoadingTask: (state, action) => {
+      state.isLoadingTask = action.payload;
+    },
   },
 });
 
@@ -73,6 +79,7 @@ export const {
   setNewTaskNotification,
   setTaskToShow,
   setClearTask,
+  setLoadingTask,
 } = globalSlice.actions;
 
 export default globalSlice.reducer;

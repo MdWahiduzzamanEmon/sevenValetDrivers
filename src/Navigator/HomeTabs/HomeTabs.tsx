@@ -1,6 +1,6 @@
 import React, {lazy, useCallback, useEffect} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {Image, StyleSheet, TouchableOpacity} from 'react-native';
+import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
 import SuspenseComponent from '../../Provider/Suspense/Suspense';
 import Ongoin from '../../assets/ongoing.png';
 import asignedTask from '../../assets/completed_task.png';
@@ -17,6 +17,7 @@ import {
 } from '../../Utils/toggleFlashlight';
 import {useAppDispatch, useAppSelector} from '../../Store/Store';
 import {
+  setLoadingTask,
   setNewTaskData,
   setNewTaskNotification,
   setTaskToShow,
@@ -32,6 +33,7 @@ import {revertLanguageFullName} from '../../Utils/selectLanguageFullName';
 // import useLocation from '../../Hooks/useLocation';
 import {TASK_TYPE, TASK_TYPES} from '../../config';
 import {useAlert} from '../../Utils/CustomAlert/AlertContext';
+import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
 
 // Lazy-loaded screens
 const OngoinTask = lazy(() => import('../../Screen/OngoinTask/OngoinTask'));
@@ -115,7 +117,7 @@ const HomeTabs = () => {
   const {user} = useAppSelector(state => state.authSlice) as any;
 
   //get newNotification from store
-  const {newTaskNotification, taskToShow} = useAppSelector(
+  const {newTaskNotification, taskToShow, newTaskData} = useAppSelector(
     state => state.globalSlice,
   ) as {
     newTaskNotification: boolean;
@@ -181,7 +183,7 @@ const HomeTabs = () => {
   }, [hideAlert, newNotification]);
 
   // call api to get assigned task
-  const [getAssignedTask] = useLazyGetAssignedTaskQuery();
+  const [getAssignedTask, {isLoading}] = useLazyGetAssignedTaskQuery();
   const [taskNotAccepted] = useTaskNotAcceptedMutation();
 
   // Start countdown timer
@@ -209,29 +211,35 @@ const HomeTabs = () => {
   };
 
   // Trigger fallback API if task is not accepted
-  const triggerFallbackApi = useCallback(async () => {
-    try {
-      if (!user?.id) return;
+  const triggerFallbackApi = useCallback(
+    async (isTaskAccepted: boolean = false) => {
+      try {
+        if (!user?.id) return;
 
-      await taskNotAccepted({
-        driverId: user?.id,
-      }).unwrap();
-      //want to show alert that you missed the task and it will go to the supervisor
-      showAlert(
-        'You missed the task',
-        'The task has been sent to the supervisor.',
-        'warning',
-      );
-    } catch (error) {
-      console.error('Error fetching assigned task:', error);
-    }
-  }, [user?.id, taskNotAccepted, showAlert]);
+        await taskNotAccepted({
+          driverId: user?.id,
+          isTaskAccepted: isTaskAccepted,
+        }).unwrap();
+        //want to show alert that you missed the task and it will go to the supervisor
+        if (isTaskAccepted === false) {
+          showAlert(
+            'You missed the task',
+            'A notification has send to your superviser.',
+            'warning',
+          );
+        }
+      } catch (error) {
+        console.error('Error fetching assigned task:', error);
+      }
+    },
+    [user?.id, taskNotAccepted, showAlert],
+  );
 
   //if newNotification arrives, set taskToShow to show the dialog and play sound and show timer
   React.useEffect(() => {
     const title = newNotification?.notification?.title as TASK_TYPE;
 
-    if (TASK_TYPES.includes(title)) {
+    if (TASK_TYPES.includes(title) && newTaskData?.taskStatus !== 'accepted') {
       dispatch(setTaskToShow(title));
       playSound();
       triggerAlertEffects();
@@ -256,7 +264,7 @@ const HomeTabs = () => {
           stopVibration();
           stopBlinkingFlashlight();
           setNewNotification(null);
-          triggerFallbackApi(); // Call fallback API
+          triggerFallbackApi(false); // Call fallback API
           stopCountdown();
         }
       }, 30000);
@@ -276,7 +284,7 @@ const HomeTabs = () => {
       if (!user?.id) return;
 
       const response = await getAssignedTask(user?.id).unwrap();
-      // console.log('response', response);
+      console.log('response', response);
       if (response?.result?.success) {
         dispatch(setNewTaskData(response?.result?.data));
       }
@@ -297,10 +305,14 @@ const HomeTabs = () => {
     stopVibration();
     stopBlinkingFlashlight();
     setNewNotification(null);
-
     stopCountdown();
+    triggerFallbackApi(true); // Call fallback API
     // startTracking();
   };
+
+  useEffect(() => {
+    dispatch(setLoadingTask(isLoading));
+  }, [dispatch, isLoading]);
 
   // Fetch assigned task when the component mounts
   useEffect(() => {

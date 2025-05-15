@@ -15,6 +15,8 @@ interface CustomAlertProps {
   message: string;
   onClose: () => void;
   type?: 'success' | 'error' | 'warning' | 'info';
+  actionLabel?: string;
+  onAction?: () => void;
 }
 
 const {width} = Dimensions.get('window');
@@ -25,6 +27,8 @@ const CustomAlert = ({
   message,
   onClose,
   type = 'info',
+  actionLabel,
+  onAction,
 }: CustomAlertProps) => {
   const getTypeColor = () => {
     switch (type) {
@@ -62,11 +66,24 @@ const CustomAlert = ({
             <TextWrapper style={styles.message}>{message}</TextWrapper>
           </View>
           <View style={styles.footer}>
-            <TouchableOpacity
-              style={[styles.button, {backgroundColor: getTypeColor()}]}
-              onPress={onClose}>
-              <TextWrapper style={styles.buttonText}>OK</TextWrapper>
-            </TouchableOpacity>
+            {actionLabel && onAction ? (
+              <TouchableOpacity
+                style={[styles.button, {backgroundColor: getTypeColor()}]}
+                onPress={() => {
+                  onClose();
+                  onAction();
+                }}>
+                <TextWrapper style={styles.buttonText}>
+                  {actionLabel}
+                </TextWrapper>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={[styles.button, {backgroundColor: getTypeColor()}]}
+                onPress={onClose}>
+                <TextWrapper style={styles.buttonText}>OK</TextWrapper>
+              </TouchableOpacity>
+            )}
           </View>
         </Animated.View>
       </View>

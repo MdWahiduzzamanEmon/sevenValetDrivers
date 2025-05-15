@@ -6,6 +6,10 @@ interface AlertContextType {
     title: string,
     message: string,
     type?: 'success' | 'error' | 'warning' | 'info',
+    options?: {
+      actionLabel?: string;
+      onAction?: () => void;
+    },
   ) => void;
   hideAlert: () => void;
 }
@@ -20,6 +24,8 @@ export const AlertProvider: React.FC<{children: React.ReactNode}> = ({
     title: string;
     message: string;
     type: 'success' | 'error' | 'warning' | 'info';
+    actionLabel?: string;
+    onAction?: () => void;
   }>({
     visible: false,
     title: '',
@@ -32,12 +38,14 @@ export const AlertProvider: React.FC<{children: React.ReactNode}> = ({
       title: string,
       message: string,
       type: 'success' | 'error' | 'warning' | 'info' = 'info',
+      options?: {actionLabel?: string; onAction?: () => void},
     ) => {
       setAlert({
         visible: true,
         title,
         message,
         type,
+        ...options,
       });
     },
     [],
@@ -56,6 +64,8 @@ export const AlertProvider: React.FC<{children: React.ReactNode}> = ({
         message={alert.message}
         type={alert.type}
         onClose={hideAlert}
+        actionLabel={alert.actionLabel}
+        onAction={alert.onAction}
       />
     </AlertContext.Provider>
   );
