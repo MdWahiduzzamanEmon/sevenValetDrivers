@@ -8,6 +8,14 @@ type Props = {
   children: React.ReactNode;
 };
 
+export type NetworkStatusContextType = {
+  isConnected: boolean | null;
+};
+
+export const NetworkStatusContext = React.createContext<
+  NetworkStatusContextType | undefined
+>(undefined);
+
 const NetworkConnectivityProvider: React.FC<Props> = ({children}) => {
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const {showAlert} = useAlert();
@@ -43,7 +51,11 @@ const NetworkConnectivityProvider: React.FC<Props> = ({children}) => {
   }, [isConnected, firstCheck, showAlert, checkConnection]);
 
   // Always render children
-  return <SafeAreaProvider style={{flex: 1}}>{children}</SafeAreaProvider>;
+  return (
+    <NetworkStatusContext.Provider value={{isConnected}}>
+      <SafeAreaProvider style={{flex: 1}}>{children}</SafeAreaProvider>
+    </NetworkStatusContext.Provider>
+  );
 };
 
 export default NetworkConnectivityProvider;

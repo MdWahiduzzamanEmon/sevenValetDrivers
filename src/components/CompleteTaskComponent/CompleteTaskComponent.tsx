@@ -1,4 +1,4 @@
-import React, {useRef, useEffect} from 'react';
+import React, {useRef, useEffect, useContext} from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,8 @@ import useLocation from '../../Hooks/useLocation';
 import {setClearTask} from '../../Store/feature/globalSlice';
 import {useAppDispatch} from '../../Store/Store';
 import {setTaskPrgressingTimer} from '../../Store/feature/Auth/authSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {NetworkStatusContext} from '../../Provider/NetworkStatusProvider/NetworkStatusProvider';
 
 const CompleteTaskComponent = ({
   user,
@@ -19,16 +21,19 @@ const CompleteTaskComponent = ({
   setStatus,
   showDialog,
   setShowDialog,
+  elapsedTime = 0, // new prop
 }: {
   user: any;
   completeTask: any;
   setStatus: any;
   showDialog: boolean;
   setShowDialog: any;
+  elapsedTime?: number;
 }) => {
   const dispatch = useAppDispatch();
   const {stopTracking, location} = useLocation();
-
+  const networkContext = useContext(NetworkStatusContext);
+  const isConnected = networkContext?.isConnected;
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
   useEffect(() => {
@@ -41,24 +46,45 @@ const CompleteTaskComponent = ({
     }
   }, [showDialog, slideAnim]);
 
-  //handle start task
+  // Calculate completionHour and completetionMin
+  const completionHour = Math.floor((elapsedTime || 0) / (1000 * 60 * 60));
+  const completetionMin = Math.floor(
+    ((elapsedTime || 0) % (1000 * 60 * 60)) / (1000 * 60),
+  );
 
+  //handle complete task
   const confirmStart = async () => {
     setShowDialog(false);
     dispatch(setTaskPrgressingTimer(0));
-    try {
-      const taskData = {
-        driverId: user.id,
-        latitude: location?.latitude?.toString() || '',
-        longitude: location?.longitude?.toString() || '',
-        speed: location?.speed || 0,
-        heading: location?.heading || 0,
-      };
-
-      const res = await completeTask(taskData).unwrap();
-      console.log('res-complete task', res);
+    const taskData = {
+      driverId: user.id,
+      latitude: location?.latitude?.toString() || '',
+      longitude: location?.longitude?.toString() || '',
+      speed: location?.speed || 0,
+      heading: location?.heading || 0,
+      chachingData: false,
+      completionHour: 0,
+      completetionMin: 0,
+    };
+    if (!isConnected) {
+      // Save to cache for later sync
+      await AsyncStorage.setItem(
+        'pendingCompleteTask',
+        JSON.stringify({
+          ...taskData,
+          chachingData: true,
+          completionHour,
+          completetionMin,
+        }),
+      );
       setStatus('COMPLETED');
-      //clear the task from the server
+      dispatch(setClearTask());
+      stopTracking();
+      return;
+    }
+    try {
+      await completeTask(taskData).unwrap();
+      setStatus('COMPLETED');
       dispatch(setClearTask());
       stopTracking();
     } catch (error) {

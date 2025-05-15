@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {View, StyleSheet} from 'react-native';
 import {Avatar, useTheme} from 'react-native-paper';
 // import moment from 'moment';
@@ -32,6 +32,8 @@ import {
   activateKeepAwake,
   deactivateKeepAwake,
 } from '@sayem314/react-native-keep-awake';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {NetworkStatusContext} from '../../Provider/NetworkStatusProvider/NetworkStatusProvider';
 export type TaskData = {
   taskStatus: string;
   taskType: 'ParkIn' | 'ParkOut';
@@ -93,7 +95,6 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
   const [status, setStatus] = useState<'NOT_STARTED' | 'ONGOING' | 'COMPLETED'>(
     'NOT_STARTED',
   );
-  const progress = useSharedValue(0);
 
   const theme = useTheme();
   // const start = data ? moment(data.startTime) : moment();
@@ -101,15 +102,15 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
 
   //this section is commented out to avoid triggering the alert effects on every render.
 
-  const progressColor = useAnimatedStyle(() => {
-    const color =
-      progress.value < 0.6
-        ? theme.colors.primary
-        : progress.value < 0.9
-        ? '#FFA500'
-        : theme.colors.error;
-    return {backgroundColor: color};
-  });
+  // const progressColor = useAnimatedStyle(() => {
+  //   const color =
+  //     progress.value < 0.6
+  //       ? theme.colors.primary
+  //       : progress.value < 0.9
+  //       ? '#FFA500'
+  //       : theme.colors.error;
+  //   return {backgroundColor: color};
+  // });
 
   // useEffect(() => {
   //   const interval = setInterval(() => {
@@ -175,14 +176,19 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
   }, [status]);
 
   const getButtonLabel = () => {
-    if (data?.taskType === 'ParkIn')
+    if (data?.taskType === 'ParkIn') {
       return status === 'ONGOING' ? t('park_completed') : t('park_in');
+    }
     return status === 'ONGOING' ? t('park_out_completed') : t('park_out');
   };
 
   const getStatusLabel = () => {
-    if (status === 'NOT_STARTED') return `${t('task')} ${t('not_started')}`;
-    if (status === 'ONGOING') return `${t('task')} ${t('ongoing')}`;
+    if (status === 'NOT_STARTED') {
+      return `${t('task')} ${t('not_started')}`;
+    }
+    if (status === 'ONGOING') {
+      return `${t('task')} ${t('ongoing')}`;
+    }
     return `${t('task')} ${t('completed')}`;
   };
 
@@ -244,6 +250,29 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
       marginBottom: Math.min(SCREEN_HEIGHT * 0.01, 10),
     };
   });
+
+  const networkContext = useContext(NetworkStatusContext);
+  const isConnected = networkContext?.isConnected;
+
+  // Check for cached completion when regaining connection
+  useEffect(() => {
+    const trySendCachedCompletion = async () => {
+      if (isConnected) {
+        const cached = await AsyncStorage.getItem('pendingCompleteTask');
+        if (cached) {
+          try {
+            const parsed = JSON.parse(cached);
+            await completeTask(parsed).unwrap();
+            await AsyncStorage.removeItem('pendingCompleteTask');
+          } catch (e) {
+            // Optionally handle error
+            console.error(e);
+          }
+        }
+      }
+    };
+    trySendCachedCompletion();
+  }, [isConnected, completeTask]);
 
   if (!data) {
     // {
@@ -393,6 +422,7 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
         setStatus={setStatus}
         setShowDialog={setShowCompleteTaskDialog}
         showDialog={showCompleteTaskDialog}
+        elapsedTime={elapsedTime}
       />
     </Animated.View>
 
