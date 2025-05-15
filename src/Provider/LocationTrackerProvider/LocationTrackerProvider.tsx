@@ -14,6 +14,7 @@ import {
   useUpdateDriverLocationMutation,
 } from '../../Store/feature/globalApiSlice';
 import {useAppSelector} from '../../Store/Store';
+import {check, PERMISSIONS, RESULTS} from 'react-native-permissions';
 
 // Define types
 interface LocationData {
@@ -54,6 +55,8 @@ export const LocationTrackerProvider = ({children}: ProviderProps) => {
             title: 'Location Permission Required',
             message: 'This app needs location access to track your movements.',
             buttonPositive: 'OK',
+            buttonNegative: 'Cancel',
+            buttonNeutral: 'Ask Me Later',
           },
         );
 
@@ -92,10 +95,53 @@ export const LocationTrackerProvider = ({children}: ProviderProps) => {
 
   const [updateDriverLocation] = useUpdateDriverLocationMutation();
 
+  // Helper to check if location services are enabled (Android)
+  const checkLocationServicesEnabled = async (): Promise<boolean> => {
+    if (Platform.OS === 'android') {
+      try {
+        const isEnabled = await check(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
+        if (isEnabled === RESULTS.BLOCKED || isEnabled === RESULTS.DENIED) {
+          return false;
+        }
+        // Additional check: try to get current position to see if location is really enabled
+        return new Promise(resolve => {
+          Geolocation.getCurrentPosition(
+            () => resolve(true),
+            () => resolve(false),
+            {enableHighAccuracy: true, timeout: 5000, maximumAge: 0},
+          );
+        });
+      } catch (e) {
+        return false;
+      }
+    }
+    return true;
+  };
+
   // Start location tracking
   const startTracking = async () => {
     const hasPermission = await requestLocationPermission();
-    if (!hasPermission) return;
+    if (!hasPermission) {
+      return;
+    }
+
+    // Check if location services are enabled
+    const isLocationEnabled = await checkLocationServicesEnabled();
+    if (!isLocationEnabled) {
+      Alert.alert(
+        'Location Services Off',
+        'Please enable location services (GPS) to use this feature.',
+        [
+          {
+            text: 'Open Location Settings',
+            onPress: () => Linking.openSettings(),
+          },
+          {text: 'Cancel', style: 'cancel'},
+        ],
+        {cancelable: false},
+      );
+      return;
+    }
 
     const options: GeolocationOptions = {
       enableHighAccuracy: true,
@@ -126,7 +172,14 @@ export const LocationTrackerProvider = ({children}: ProviderProps) => {
         });
         // Update location in the backend
         try {
-          if (!user?.id) return;
+          if (!user?.id) {
+            return;
+          }
+
+          if (!latitude || !longitude) {
+            console.error('Invalid location data:', {latitude, longitude});
+            return;
+          }
 
           const data = {
             driverId: user?.id,
