@@ -25,11 +25,11 @@ const OngoinTask = () => {
   return (
     <Container>
       <View style={styles.container}>
-        {isLoadingTask ? (
+        {/* {isLoadingTask ? (
           <TextWrapper style={styles.waitingText}>Loading your task...</TextWrapper>
         ) : (
-          <TaskCard data={normalizedTaskData} />
-        )}
+          )} */}
+        <TaskCard data={normalizedTaskData} isLoadingTask={isLoadingTask} />
       </View>
     </Container>
   );
@@ -40,12 +40,12 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: PADDING_SCREEN_HORIZONTAL,
   },
-  waitingText: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 20,
-    color: '#fff',
-  },
+  // waitingText: {
+  //   fontSize: 16,
+  //   textAlign: 'center',
+  //   marginTop: 20,
+  //   color: '#fff',
+  // },
 });
 
 export default OngoinTask;

@@ -59,7 +59,10 @@ const CARD_PADDING = Math.min(SCREEN_WIDTH * 0.04, 16);
 const TITLE_FONT_SIZE = Math.min(SCREEN_WIDTH * 0.05, 20);
 const INSTRUCTION_FONT_SIZE = Math.min(SCREEN_WIDTH * 0.04, 16);
 
-const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
+const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
+  data,
+  isLoadingTask = false,
+}) => {
   const {newNotification} = useFirebaseData() as any;
 
   const [showStartTaskDialog, setShowStartTaskDialog] = useState(false);
@@ -128,6 +131,7 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
     }
   }, [newNotification]);
 
+  // console.log(data.taskStatus, 'data.taskStatus');
   useEffect(() => {
     if (data) {
       if (data.taskStatus === 'Ongoing') {
@@ -274,7 +278,7 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
     trySendCachedCompletion();
   }, [isConnected, completeTask]);
 
-  if (!data) {
+  if (!data || isLoadingTask) {
     // {
     //   /* //text : waiting for new task ,and waiting icon and content will be in center */
     // }
@@ -295,7 +299,8 @@ const TaskCard: React.FC<{data: TaskData}> = ({data}) => {
           />
         </Animated.View>
         <TextWrapper variant="titleMedium" style={styles.waitingText}>
-          {t('waiting_for_new_task')}
+          {/* {t('waiting_for_new_task')} */}
+          {isLoadingTask ? t('loading_your_task') : t('waiting_for_new_task')}
         </TextWrapper>
       </Animated.View>
     );
