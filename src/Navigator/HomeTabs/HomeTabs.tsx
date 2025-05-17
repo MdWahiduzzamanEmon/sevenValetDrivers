@@ -1,6 +1,13 @@
 import React, {lazy, useCallback, useEffect} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {Image, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {
+  AppState,
+  AppStateStatus,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import SuspenseComponent from '../../Provider/Suspense/Suspense';
 import Ongoin from '../../assets/ongoing.png';
 import asignedTask from '../../assets/completed_task.png';
@@ -236,10 +243,11 @@ const HomeTabs = () => {
   );
 
   //if newNotification arrives, set taskToShow to show the dialog and play sound and show timer
+
   React.useEffect(() => {
     const title = newNotification?.notification?.title as TASK_TYPE;
 
-    if (TASK_TYPES.includes(title) && newTaskData?.taskStatus !== 'accepted') {
+    if (TASK_TYPES.includes(title)) {
       dispatch(setTaskToShow(title));
       playSound();
       triggerAlertEffects();
@@ -277,6 +285,37 @@ const HomeTabs = () => {
     // Only rerun on new notifications
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, triggerAlertEffects, triggerFallbackApi, lastNotificationId]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      'change',
+      (nextAppState: AppStateStatus) => {
+        if (
+          nextAppState === 'background' ||
+          nextAppState === 'inactive' // Optional: consider inactive for iOS quick backgrounding
+        ) {
+          if (!acceptedRef.current && newTaskNotification) {
+            console.log(
+              'App is backgrounded before task accepted. Triggering fallback...',
+            );
+            dispatch(setNewTaskNotification(false));
+            dispatch(setTaskToShow(null));
+            stopSound();
+            stopVibration();
+            stopBlinkingFlashlight();
+            setNewNotification(null);
+            stopCountdown();
+            triggerFallbackApi(false); // Notify server
+          }
+        }
+      },
+    );
+
+    return () => {
+      subscription.remove();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newTaskNotification, triggerFallbackApi, dispatch]);
 
   // Fetch assigned task
   const handleGetAssignedTask = useCallback(async () => {

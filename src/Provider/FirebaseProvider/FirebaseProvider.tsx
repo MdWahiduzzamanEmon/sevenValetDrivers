@@ -211,6 +211,20 @@ const FirebaseProvider = ({children}: {children: React.ReactNode}) => {
         'A new FCM message arrived in foreground:',
         JSON.stringify(remoteMessage),
       );
+
+      // if not authenticated
+      if (!user?.id) {
+        return;
+      }
+
+      // if (remoteMessage && loginUserData?.user?.id) {
+      if (remoteMessage && user?.id) {
+        console.log(
+          'Notification caused app to open from foreground state:',
+          remoteMessage,
+        );
+      }
+
       showNotification(remoteMessage);
     };
     //forground means - when app is open

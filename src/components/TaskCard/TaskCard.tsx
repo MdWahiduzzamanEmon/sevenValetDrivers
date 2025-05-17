@@ -278,7 +278,9 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
     trySendCachedCompletion();
   }, [isConnected, completeTask]);
 
-  if (!data || isLoadingTask) {
+  // console.log(data, 'data');
+
+  if (!data || isLoadingTask || data?.taskStatus === 'Assigned') {
     // {
     //   /* //text : waiting for new task ,and waiting icon and content will be in center */
     // }
