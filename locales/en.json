@@ -54,5 +54,7 @@
   "park_in": "Park In",
   "park_out": "Park Out",
   "park_out_completed": "Park Out Completed",
-  "loading_your_task": "Loading your task..."
+  "loading_your_task": "Loading your task...",
+  "please_wait_while_we_fetch_your_task": "Please wait while we fetch your task",
+  "no_internet_connection": "No internet connection"
 }

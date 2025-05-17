@@ -59,8 +59,17 @@ const StartTaskComponent = ({
       console.log('res-start task', res);
       setStatus('ONGOING');
       startTracking();
-    } catch (error) {
-      console.error('Error starting task:', error);
+    } catch (error: any) {
+      if (
+        error?.status === 'FETCH_ERROR' ||
+        error?.name === 'ApiError' ||
+        error?.message?.toLowerCase().includes('network') ||
+        error?.originalStatus === 0
+      ) {
+        // Optionally show alert here if needed
+      } else {
+        console.error('Error starting task:', error);
+      }
     }
   };
 

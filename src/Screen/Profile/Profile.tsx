@@ -92,11 +92,25 @@ const Profile = () => {
       }
     } catch (error: any) {
       console.log('Update profile error:', error);
-      showAlert(
-        t('error'),
-        error?.data?.message || error?.message || t('update_failed'),
-        'error',
-      );
+      if (
+        error?.status === 'FETCH_ERROR' ||
+        error?.name === 'ApiError' ||
+        error?.message?.toLowerCase().includes('network') ||
+        error?.originalStatus === 0
+      ) {
+        showAlert(
+          t('error'),
+          t('no_internet_connection') ||
+            'No Internet Connection! Please check your internet connection and try again.',
+          'error',
+        );
+      } else {
+        showAlert(
+          t('error'),
+          error?.data?.message || error?.message || t('update_failed'),
+          'error',
+        );
+      }
     }
   };
 

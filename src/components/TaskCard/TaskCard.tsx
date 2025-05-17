@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
 import React, {useState, useEffect, useContext} from 'react';
-import {View, StyleSheet} from 'react-native';
+import {View, StyleSheet, ActivityIndicator} from 'react-native';
 import {Avatar, useTheme} from 'react-native-paper';
 // import moment from 'moment';
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
@@ -23,8 +23,8 @@ import {
   useCompleteTaskMutation,
   useStartNewTaskMutation,
 } from '../../Store/feature/globalApiSlice';
-import StartTaskComponent from '../StartTaskComponent/StartTaskComponent';
-import CompleteTaskComponent from '../CompleteTaskComponent/CompleteTaskComponent';
+// import StartTaskComponent from '../StartTaskComponent/StartTaskComponent';
+// import CompleteTaskComponent from '../CompleteTaskComponent/CompleteTaskComponent';
 import {useFirebaseData} from '../../Hooks/useFirebaseData';
 import formatElapsedTime from '../../Utils/formatElapsedTime';
 // import {stopSound} from '../../Utils/Sound/Sound';
@@ -34,6 +34,7 @@ import {
 } from '@sayem314/react-native-keep-awake';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {NetworkStatusContext} from '../../Provider/NetworkStatusProvider/NetworkStatusProvider';
+import {setTaskPrgressingTimer} from '../../Store/feature/Auth/authSlice';
 export type TaskData = {
   taskStatus: string;
   taskType: 'ParkIn' | 'ParkOut';
@@ -65,11 +66,15 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
 }) => {
   const {newNotification} = useFirebaseData() as any;
 
-  const [showStartTaskDialog, setShowStartTaskDialog] = useState(false);
-  const [showCompleteTaskDialog, setShowCompleteTaskDialog] = useState(false);
+  // const [showStartTaskDialog, setShowStartTaskDialog] = useState(false);
+  // const [showCompleteTaskDialog, setShowCompleteTaskDialog] = useState(false);
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
   const {stopTracking} = useLocation();
+  const networkContext = useContext(NetworkStatusContext);
+  const isConnected = networkContext?.isConnected;
+  const {startTracking, location} = useLocation();
+
   const {user} = useAppSelector(state => state.authSlice) as any;
   const {taskPrgressingTimer, taskStartTime} = useAppSelector(
     state => state.authSlice,
@@ -155,9 +160,11 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
 
   const handleStatusChange = async () => {
     if (status === 'NOT_STARTED') {
-      setShowStartTaskDialog(true);
+      // setShowStartTaskDialog(true);
+      confirmStart();
     } else if (status === 'ONGOING') {
-      setShowCompleteTaskDialog(true);
+      // setShowCompleteTaskDialog(true);
+      confirmStartComplete();
     } else if (status === 'COMPLETED') {
       //handle completed task
       dispatch(setClearTask());
@@ -244,19 +251,17 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
       borderWidth: withTiming(pulse.value > 1 ? 2 : 1),
     };
   });
+
   const pulsingStyle = useAnimatedStyle(() => {
     return {
       transform: [{scale: pulse.value}],
-      backgroundColor: theme.colors.primary,
+      backgroundColor: isConnected ? theme.colors.primary : theme.colors.red,
       borderRadius: 100,
       padding: Math.min(SCREEN_WIDTH * 0.02, 10),
       opacity: 0.8,
       marginBottom: Math.min(SCREEN_HEIGHT * 0.01, 10),
     };
   });
-
-  const networkContext = useContext(NetworkStatusContext);
-  const isConnected = networkContext?.isConnected;
 
   // Check for cached completion when regaining connection
   useEffect(() => {
@@ -266,8 +271,21 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
         if (cached) {
           try {
             const parsed = JSON.parse(cached);
-            await completeTask(parsed).unwrap();
-            await AsyncStorage.removeItem('pendingCompleteTask');
+            try {
+              await completeTask(parsed).unwrap();
+              await AsyncStorage.removeItem('pendingCompleteTask');
+            } catch (e: any) {
+              if (
+                e?.status === 'FETCH_ERROR' ||
+                e?.name === 'ApiError' ||
+                e?.message?.toLowerCase().includes('network') ||
+                e?.originalStatus === 0
+              ) {
+                // Optionally show alert here if needed
+              } else {
+                console.error(e);
+              }
+            }
           } catch (e) {
             // Optionally handle error
             console.error(e);
@@ -279,8 +297,133 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
   }, [isConnected, completeTask]);
 
   // console.log(data, 'data');
+  // console.log(isLoadingTask, 'isLoadingTask');
 
-  if (!data || isLoadingTask || data?.taskStatus === 'Assigned') {
+  const confirmStart = async () => {
+    // setShowDialog(false);
+    dispatch(setTaskPrgressingTimer(Date.now()));
+    try {
+      const taskData = {
+        driverId: user.id,
+        latitude: location?.latitude?.toString() || '',
+        longitude: location?.longitude?.toString() || '',
+        speed: location?.speed || 0,
+        heading: location?.heading || 0,
+      };
+
+      const res = await startNewTask(taskData).unwrap();
+      // console.log('res-start task', res);
+      setStatus('ONGOING');
+      startTracking();
+    } catch (error: any) {
+      if (
+        error?.status === 'FETCH_ERROR' ||
+        error?.name === 'ApiError' ||
+        error?.message?.toLowerCase().includes('network') ||
+        error?.originalStatus === 0
+      ) {
+        // Optionally show alert here if needed
+      } else {
+        console.error('Error starting task:', error);
+      }
+    }
+  };
+
+  // Calculate completionHour and completetionMin
+  const completionHour = Math.floor((elapsedTime || 0) / (1000 * 60 * 60));
+  const completetionMin = Math.floor(
+    ((elapsedTime || 0) % (1000 * 60 * 60)) / (1000 * 60),
+  );
+
+  //handle complete task
+  const confirmStartComplete = async () => {
+    // setShowDialog(false);
+    dispatch(setTaskPrgressingTimer(0));
+    const taskData = {
+      driverId: user.id,
+      latitude: location?.latitude?.toString() || '',
+      longitude: location?.longitude?.toString() || '',
+      speed: location?.speed || 0,
+      heading: location?.heading || 0,
+      chachingData: false,
+      completionHour: 0,
+      completetionMin: 0,
+    };
+    if (!isConnected) {
+      // Save to cache for later sync
+      await AsyncStorage.setItem(
+        'pendingCompleteTask',
+        JSON.stringify({
+          ...taskData,
+          chachingData: true,
+          completionHour,
+          completetionMin,
+        }),
+      );
+      setStatus('COMPLETED');
+      dispatch(setClearTask());
+      stopTracking();
+      return;
+    }
+    try {
+      await completeTask(taskData).unwrap();
+      setStatus('COMPLETED');
+      dispatch(setClearTask());
+      stopTracking();
+    } catch (error: any) {
+      if (
+        error?.status === 'FETCH_ERROR' ||
+        error?.name === 'ApiError' ||
+        error?.message?.toLowerCase().includes('network') ||
+        error?.originalStatus === 0
+      ) {
+        // Optionally show alert here if needed
+      } else {
+        console.error('Error starting task:', error);
+      }
+    }
+  };
+
+  //if loading task then show loading ui
+
+  if (isLoadingTask) {
+    return (
+      <Animated.View
+        style={[
+          animatedBorderStyle,
+          styles.cardContainer,
+          styles.emptyContainer,
+          {justifyContent: 'center', alignItems: 'center', padding: 20},
+        ]}>
+        <Animated.View style={[pulsingStyle, {marginBottom: 20}]}>
+          <Avatar.Icon
+            icon="car"
+            size={Math.min(SCREEN_HEIGHT * 0.1, 80)}
+            backgroundColor={theme.colors.primary}
+            style={styles.avatar}
+          />
+        </Animated.View>
+
+        <ActivityIndicator
+          size="large"
+          color={theme.colors.primary}
+          style={{marginBottom: 15, marginTop: 10}}
+          animating={true}
+        />
+
+        <AnimatedDotsLoadingText text={t('loading_your_task')} />
+
+        <TextWrapper
+          variant="bodyMedium"
+          style={{textAlign: 'center', marginTop: 10}}>
+          {t('please_wait_while_we_fetch_your_task')}
+        </TextWrapper>
+      </Animated.View>
+    );
+  }
+
+  //if no data or task status is assigned then show waiting for new task
+  if (!data || data?.taskStatus === 'Assigned') {
     // {
     //   /* //text : waiting for new task ,and waiting icon and content will be in center */
     // }
@@ -294,15 +437,19 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
         <Animated.View
           style={[pulsingStyle, {padding: Math.min(SCREEN_WIDTH * 0.02, 10)}]}>
           <Avatar.Icon
-            icon="car"
+            icon={isConnected ? 'car' : 'wifi-off'}
             size={Math.min(SCREEN_HEIGHT * 0.1, 80)}
-            backgroundColor={theme.colors.primary}
+            backgroundColor={
+              isConnected ? theme.colors.primary : theme.colors.red
+            }
             style={styles.avatar}
           />
         </Animated.View>
         <TextWrapper variant="titleMedium" style={styles.waitingText}>
           {/* {t('waiting_for_new_task')} */}
-          {isLoadingTask ? t('loading_your_task') : t('waiting_for_new_task')}
+          {isConnected
+            ? t('waiting_for_new_task')
+            : t('no_internet_connection')}
         </TextWrapper>
       </Animated.View>
     );
@@ -320,9 +467,11 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
       <Animated.View style={[styles.titleContainer, animatedHeaderStyle]}>
         <Animated.View style={[pulsingStyle]}>
           <Avatar.Icon
-            icon="car"
-            size={Math.min(SCREEN_HEIGHT * 0.06, 48)}
-            backgroundColor={theme.colors.primary}
+            icon={isConnected ? 'car' : 'wifi-off'}
+            size={Math.min(SCREEN_HEIGHT * 0.1, 80)}
+            backgroundColor={
+              isConnected ? theme.colors.primary : theme.colors.red
+            }
             style={styles.avatar}
           />
         </Animated.View>
@@ -414,23 +563,23 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
       </View>
 
       {/* //modal for start task */}
-      <StartTaskComponent
+      {/* <StartTaskComponent
         user={user}
         startNewTask={startNewTask}
         setStatus={setStatus}
         setShowDialog={setShowStartTaskDialog}
         showDialog={showStartTaskDialog}
-      />
+      /> */}
 
       {/* //modal for complete task */}
-      <CompleteTaskComponent
+      {/* <CompleteTaskComponent
         user={user}
         completeTask={completeTask}
         setStatus={setStatus}
         setShowDialog={setShowCompleteTaskDialog}
         showDialog={showCompleteTaskDialog}
         elapsedTime={elapsedTime}
-      />
+      /> */}
     </Animated.View>
 
     // </Animated.View>
@@ -637,3 +786,21 @@ const styles = StyleSheet.create({
     fontFamily: 'monospace', // or custom license plate font
   },
 });
+
+const AnimatedDotsLoadingText = ({text}: {text: string}) => {
+  const [dots, setDots] = React.useState('');
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setDots(prev => (prev.length >= 3 ? '' : prev + '.'));
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <TextWrapper variant="titleLarge" style={{textAlign: 'center'}}>
+      {text}
+      {dots}
+    </TextWrapper>
+  );
+};

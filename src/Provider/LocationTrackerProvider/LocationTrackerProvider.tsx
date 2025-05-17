@@ -189,12 +189,29 @@ export const LocationTrackerProvider = ({children}: ProviderProps) => {
             heading: heading ?? 120,
           } as UpdateLocationData;
 
-          const res = await updateDriverLocation(data).unwrap();
-
-          if (res?.result?.success) {
-            console.log('Location updated successfully:', res);
-          } else {
-            console.error('Failed to update location:', res?.result?.message);
+          try {
+            const res = await updateDriverLocation(data).unwrap();
+            if (res?.result?.success) {
+              console.log('Location updated successfully:', res);
+            } else {
+              console.error('Failed to update location:', res?.result?.message);
+            }
+          } catch (error: any) {
+            if (
+              error?.status === 'FETCH_ERROR' ||
+              error?.name === 'ApiError' ||
+              error?.message?.toLowerCase().includes('network') ||
+              error?.originalStatus === 0
+            ) {
+              Alert.alert(
+                'Network Error',
+                'Failed to update location. Please check your internet connection.',
+                [{text: 'OK'}],
+                {cancelable: false},
+              );
+            } else {
+              console.error('Error updating location:', error);
+            }
           }
         } catch (error) {
           console.error('Error updating location:', error);

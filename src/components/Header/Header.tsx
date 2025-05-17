@@ -6,19 +6,38 @@ import logout from '../../assets/logout.png';
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
 import {useNavigation} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
-import {useAppDispatch} from '../../Store/Store';
+import {useAppDispatch, useAppSelector} from '../../Store/Store';
 import {setLogout} from '../../Store/feature/Auth/authSlice';
+import {useLogoutApiMutation} from '../../Store/feature/Auth/authApiSlice';
 
 const Header = () => {
   const {t} = useTranslation();
   const navigate = useNavigation() as any;
   const dispatch = useAppDispatch();
+  const {user} = useAppSelector(state => state.authSlice);
+  const [logoutApi] = useLogoutApiMutation();
 
-  const onLogout = () => {
+  const onLogout = async () => {
     // Handle logout logic here
     // console.log('Logout pressed');
-    dispatch(setLogout());
-    navigate.navigate('Auth');
+    // Call the logout API
+    try {
+      await logoutApi(user).unwrap();
+      // console.log('Logout successful');
+      dispatch(setLogout());
+      navigate.navigate('Auth');
+    } catch (error: any) {
+      if (
+        error?.status === 'FETCH_ERROR' ||
+        error?.name === 'ApiError' ||
+        error?.message?.toLowerCase().includes('network') ||
+        error?.originalStatus === 0
+      ) {
+        // Optionally show alert here if needed
+      } else {
+        console.error('Logout failed', error);
+      }
+    }
   };
   return (
     <View style={styles.container}>

@@ -90,11 +90,24 @@ const FirebaseProvider = ({children}: {children: React.ReactNode}) => {
           //send token to the another server for push notification
 
           if (token && user?.id) {
-            const res = await sendFcmTokenToZoho({
-              fcmToken: token,
-              driverId: user?.id,
-            })?.unwrap();
-            console.log('res', res);
+            try {
+              const res = await sendFcmTokenToZoho({
+                fcmToken: token,
+                driverId: user?.id,
+              })?.unwrap();
+              console.log('res', res);
+            } catch (error: any) {
+              if (
+                error?.status === 'FETCH_ERROR' ||
+                error?.name === 'ApiError' ||
+                error?.message?.toLowerCase().includes('network') ||
+                error?.originalStatus === 0
+              ) {
+                // Optionally show alert here if needed
+              } else {
+                console.error('Error sending FCM token to Zoho:', error);
+              }
+            }
           }
         } else {
           console.log('Permission Denied');
@@ -218,7 +231,7 @@ const FirebaseProvider = ({children}: {children: React.ReactNode}) => {
       }
 
       // if (remoteMessage && loginUserData?.user?.id) {
-      if (remoteMessage && user?.id) {
+      if (remoteMessage) {
         console.log(
           'Notification caused app to open from foreground state:',
           remoteMessage,

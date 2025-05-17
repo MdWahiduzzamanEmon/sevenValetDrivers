@@ -57,6 +57,7 @@ const theme = {
     primary: '#6200ee',
     secondary: '#03dac4',
     text: '#fff',
+    red: '#ff0000',
   },
 } as any;
 

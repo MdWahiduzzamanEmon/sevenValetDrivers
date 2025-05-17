@@ -16,3 +16,4 @@ export const UPDATE_FCM_TOKEN_PUBLIC_KEY = 'CgDe8UQnXQD5jPaDpCb0XNd57';
 export const START_TASK_PUBLIC_KEY = 'GtqEpUCvF8J6BShpUyVqk7jZ2';
 export const COMPLETE_TASK_PUBLIC_KEY = 'n0hE4DG7tTmme3NjNxj7aUVDb';
 export const TASK_NOT_ACCEPTED_PUBLIC_KEY = '49dAGO9N7aOu7heh8JnrkrSGh';
+export const LOGOUT_PUBLIC_KEY = '6bj9z1qsTjSN8JjF4E1dD7Bqd';

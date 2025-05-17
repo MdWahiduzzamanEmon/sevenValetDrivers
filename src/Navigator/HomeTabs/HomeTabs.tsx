@@ -235,14 +235,29 @@ const HomeTabs = () => {
             'warning',
           );
         }
-      } catch (error) {
-        console.error('Error fetching assigned task:', error);
+      } catch (error: any) {
+        if (
+          error?.status === 'FETCH_ERROR' ||
+          error?.name === 'ApiError' ||
+          error?.message?.toLowerCase().includes('network') ||
+          error?.originalStatus === 0
+        ) {
+          showAlert(
+            'No Internet Connection!',
+            'Please check your internet connection and try again.',
+            'error',
+          );
+        } else {
+          console.error('Error fetching assigned task:', error);
+        }
       }
     },
     [user?.id, taskNotAccepted, showAlert],
   );
 
   //if newNotification arrives, set taskToShow to show the dialog and play sound and show timer
+
+  console.log('newTaskNotification', newNotification);
 
   React.useEffect(() => {
     const title = newNotification?.notification?.title as TASK_TYPE;
@@ -306,6 +321,7 @@ const HomeTabs = () => {
             setNewNotification(null);
             stopCountdown();
             triggerFallbackApi(false); // Notify server
+            if (timerRef.current) clearTimeout(timerRef.current);
           }
         }
       },
@@ -313,6 +329,7 @@ const HomeTabs = () => {
 
     return () => {
       subscription.remove();
+      if (timerRef.current) clearTimeout(timerRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newTaskNotification, triggerFallbackApi, dispatch]);
@@ -327,10 +344,23 @@ const HomeTabs = () => {
       if (response?.result?.success) {
         dispatch(setNewTaskData(response?.result?.data));
       }
-    } catch (error) {
-      console.error('Error fetching assigned task:', error);
+    } catch (error: any) {
+      if (
+        error?.status === 'FETCH_ERROR' ||
+        error?.name === 'ApiError' ||
+        error?.message?.toLowerCase().includes('network') ||
+        error?.originalStatus === 0
+      ) {
+        showAlert(
+          'No Internet Connection!',
+          'Please check your internet connection and try again.',
+          'error',
+        );
+      } else {
+        console.error('Error fetching assigned task:', error);
+      }
     }
-  }, [dispatch, getAssignedTask, user?.id]);
+  }, [dispatch, getAssignedTask, user?.id, showAlert]);
 
   // Handle task acceptance
   const handleAccept = () => {

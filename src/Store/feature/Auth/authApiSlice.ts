@@ -1,4 +1,8 @@
-import {LOGIN_PUBLIC_KEY, UPDATE_PROFILE_PUBLIC_KEY} from '../../../Base';
+import {
+  LOGIN_PUBLIC_KEY,
+  LOGOUT_PUBLIC_KEY,
+  UPDATE_PROFILE_PUBLIC_KEY,
+} from '../../../Base';
 import {apiSlice} from '../../api/apiSlice';
 import type {EndpointBuilder} from '@reduxjs/toolkit/query';
 
@@ -39,6 +43,18 @@ export const authApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ['UserProfile'], // Invalidate the UserProfile cache tag
     }),
+
+    //logout
+    logoutApi: builder.mutation({
+      query: (data: any) => ({
+        url: `/driver_log_out?publickey=${LOGOUT_PUBLIC_KEY}`,
+        method: 'POST',
+        body: {
+          driverId: data.driverId,
+        },
+      }),
+    }),
   }),
 });
-export const {useLoginMutation, useUpdateProfileMutation} = authApiSlice;
+export const {useLoginMutation, useUpdateProfileMutation, useLogoutApiMutation} =
+  authApiSlice;

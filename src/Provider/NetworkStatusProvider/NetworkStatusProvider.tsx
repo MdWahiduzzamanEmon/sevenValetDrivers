@@ -22,7 +22,9 @@ const NetworkConnectivityProvider: React.FC<Props> = ({children}) => {
   const [firstCheck, setFirstCheck] = useState(true);
 
   const checkConnection = useCallback(() => {
-    NetInfo.fetch().then(state => setIsConnected(state.isConnected));
+    NetInfo.fetch().then(state => {
+      setIsConnected(state.isConnected);
+    });
   }, []);
 
   useEffect(() => {

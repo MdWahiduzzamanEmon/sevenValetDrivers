@@ -54,5 +54,7 @@
   "park_in": "পার্ক ইন",
   "park_out": "পার্ক আউট",
   "park_out_completed": "পার্ক আউট সম্পন্ন হয়েছে",
-  "loading_your_task": "আপনার কাজ লোড হচ্ছে..."
+  "loading_your_task": "আপনার কাজ লোড হচ্ছে...",
+  "please_wait_while_we_fetch_your_task": "দয়া করে অপেক্ষা করুন যখন আমরা আপনার কাজটি নিয়ে আসি",
+  "no_internet_connection": "কোনও ইন্টারনেট সংযোগ নেই"
 }

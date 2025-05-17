@@ -1,12 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import {View, StyleSheet, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import CustomTextInput from '../../Utils/CustomTextInput/CustomTextInput';
 import CustomButton from '../../Utils/CustomButton/CustomButton';
 import Container from '../../components/Container/Container';
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
-import {APP_NAME} from '../../config';
+import {APP_NAME, SCREEN_HEIGHT} from '../../config';
 import {useLoginMutation} from '../../Store/feature/Auth/authApiSlice';
 import {useAppDispatch, useAppSelector} from '../../Store/Store';
 import {
@@ -17,8 +17,14 @@ import {
 import CustomOTPInput from '../../Utils/CustomOTPInput/CustomOTPInput';
 import {useAlert} from '../../Utils/CustomAlert/AlertContext';
 import {useTranslation} from 'react-i18next';
+import {NetworkStatusContext} from '../../Provider/NetworkStatusProvider/NetworkStatusProvider';
+import {Avatar} from 'react-native-paper';
+import theme from '../../Theme/theme';
 
 const SignInScreen = () => {
+  const networkContext = useContext(NetworkStatusContext);
+  const isConnected = networkContext?.isConnected;
+
   const {t} = useTranslation();
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
@@ -78,9 +84,22 @@ const SignInScreen = () => {
           'error',
         );
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log('error', error);
-      showAlert('Error', 'An unexpected error occurred', 'error');
+      if (
+        error?.status === 'FETCH_ERROR' ||
+        error?.name === 'ApiError' ||
+        error?.message?.toLowerCase().includes('network') ||
+        error?.originalStatus === 0
+      ) {
+        showAlert(
+          'No Internet Connection!',
+          'Please check your internet connection and try again.',
+          'error',
+        );
+      } else {
+        showAlert('Error', 'An unexpected error occurred', 'error');
+      }
     }
   };
 
@@ -124,10 +143,27 @@ const SignInScreen = () => {
         </TextWrapper>
       </View>
 
+      {/* //isConnected */}
+      {!isConnected && (
+        <View
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginTop: 20,
+          }}>
+          <Avatar.Icon
+            icon="wifi-off"
+            size={Math.min(SCREEN_HEIGHT * 0.1, 80)}
+            backgroundColor={theme.colors.red}
+            // style={styles.avatar}
+          />
+        </View>
+      )}
+
       <View
         style={{
           paddingHorizontal: 16,
-          marginTop: 100,
+          marginTop: isConnected ? 100 : 0,
           flex: 1,
           justifyContent: 'flex-start',
           gap: 8,

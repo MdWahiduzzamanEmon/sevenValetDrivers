@@ -5,7 +5,7 @@ import TaskCard from '../../components/TaskCard/TaskCard';
 import {useAppSelector} from '../../Store/Store';
 import {PADDING_SCREEN_HORIZONTAL} from '../../config';
 import type {TaskData} from '../../components/TaskCard/TaskCard';
-import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
+// import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
 
 const OngoinTask = () => {
   const {newTaskData, isLoadingTask} = useAppSelector(
