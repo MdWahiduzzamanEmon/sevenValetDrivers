@@ -468,7 +468,7 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
         <Animated.View style={[pulsingStyle]}>
           <Avatar.Icon
             icon={isConnected ? 'car' : 'wifi-off'}
-            size={Math.min(SCREEN_HEIGHT * 0.1, 80)}
+            size={Math.min(SCREEN_HEIGHT * 0.1, 50)}
             backgroundColor={
               isConnected ? theme.colors.primary : theme.colors.red
             }
@@ -660,7 +660,7 @@ const styles = StyleSheet.create({
   titleContainer: {
     borderWidth: 1,
     borderColor: '#ccc',
-    paddingTop: Math.min(SCREEN_HEIGHT * 0.01, 10),
+    paddingTop: Math.min(SCREEN_HEIGHT * 0.02, 15),
     paddingBottom: Math.min(SCREEN_HEIGHT * 0.005, 5),
     borderRadius: 2,
     display: 'flex',

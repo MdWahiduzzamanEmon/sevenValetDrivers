@@ -250,14 +250,16 @@ const HomeTabs = () => {
         } else {
           console.error('Error fetching assigned task:', error);
         }
+      } finally {
+        handleGetAssignedTask();
       }
     },
-    [user?.id, taskNotAccepted, showAlert],
+    [user?.id, taskNotAccepted, showAlert, handleGetAssignedTask],
   );
 
   //if newNotification arrives, set taskToShow to show the dialog and play sound and show timer
 
-  console.log('newTaskNotification', newNotification);
+  // console.log('newTaskNotification', newNotification);
 
   React.useEffect(() => {
     const title = newNotification?.notification?.title as TASK_TYPE;
@@ -368,7 +370,6 @@ const HomeTabs = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
     dispatch(setNewTaskNotification(false));
     // dispatch(setNewTaskData(taskToShow));
-    handleGetAssignedTask();
     dispatch(setTaskToShow(null));
     stopSound();
     stopVibration();
