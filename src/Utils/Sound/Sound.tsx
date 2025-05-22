@@ -7,7 +7,7 @@ const playSound = async () => {
   try {
     SoundPlayer.setVolume(currentVolume);
 
-    SoundPlayer.playSoundFile('tone2', 'mp3');
+    SoundPlayer.playSoundFile('tone3', 'mp3');
     SoundPlayer.setNumberOfLoops(-1); // Loop indefinitely
     console.log('Sound is playing');
 

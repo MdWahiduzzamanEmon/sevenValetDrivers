@@ -6,7 +6,6 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
-  View,
 } from 'react-native';
 import SuspenseComponent from '../../Provider/Suspense/Suspense';
 import Ongoin from '../../assets/ongoing.png';
@@ -193,29 +192,33 @@ const HomeTabs = () => {
   const [getAssignedTask, {isLoading}] = useLazyGetAssignedTaskQuery();
   const [taskNotAccepted] = useTaskNotAcceptedMutation();
 
-  // Start countdown timer
-  const startCountdown = () => {
-    setCountdown(30); // reset
-    if (countdownIntervalRef.current)
-      clearInterval(countdownIntervalRef.current);
+  // Fetch assigned task
+  const handleGetAssignedTask = useCallback(async () => {
+    try {
+      if (!user?.id) return;
 
-    countdownIntervalRef.current = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(countdownIntervalRef.current!);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  // Cleanup countdown
-  const stopCountdown = () => {
-    if (countdownIntervalRef.current) {
-      clearInterval(countdownIntervalRef.current);
+      const response = await getAssignedTask(user?.id).unwrap();
+      console.log('response', response);
+      if (response?.result?.success) {
+        dispatch(setNewTaskData(response?.result?.data));
+      }
+    } catch (error: any) {
+      if (
+        error?.status === 'FETCH_ERROR' ||
+        error?.name === 'ApiError' ||
+        error?.message?.toLowerCase().includes('network') ||
+        error?.originalStatus === 0
+      ) {
+        showAlert(
+          'No Internet Connection!',
+          'Please check your internet connection and try again.',
+          'error',
+        );
+      } else {
+        console.error('Error fetching assigned task:', error);
+      }
     }
-  };
+  }, [dispatch, getAssignedTask, user?.id, showAlert]);
 
   // Trigger fallback API if task is not accepted
   const triggerFallbackApi = useCallback(
@@ -256,6 +259,30 @@ const HomeTabs = () => {
     },
     [user?.id, taskNotAccepted, showAlert, handleGetAssignedTask],
   );
+
+  // Start countdown timer
+  const startCountdown = () => {
+    setCountdown(30); // reset
+    if (countdownIntervalRef.current)
+      clearInterval(countdownIntervalRef.current);
+
+    countdownIntervalRef.current = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(countdownIntervalRef.current!);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  // Cleanup countdown
+  const stopCountdown = () => {
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+    }
+  };
 
   //if newNotification arrives, set taskToShow to show the dialog and play sound and show timer
 
@@ -335,34 +362,6 @@ const HomeTabs = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newTaskNotification, triggerFallbackApi, dispatch]);
-
-  // Fetch assigned task
-  const handleGetAssignedTask = useCallback(async () => {
-    try {
-      if (!user?.id) return;
-
-      const response = await getAssignedTask(user?.id).unwrap();
-      console.log('response', response);
-      if (response?.result?.success) {
-        dispatch(setNewTaskData(response?.result?.data));
-      }
-    } catch (error: any) {
-      if (
-        error?.status === 'FETCH_ERROR' ||
-        error?.name === 'ApiError' ||
-        error?.message?.toLowerCase().includes('network') ||
-        error?.originalStatus === 0
-      ) {
-        showAlert(
-          'No Internet Connection!',
-          'Please check your internet connection and try again.',
-          'error',
-        );
-      } else {
-        console.error('Error fetching assigned task:', error);
-      }
-    }
-  }, [dispatch, getAssignedTask, user?.id, showAlert]);
 
   // Handle task acceptance
   const handleAccept = () => {

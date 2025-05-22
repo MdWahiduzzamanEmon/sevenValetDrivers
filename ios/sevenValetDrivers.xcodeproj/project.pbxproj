@@ -42,6 +42,7 @@
 		F2C73805064E4237B47B6181 /* Fontisto.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F1D9FD92413D49E3BBE4E1FE /* Fontisto.ttf */; };
 		F5479C6B59FF405CA5D93745 /* Foundation.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 283353E6988B4DFBADAE323D /* Foundation.ttf */; };
 		FAD947ED14A540678DD45772 /* FontAwesome5_Solid.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 178C8CE4E0A94A5B955478C7 /* FontAwesome5_Solid.ttf */; };
+		1C175D2607C540D19D96D1D8 /* tone3.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 21E3C158E77648A881FFDE6F /* tone3.mp3 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -85,6 +86,7 @@
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		ED4C9D77F9CF4D59BEA11D9B /* FontAwesome6_Solid.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome6_Solid.ttf; path = ../src/assets/fonts/Fonts/FontAwesome6_Solid.ttf; sourceTree = "<group>"; };
 		F1D9FD92413D49E3BBE4E1FE /* Fontisto.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = Fontisto.ttf; path = ../src/assets/fonts/Fonts/Fontisto.ttf; sourceTree = "<group>"; };
+		21E3C158E77648A881FFDE6F /* tone3.mp3 */ = {isa = PBXFileReference; name = "tone3.mp3"; path = "../src/assets/tone3.mp3"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -153,6 +155,7 @@
 				3E63C665985F4CF5B8AF86CF /* SimpleLineIcons.ttf */,
 				C2EFD53B727A40F9A0FF2E15 /* Zocial.ttf */,
 				840A65DD99B640AFBC9996B3 /* tone2.mp3 */,
+				21E3C158E77648A881FFDE6F /* tone3.mp3 */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -290,6 +293,7 @@
 				321DB6F4BA3A482EA2228FB0 /* SimpleLineIcons.ttf in Resources */,
 				982C917B2EFE4DD5AB5E44AA /* Zocial.ttf in Resources */,
 				83AD861360714E3B980CDA7D /* tone2.mp3 in Resources */,
+				1C175D2607C540D19D96D1D8 /* tone3.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
