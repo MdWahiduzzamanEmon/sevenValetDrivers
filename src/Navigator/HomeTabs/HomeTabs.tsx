@@ -1,12 +1,6 @@
 import React, {lazy, useCallback, useEffect} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {
-  AppState,
-  AppStateStatus,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
+import {Image, StyleSheet, TouchableOpacity, AppState, AppStateStatus} from 'react-native';
 import SuspenseComponent from '../../Provider/Suspense/Suspense';
 import Ongoin from '../../assets/ongoing.png';
 import asignedTask from '../../assets/completed_task.png';
@@ -39,7 +33,6 @@ import {revertLanguageFullName} from '../../Utils/selectLanguageFullName';
 // import useLocation from '../../Hooks/useLocation';
 import {TASK_TYPE, TASK_TYPES} from '../../config';
 import {useAlert} from '../../Utils/CustomAlert/AlertContext';
-import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
 
 // Lazy-loaded screens
 const OngoinTask = lazy(() => import('../../Screen/OngoinTask/OngoinTask'));
@@ -300,7 +293,9 @@ const HomeTabs = () => {
       acceptedRef.current = false;
 
       // Clear previous timer
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
       stopCountdown();
 
       // Start countdown display
@@ -308,6 +303,7 @@ const HomeTabs = () => {
 
       // Set up 30-sec auto-close
       timerRef.current = setTimeout(() => {
+        // Only trigger fallback if not accepted
         if (!acceptedRef.current) {
           console.log('Auto-closing dialog and triggering fallback API...');
           dispatch(setNewTaskNotification(false));
@@ -316,20 +312,46 @@ const HomeTabs = () => {
           stopVibration();
           stopBlinkingFlashlight();
           setNewNotification(null);
-          triggerFallbackApi(false); // Call fallback API
           stopCountdown();
+          triggerFallbackApi(false); // Call fallback API
         }
       }, 30000);
     }
 
     return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
     };
-
-    // Only rerun on new notifications
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, triggerAlertEffects, triggerFallbackApi, lastNotificationId]);
 
+  // Handle task acceptance
+  const handleAccept = () => {
+    acceptedRef.current = true;
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    dispatch(setNewTaskNotification(false));
+    dispatch(setTaskToShow(null));
+    stopSound();
+    stopVibration();
+    stopBlinkingFlashlight();
+    setNewNotification(null);
+    stopCountdown();
+    triggerFallbackApi(true); // Call fallback API
+  };
+
+  useEffect(() => {
+    dispatch(setLoadingTask(isLoading));
+  }, [dispatch, isLoading]);
+
+  // Fetch assigned task when the component mounts
+  useEffect(() => {
+    handleGetAssignedTask();
+  }, [handleGetAssignedTask]);
+
+  // Restore AppState background/inactive logic
   useEffect(() => {
     const subscription = AppState.addEventListener(
       'change',
@@ -362,31 +384,6 @@ const HomeTabs = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newTaskNotification, triggerFallbackApi, dispatch]);
-
-  // Handle task acceptance
-  const handleAccept = () => {
-    acceptedRef.current = true;
-    if (timerRef.current) clearTimeout(timerRef.current);
-    dispatch(setNewTaskNotification(false));
-    // dispatch(setNewTaskData(taskToShow));
-    dispatch(setTaskToShow(null));
-    stopSound();
-    stopVibration();
-    stopBlinkingFlashlight();
-    setNewNotification(null);
-    stopCountdown();
-    triggerFallbackApi(true); // Call fallback API
-    // startTracking();
-  };
-
-  useEffect(() => {
-    dispatch(setLoadingTask(isLoading));
-  }, [dispatch, isLoading]);
-
-  // Fetch assigned task when the component mounts
-  useEffect(() => {
-    handleGetAssignedTask();
-  }, [handleGetAssignedTask]);
 
   return (
     <>

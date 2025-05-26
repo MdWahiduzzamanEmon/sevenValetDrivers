@@ -52,6 +52,7 @@ export type TaskData = {
   id: string;
   keyHolderId: string;
   priority: 'Normal' | 'High';
+  parkingSlotId: string;
 };
 
 // Calculate responsive sizes
@@ -311,7 +312,7 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
         heading: location?.heading || 0,
       };
 
-      const res = await startNewTask(taskData).unwrap();
+      await startNewTask(taskData).unwrap();
       // console.log('res-start task', res);
       setStatus('ONGOING');
       startTracking();
@@ -484,9 +485,6 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
             : t('park_out_the_car')}
         </TextWrapper>
       </Animated.View>
-      <TextWrapper variant="titleSmall" style={styles.description}>
-        {data.description}
-      </TextWrapper>
 
       {data?.specialInstruction && (
         <View style={styles.instructionsContainer}>
@@ -499,16 +497,31 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
 
       <View style={styles.content}>
         <VehicleDetails data={data} />
-
-        {/* <View style={styles.progressBarContainer}>
-          <Animated.View
-            style={[
-              styles.progressBarFill,
-              progressColor,
-              {width: `${progress.value * 100}%`},
-            ]}
-          />
-        </View> */}
+        {/* Key Holder and Parking Slot ID */}
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 10,
+          }}>
+          <View style={{flex: 1, alignItems: 'center'}}>
+            <TextWrapper style={{fontWeight: 'bold', color: '#fff'}}>
+              Key Holder
+            </TextWrapper>
+            <TextWrapper style={{color: '#fff'}}>
+              {data.keyHolderId || '-'}
+            </TextWrapper>
+          </View>
+          <View style={{flex: 1, alignItems: 'center'}}>
+            <TextWrapper style={{fontWeight: 'bold', color: '#fff'}}>
+              Parking Slot
+            </TextWrapper>
+            <TextWrapper style={{color: '#fff'}}>
+              {data.parkingSlotId || '-'}
+            </TextWrapper>
+          </View>
+        </View>
 
         <View
           style={{
@@ -675,9 +688,6 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     textAlign: 'center',
   },
-  description: {
-    marginBottom: Math.min(SCREEN_HEIGHT * 0.01, 10),
-  },
   content: {
     flexDirection: 'column',
     flex: 1,
@@ -724,17 +734,6 @@ const styles = StyleSheet.create({
     fontSize: Math.min(SCREEN_WIDTH * 1, 20),
     fontWeight: '600',
     color: '#fff',
-  },
-  progressBarContainer: {
-    height: 5,
-    backgroundColor: '#eee',
-    borderRadius: 4,
-    overflow: 'hidden',
-    marginVertical: Math.min(SCREEN_HEIGHT * 0.015, 12),
-  },
-  progressBarFill: {
-    height: '100%',
-    borderRadius: 4,
   },
   statusContainer: {
     flexDirection: 'row',
