@@ -497,31 +497,6 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
 
       <View style={styles.content}>
         <VehicleDetails data={data} />
-        {/* Key Holder and Parking Slot ID */}
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: 10,
-          }}>
-          <View style={{flex: 1, alignItems: 'center'}}>
-            <TextWrapper style={{fontWeight: 'bold', color: '#fff'}}>
-              Key Holder
-            </TextWrapper>
-            <TextWrapper style={{color: '#fff'}}>
-              {data.keyHolderId || '-'}
-            </TextWrapper>
-          </View>
-          <View style={{flex: 1, alignItems: 'center'}}>
-            <TextWrapper style={{fontWeight: 'bold', color: '#fff'}}>
-              Parking Slot
-            </TextWrapper>
-            <TextWrapper style={{color: '#fff'}}>
-              {data.parkingSlotId || '-'}
-            </TextWrapper>
-          </View>
-        </View>
 
         <View
           style={{
@@ -604,21 +579,22 @@ export default TaskCard;
 const VehicleDetails: React.FC<{data: TaskData}> = ({data}) => {
   return (
     <View style={styles.vehicleDetailsContainer}>
-      <View style={styles.detailItem}>
-        <Avatar.Icon
-          icon="car"
-          size={ICON_SIZE}
-          style={styles.icon}
-          color="#fff"
-          backgroundColor={BG_COLOR_BUTTON}
-        />
-        <View style={styles.textContainer}>
+      <View>
+        <View style={styles.detailItem}>
+          {/* <View style={styles.textContainer}>  */}
+          <Avatar.Icon
+            icon="car"
+            size={ICON_SIZE}
+            style={styles.icon}
+            color="#fff"
+            backgroundColor={BG_COLOR_BUTTON}
+          />
           <TextWrapper style={styles.label}>Vehicle</TextWrapper>
-          <TextWrapper
-            style={
-              styles.value
-            }>{`${data.carBrand}, ${data.carModel}`}</TextWrapper>
+          {/* </View> */}
         </View>
+        <TextWrapper style={styles.value}>
+          {`${data.carBrand}, ${data.carModel}`}
+        </TextWrapper>
       </View>
 
       <View style={styles.plateDetailsContainer}>
@@ -638,22 +614,71 @@ const VehicleDetails: React.FC<{data: TaskData}> = ({data}) => {
       </View>
 
       {data.pickOrDropLocation && (
-        <View style={styles.detailItem}>
-          <Avatar.Icon
-            icon="map-marker"
-            size={ICON_SIZE}
-            style={styles.icon}
-            color="#fff"
-            backgroundColor={BG_COLOR_BUTTON}
-          />
-          <View style={styles.textContainer}>
+        <View>
+          <View style={styles.detailItem}>
+            <Avatar.Icon
+              icon="map-marker"
+              size={ICON_SIZE}
+              style={styles.icon}
+              color="#fff"
+              backgroundColor={BG_COLOR_BUTTON}
+            />
             <TextWrapper style={styles.label}>Drop Location</TextWrapper>
-            <TextWrapper style={styles.value}>
-              {data.pickOrDropLocation}
-            </TextWrapper>
           </View>
+          {/* <View style={styles.textContainer}> */}
+          <TextWrapper style={styles.value}>
+            {data.pickOrDropLocation}
+          </TextWrapper>
+          {/* </View> */}
         </View>
       )}
+
+      {/* Key Holder and Parking Slot ID */}
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 10,
+          width: '100%', // ensure full width
+        }}>
+        <View style={{flex: 1, alignItems: 'flex-start'}}>
+          <View style={styles.detailItem}>
+            <Avatar.Icon
+              icon="parking"
+              size={Math.min(SCREEN_HEIGHT * 0.1, 20)}
+              style={styles.icon}
+              color="#fff"
+              backgroundColor={BG_COLOR_BUTTON}
+            />
+            <TextWrapper style={styles.label}>Parking Slot</TextWrapper>
+          </View>
+          <TextWrapper style={styles.parkinOutContainer}>
+            <TextWrapper style={styles.parkinOutText}>
+              {data.parkingSlotId || '-'}
+            </TextWrapper>
+          </TextWrapper>
+        </View>
+
+        <View style={{flex: 1, alignItems: 'flex-end'}}>
+          {/* <TextWrapper style={styles.label}>Key Holder</TextWrapper> */}
+          <View style={styles.detailItem}>
+            <Avatar.Icon
+              icon="key"
+              size={Math.min(SCREEN_HEIGHT * 0.1, 20)}
+              style={styles.icon}
+              color="#fff"
+              backgroundColor={BG_COLOR_BUTTON}
+            />
+            <TextWrapper style={styles.label}>Key Holder</TextWrapper>
+          </View>
+          <TextWrapper style={styles.parkinOutContainer}>
+            <TextWrapper style={styles.parkinOutText}>
+              {data.keyHolderId || '-'}
+            </TextWrapper>
+          </TextWrapper>
+        </View>
+      </View>
     </View>
   );
 };
@@ -691,7 +716,7 @@ const styles = StyleSheet.create({
   content: {
     flexDirection: 'column',
     flex: 1,
-    marginTop: Math.min(SCREEN_HEIGHT * 0.02, 20),
+    marginTop: Math.min(SCREEN_HEIGHT * 0.02, 0),
   },
   instructionsContainer: {
     marginVertical: Math.min(SCREEN_HEIGHT * 0.01, 10),
@@ -707,7 +732,7 @@ const styles = StyleSheet.create({
   },
   vehicleDetailsContainer: {
     marginVertical: Math.min(SCREEN_HEIGHT * 0.01, 10),
-    gap: Math.min(SCREEN_HEIGHT * 0.015, 12),
+    gap: Math.min(SCREEN_HEIGHT * 0.015, 10),
   },
   detailItem: {
     flexDirection: 'row',
@@ -717,7 +742,8 @@ const styles = StyleSheet.create({
   plateDetailsContainer: {
     flexDirection: 'column',
     justifyContent: 'center',
-    marginVertical: Math.min(SCREEN_HEIGHT * 0.01, 10),
+    marginTop: Math.min(SCREEN_HEIGHT * 0.01, 10),
+    marginBottom: Math.min(SCREEN_HEIGHT * 0.01, 0),
   },
   icon: {
     marginRight: Math.min(SCREEN_WIDTH * 0.03, 12),
@@ -770,7 +796,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 10,
+    marginTop: 10,
     elevation: 3, // for Android shadow
     shadowColor: '#000', // iOS shadow
     shadowOffset: {width: 0, height: 2},
@@ -783,6 +809,33 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#000',
     fontFamily: 'monospace', // or custom license plate font
+  },
+
+  parkinOutContainer: {
+    backgroundColor: '#fff', // or '#f1c40f' for yellow
+    borderColor: '#e67e22', // or '#e67e22' for orange
+    borderWidth: 3,
+    borderRadius: 6,
+    paddingTop: 3,
+    paddingHorizontal: 14,
+    alignItems: 'center', // center horizontally
+    justifyContent: 'center', // center vertically
+    marginTop: 10,
+    elevation: 3, // for Android shadow
+    shadowColor: '#000', // iOS shadow
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    // alignSelf: 'stretch', // ensure container stretches to parent width
+  },
+  parkinOutText: {
+    fontSize: 18,
+    letterSpacing: 2,
+    fontWeight: 'bold',
+    color: '#000',
+    fontFamily: 'monospace', // or custom license plate font
+    textAlign: 'center', // center text horizontally
+    width: '100%', // ensure text takes full width of container
   },
 });
 

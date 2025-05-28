@@ -1,6 +1,12 @@
 import React, {lazy, useCallback, useEffect} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {Image, StyleSheet, TouchableOpacity, AppState, AppStateStatus} from 'react-native';
+import {
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  AppState,
+  AppStateStatus,
+} from 'react-native';
 import SuspenseComponent from '../../Provider/Suspense/Suspense';
 import Ongoin from '../../assets/ongoing.png';
 import asignedTask from '../../assets/completed_task.png';
@@ -256,13 +262,15 @@ const HomeTabs = () => {
   // Start countdown timer
   const startCountdown = () => {
     setCountdown(30); // reset
-    if (countdownIntervalRef.current)
+    if (countdownIntervalRef.current) {
       clearInterval(countdownIntervalRef.current);
+    }
 
     countdownIntervalRef.current = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
           clearInterval(countdownIntervalRef.current!);
+          handleAutoClose();
           return 0;
         }
         return prev - 1;
@@ -271,13 +279,28 @@ const HomeTabs = () => {
   };
 
   // Cleanup countdown
-  const stopCountdown = () => {
+  const stopCountdown = useCallback(() => {
     if (countdownIntervalRef.current) {
       clearInterval(countdownIntervalRef.current);
     }
-  };
+  }, []);
 
-  //if newNotification arrives, set taskToShow to show the dialog and play sound and show timer
+  // Auto-close logic extracted to a single function
+  const handleAutoClose = useCallback(() => {
+    if (!acceptedRef.current) {
+      dispatch(setNewTaskNotification(false));
+      dispatch(setTaskToShow(null));
+      stopSound();
+      stopVibration();
+      stopBlinkingFlashlight();
+      setNewNotification(null);
+      stopCountdown();
+      triggerFallbackApi(false); // Call fallback API
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, stopCountdown, triggerFallbackApi]);
+
+  // if newNotification arrives, set taskToShow to show the dialog and play sound and show timer
 
   // console.log('newTaskNotification', newNotification);
 
@@ -304,17 +327,8 @@ const HomeTabs = () => {
       // Set up 30-sec auto-close
       timerRef.current = setTimeout(() => {
         // Only trigger fallback if not accepted
-        if (!acceptedRef.current) {
-          console.log('Auto-closing dialog and triggering fallback API...');
-          dispatch(setNewTaskNotification(false));
-          dispatch(setTaskToShow(null));
-          stopSound();
-          stopVibration();
-          stopBlinkingFlashlight();
-          setNewNotification(null);
-          stopCountdown();
-          triggerFallbackApi(false); // Call fallback API
-        }
+        console.log('Auto-closing dialog and triggering fallback API...');
+        handleAutoClose();
       }, 30000);
     }
 
@@ -324,7 +338,13 @@ const HomeTabs = () => {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, triggerAlertEffects, triggerFallbackApi, lastNotificationId]);
+  }, [
+    dispatch,
+    triggerAlertEffects,
+    triggerFallbackApi,
+    lastNotificationId,
+    handleAutoClose,
+  ]);
 
   // Handle task acceptance
   const handleAccept = () => {
@@ -372,7 +392,9 @@ const HomeTabs = () => {
             setNewNotification(null);
             stopCountdown();
             triggerFallbackApi(false); // Notify server
-            if (timerRef.current) clearTimeout(timerRef.current);
+            if (timerRef.current) {
+              clearTimeout(timerRef.current);
+            }
           }
         }
       },
@@ -380,7 +402,9 @@ const HomeTabs = () => {
 
     return () => {
       subscription.remove();
-      if (timerRef.current) clearTimeout(timerRef.current);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newTaskNotification, triggerFallbackApi, dispatch]);
