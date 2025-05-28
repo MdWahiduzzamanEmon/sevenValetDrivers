@@ -796,7 +796,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 10,
+    marginTop: 8,
     elevation: 3, // for Android shadow
     shadowColor: '#000', // iOS shadow
     shadowOffset: {width: 0, height: 2},
