@@ -17,11 +17,17 @@ import Animated, {
 } from 'react-native-reanimated';
 import {useTranslation} from 'react-i18next';
 import {useAppDispatch, useAppSelector} from '../../Store/Store';
-import {setClearTask} from '../../Store/feature/globalSlice';
+import {
+  setClearTask,
+  setNewTaskData,
+  setTaskToShow,
+  setNewTaskNotification,
+} from '../../Store/feature/globalSlice';
 import useLocation from '../../Hooks/useLocation';
 import {
   useCompleteTaskMutation,
   useStartNewTaskMutation,
+  useLazyGetAssignedTaskQuery,
 } from '../../Store/feature/globalApiSlice';
 // import StartTaskComponent from '../StartTaskComponent/StartTaskComponent';
 // import CompleteTaskComponent from '../CompleteTaskComponent/CompleteTaskComponent';
@@ -158,6 +164,38 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
     useStartNewTaskMutation();
   const [completeTask, {isLoading: completeTaskLoading}] =
     useCompleteTaskMutation();
+  const [getAssignedTask] = useLazyGetAssignedTaskQuery();
+
+  // Function to check for next available tasks
+  const checkNextAvailableTask = async () => {
+    try {
+      if (!user?.id) return;
+
+      const response = await getAssignedTask(user.id).unwrap();
+      console.log('Next task check response:', response);
+
+      if (response?.result?.success) {
+        if (response.code === 3000) {
+          // No available assigned tasks
+          console.log('No available assigned tasks for this driver.');
+          dispatch(setTaskToShow(null));
+        } else if (response?.result?.data) {
+          // Task available, dispatch the data
+          const taskData = response.result.data;
+          const taskType =
+            taskData.taskType === 'Parking' ? 'ParkIn' : 'ParkOut';
+
+          dispatch(setNewTaskData(taskData));
+          dispatch(setTaskToShow(taskType));
+          dispatch(setNewTaskNotification(true));
+          console.log('New task found and dispatched:', taskData);
+        }
+      }
+    } catch (error: any) {
+      console.error('Error checking for next task:', error);
+      dispatch(setTaskToShow(null));
+    }
+  };
 
   const handleStatusChange = async () => {
     if (status === 'NOT_STARTED') {
@@ -364,6 +402,9 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
       setStatus('COMPLETED');
       dispatch(setClearTask());
       stopTracking();
+
+      // Check for next available task after completing current task
+      await checkNextAvailableTask();
       return;
     }
     try {
@@ -371,6 +412,9 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
       setStatus('COMPLETED');
       dispatch(setClearTask());
       stopTracking();
+
+      // Check for next available task after completing current task
+      await checkNextAvailableTask();
     } catch (error: any) {
       if (
         error?.status === 'FETCH_ERROR' ||

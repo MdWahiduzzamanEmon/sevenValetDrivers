@@ -18,7 +18,7 @@ import {useFirebaseData} from '../../Hooks/useFirebaseData';
 import {stopVibration, vibrateDevice} from '../../Utils/vibrate';
 import {playSound, stopSound} from '../../Utils/Sound/Sound';
 import {
-  startBlinkingFlashlight,
+  // startBlinkingFlashlight,
   stopBlinkingFlashlight,
 } from '../../Utils/toggleFlashlight';
 import {useAppDispatch, useAppSelector} from '../../Store/Store';
@@ -122,7 +122,7 @@ const HomeTabs = () => {
   const {user} = useAppSelector(state => state.authSlice) as any;
 
   //get newNotification from store
-  const {newTaskNotification, taskToShow, newTaskData} = useAppSelector(
+  const {newTaskNotification, taskToShow} = useAppSelector(
     state => state.globalSlice,
   ) as {
     newTaskNotification: boolean;
@@ -165,9 +165,9 @@ const HomeTabs = () => {
   // console.log('newNotification', newNotification);
 
   //start blinking flashlight
-  const handleStartBlinking = async () => {
-    await startBlinkingFlashlight();
-  };
+  // const handleStartBlinking = async () => {
+  //   await startBlinkingFlashlight();
+  // };
 
   //start blinking flashlight and vibrate
   const triggerAlertEffects = useCallback(() => {
@@ -297,7 +297,7 @@ const HomeTabs = () => {
       stopCountdown();
       triggerFallbackApi(false); // Call fallback API
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, stopCountdown, triggerFallbackApi]);
 
   // if newNotification arrives, set taskToShow to show the dialog and play sound and show timer
