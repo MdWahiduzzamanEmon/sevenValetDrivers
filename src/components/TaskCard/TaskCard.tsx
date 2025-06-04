@@ -187,7 +187,7 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
 
           dispatch(setNewTaskData(taskData));
           dispatch(setTaskToShow(taskType));
-          dispatch(setNewTaskNotification(true));
+          dispatch(setNewTaskNotification(false));
           console.log('New task found and dispatched:', taskData);
         }
       }
@@ -408,10 +408,13 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
       return;
     }
     try {
-      await completeTask(taskData).unwrap();
+      const res = await completeTask(taskData).unwrap();
+      console.log('res-complete task', res);
       setStatus('COMPLETED');
       dispatch(setClearTask());
       stopTracking();
+
+      if (!res?.result?.nextTaskAssigned) return;
 
       // Check for next available task after completing current task
       await checkNextAvailableTask();
@@ -468,6 +471,7 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
   }
 
   //if no data or task status is assigned then show waiting for new task
+  // if (!data || data?.taskStatus === 'Assigned') {
   if (!data || data?.taskStatus === 'Assigned') {
     // {
     //   /* //text : waiting for new task ,and waiting icon and content will be in center */

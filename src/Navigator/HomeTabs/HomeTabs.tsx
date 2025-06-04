@@ -18,6 +18,10 @@ import {useFirebaseData} from '../../Hooks/useFirebaseData';
 import {stopVibration, vibrateDevice} from '../../Utils/vibrate';
 import {playSound, stopSound} from '../../Utils/Sound/Sound';
 import {
+  activateKeepAwake,
+  deactivateKeepAwake,
+} from '@sayem314/react-native-keep-awake';
+import {
   // startBlinkingFlashlight,
   stopBlinkingFlashlight,
 } from '../../Utils/toggleFlashlight';
@@ -111,6 +115,7 @@ const HomeTabs = () => {
   const acceptedRef = React.useRef(false);
   const timerRef = React.useRef<NodeJS.Timeout | null>(null);
   const countdownIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
+  const fallbackApiCalledRef = React.useRef(false);
   const {t, i18n} = useTranslation();
   const dispatch = useAppDispatch();
   const {showAlert, hideAlert} = useAlert();
@@ -188,16 +193,19 @@ const HomeTabs = () => {
   }, [hideAlert, newNotification]);
 
   // call api to get assigned task
-  const [getAssignedTask, {isLoading}] = useLazyGetAssignedTaskQuery();
+  const [getAssignedTask, {isLoading, isFetching}] =
+    useLazyGetAssignedTaskQuery();
   const [taskNotAccepted] = useTaskNotAcceptedMutation();
 
   // Fetch assigned task
   const handleGetAssignedTask = useCallback(async () => {
     try {
-      if (!user?.id) return;
+      if (!user?.id) {
+        return;
+      }
 
       const response = await getAssignedTask(user?.id).unwrap();
-      console.log('response', response);
+      console.log('Fetch assigned task', response?.result?.data);
       if (response?.result?.success) {
         dispatch(setNewTaskData(response?.result?.data));
       }
@@ -223,12 +231,24 @@ const HomeTabs = () => {
   const triggerFallbackApi = useCallback(
     async (isTaskAccepted: boolean = false) => {
       try {
-        if (!user?.id) return;
+        if (!user?.id) {
+          return;
+        }
 
-        await taskNotAccepted({
+        // Prevent multiple calls for the same task notification
+        if (fallbackApiCalledRef.current) {
+          console.log('Fallback API already called, skipping...');
+          return;
+        }
+
+        fallbackApiCalledRef.current = true;
+
+        const res = await taskNotAccepted({
           driverId: user?.id,
           isTaskAccepted: isTaskAccepted,
         }).unwrap();
+
+        console.log('Task is/not accepted response:', res);
         //want to show alert that you missed the task and it will go to the supervisor
         if (isTaskAccepted === false) {
           showAlert(
@@ -250,7 +270,7 @@ const HomeTabs = () => {
             'error',
           );
         } else {
-          console.error('Error fetching assigned task:', error);
+          console.log('Error fetching assigned task:', error);
         }
       } finally {
         handleGetAssignedTask();
@@ -287,7 +307,7 @@ const HomeTabs = () => {
 
   // Auto-close logic extracted to a single function
   const handleAutoClose = useCallback(() => {
-    if (!acceptedRef.current) {
+    if (!acceptedRef.current && !fallbackApiCalledRef.current) {
       dispatch(setNewTaskNotification(false));
       dispatch(setTaskToShow(null));
       stopSound();
@@ -295,6 +315,7 @@ const HomeTabs = () => {
       stopBlinkingFlashlight();
       setNewNotification(null);
       stopCountdown();
+      deactivateKeepAwake(); // Deactivate keep awake when timer ends
       triggerFallbackApi(false); // Call fallback API
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -314,6 +335,10 @@ const HomeTabs = () => {
       dispatch(setNewTaskNotification(true));
 
       acceptedRef.current = false;
+      fallbackApiCalledRef.current = false; // Reset fallback API flag for new task
+
+      // Keep screen awake during countdown
+      activateKeepAwake();
 
       // Clear previous timer
       if (timerRef.current) {
@@ -349,6 +374,7 @@ const HomeTabs = () => {
   // Handle task acceptance
   const handleAccept = () => {
     acceptedRef.current = true;
+    fallbackApiCalledRef.current = false; // Reset flag so triggerFallbackApi can be called with true
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
@@ -359,12 +385,13 @@ const HomeTabs = () => {
     stopBlinkingFlashlight();
     setNewNotification(null);
     stopCountdown();
+    deactivateKeepAwake(); // Deactivate keep awake when task is accepted
     triggerFallbackApi(true); // Call fallback API
   };
 
   useEffect(() => {
-    dispatch(setLoadingTask(isLoading));
-  }, [dispatch, isLoading]);
+    dispatch(setLoadingTask(isLoading || isFetching));
+  }, [dispatch, isLoading, isFetching]);
 
   // Fetch assigned task when the component mounts
   useEffect(() => {
@@ -380,7 +407,11 @@ const HomeTabs = () => {
           nextAppState === 'background' ||
           nextAppState === 'inactive' // Optional: consider inactive for iOS quick backgrounding
         ) {
-          if (!acceptedRef.current && newTaskNotification) {
+          if (
+            !acceptedRef.current &&
+            newTaskNotification &&
+            !fallbackApiCalledRef.current
+          ) {
             console.log(
               'App is backgrounded before task accepted. Triggering fallback...',
             );
@@ -391,6 +422,7 @@ const HomeTabs = () => {
             stopBlinkingFlashlight();
             setNewNotification(null);
             stopCountdown();
+            deactivateKeepAwake(); // Deactivate keep awake when app goes to background
             triggerFallbackApi(false); // Notify server
             if (timerRef.current) {
               clearTimeout(timerRef.current);
