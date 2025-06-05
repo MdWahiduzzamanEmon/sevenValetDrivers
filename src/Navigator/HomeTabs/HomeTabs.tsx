@@ -127,7 +127,7 @@ const HomeTabs = () => {
   const {user} = useAppSelector(state => state.authSlice) as any;
 
   //get newNotification from store
-  const {newTaskNotification, taskToShow} = useAppSelector(
+  const {newTaskNotification, taskToShow, newTaskData} = useAppSelector(
     state => state.globalSlice,
   ) as {
     newTaskNotification: boolean;
@@ -235,6 +235,14 @@ const HomeTabs = () => {
           return;
         }
 
+        // Check if newTaskData exists and taskStatus is 'Accepted'
+        if (newTaskData && newTaskData.taskStatus === 'Accepted') {
+          console.log(
+            'Task status is already Accepted, skipping fallback API...',
+          );
+          return;
+        }
+
         // Prevent multiple calls for the same task notification
         if (fallbackApiCalledRef.current) {
           console.log('Fallback API already called, skipping...');
@@ -246,7 +254,7 @@ const HomeTabs = () => {
         const res = await taskNotAccepted({
           driverId: user?.id,
           isTaskAccepted: isTaskAccepted,
-        }).unwrap();
+        })?.unwrap();
 
         console.log('Task is/not accepted response:', res);
         //want to show alert that you missed the task and it will go to the supervisor
@@ -276,7 +284,7 @@ const HomeTabs = () => {
         handleGetAssignedTask();
       }
     },
-    [user?.id, taskNotAccepted, showAlert, handleGetAssignedTask],
+    [user?.id, taskNotAccepted, showAlert, handleGetAssignedTask, newTaskData],
   );
 
   // Start countdown timer
@@ -297,6 +305,7 @@ const HomeTabs = () => {
       });
     }, 1000);
   };
+  console.log('Countdown tick:', countdown);
 
   // Cleanup countdown
   const stopCountdown = useCallback(() => {
