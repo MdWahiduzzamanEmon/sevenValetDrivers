@@ -1,7 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
 import React, {useState, useEffect, useContext} from 'react';
-import {View, StyleSheet, ActivityIndicator} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity,
+  Pressable,
+} from 'react-native';
 import {Avatar, useTheme} from 'react-native-paper';
 // import moment from 'moment';
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
@@ -173,7 +179,9 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
   // Function to check for next available tasks
   const checkNextAvailableTask = async () => {
     try {
-      if (!user?.id) return;
+      if (!user?.id) {
+        return;
+      }
 
       const response = await getAssignedTask(user.id).unwrap();
       console.log('Next task check response:', response);
@@ -506,15 +514,18 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
 
         {/* //add refresh button to check for new task */}
         {isConnected && (
-          <CustomButton
-            label={'Refresh'}
-            onPress={checkNextAvailableTask}
-            style={{
-              marginTop: 10,
-              width: '80%',
-              alignSelf: 'center',
-            }}
-          />
+          <View style={{alignItems: 'center', marginTop: 10}}>
+            <Pressable
+              onPress={checkNextAvailableTask}
+              accessibilityLabel={t('refresh_tasks')}>
+              <Avatar.Icon
+                icon="refresh"
+                size={50}
+                style={{backgroundColor: 'transparent', marginRight: 8}}
+                color="#fff"
+              />
+            </Pressable>
+          </View>
         )}
       </Animated.View>
     );
