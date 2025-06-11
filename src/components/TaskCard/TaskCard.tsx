@@ -1,13 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
 import React, {useState, useEffect, useContext} from 'react';
-import {
-  View,
-  StyleSheet,
-  ActivityIndicator,
-  TouchableOpacity,
-  Pressable,
-} from 'react-native';
+import {View, StyleSheet, ActivityIndicator, Pressable} from 'react-native';
 import {Avatar, useTheme} from 'react-native-paper';
 // import moment from 'moment';
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
