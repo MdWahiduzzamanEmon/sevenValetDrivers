@@ -122,6 +122,11 @@ const HomeTabs = () => {
 
   const [countdown, setCountdown] = React.useState(30);
   const [lastNotificationId, setLastNotificationId] = React.useState<number>(0);
+
+  // Debug countdown changes
+  useEffect(() => {
+    console.log('Countdown state changed:', countdown);
+  }, [countdown]);
   const {newNotification, setNewNotification} = useFirebaseData() as any;
   //gte user profile data
   const {user} = useAppSelector(state => state.authSlice) as any;
@@ -287,35 +292,20 @@ const HomeTabs = () => {
     [user?.id, taskNotAccepted, showAlert, handleGetAssignedTask, newTaskData],
   );
 
-  // Start countdown timer
-  const startCountdown = () => {
-    setCountdown(30); // reset
-    if (countdownIntervalRef.current) {
-      clearInterval(countdownIntervalRef.current);
-    }
-
-    countdownIntervalRef.current = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(countdownIntervalRef.current!);
-          handleAutoClose();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-  console.log('Countdown tick:', countdown);
-
   // Cleanup countdown
   const stopCountdown = useCallback(() => {
     if (countdownIntervalRef.current) {
       clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
     }
   }, []);
 
   // Auto-close logic extracted to a single function
   const handleAutoClose = useCallback(() => {
+    console.log('handleAutoClose called', {
+      acceptedRef: acceptedRef.current,
+      fallbackApiCalledRef: fallbackApiCalledRef.current,
+    });
     if (!acceptedRef.current && !fallbackApiCalledRef.current) {
       dispatch(setNewTaskNotification(false));
       dispatch(setTaskToShow(null));
@@ -327,8 +317,30 @@ const HomeTabs = () => {
       deactivateKeepAwake(); // Deactivate keep awake when timer ends
       triggerFallbackApi(false); // Call fallback API
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, stopCountdown, triggerFallbackApi]);
+  }, [dispatch, stopCountdown, triggerFallbackApi, setNewNotification]);
+
+  // Start countdown timer
+  const startCountdown = useCallback(() => {
+    console.log('Starting countdown...');
+    setCountdown(30); // reset
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+
+    countdownIntervalRef.current = setInterval(() => {
+      setCountdown(prev => {
+        console.log('Countdown tick:', prev - 1);
+        if (prev <= 1) {
+          clearInterval(countdownIntervalRef.current!);
+          countdownIntervalRef.current = null;
+          handleAutoClose();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, [handleAutoClose]);
 
   // if newNotification arrives, set taskToShow to show the dialog and play sound and show timer
 
@@ -336,8 +348,14 @@ const HomeTabs = () => {
 
   React.useEffect(() => {
     const title = newNotification?.notification?.title as TASK_TYPE;
+    console.log('Notification effect triggered:', {
+      title,
+      isValidTaskType: TASK_TYPES.includes(title),
+      lastNotificationId,
+    });
 
     if (TASK_TYPES.includes(title)) {
+      console.log('Processing valid task notification...');
       dispatch(setTaskToShow(title));
       playSound();
       triggerAlertEffects();
@@ -352,6 +370,7 @@ const HomeTabs = () => {
       // Clear previous timer
       if (timerRef.current) {
         clearTimeout(timerRef.current);
+        timerRef.current = null;
       }
       stopCountdown();
 
@@ -369,31 +388,37 @@ const HomeTabs = () => {
     return () => {
       if (timerRef.current) {
         clearTimeout(timerRef.current);
+        timerRef.current = null;
       }
+      stopCountdown();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dispatch,
     triggerAlertEffects,
-    triggerFallbackApi,
     lastNotificationId,
     handleAutoClose,
+    startCountdown,
+    stopCountdown,
+    newNotification,
   ]);
 
   // Handle task acceptance
   const handleAccept = () => {
+    console.log('handleAccept called - stopping countdown');
     acceptedRef.current = true;
     fallbackApiCalledRef.current = false; // Reset flag so triggerFallbackApi can be called with true
     if (timerRef.current) {
       clearTimeout(timerRef.current);
+      timerRef.current = null;
     }
+    stopCountdown(); // Stop countdown first
+    setCountdown(0); // Reset countdown display to 0
     dispatch(setNewTaskNotification(false));
     dispatch(setTaskToShow(null));
     stopSound();
     stopVibration();
     stopBlinkingFlashlight();
     setNewNotification(null);
-    stopCountdown();
     deactivateKeepAwake(); // Deactivate keep awake when task is accepted
     triggerFallbackApi(true); // Call fallback API
   };
@@ -435,6 +460,7 @@ const HomeTabs = () => {
             triggerFallbackApi(false); // Notify server
             if (timerRef.current) {
               clearTimeout(timerRef.current);
+              timerRef.current = null;
             }
           }
         }
@@ -445,7 +471,9 @@ const HomeTabs = () => {
       subscription.remove();
       if (timerRef.current) {
         clearTimeout(timerRef.current);
+        timerRef.current = null;
       }
+      stopCountdown();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newTaskNotification, triggerFallbackApi, dispatch]);

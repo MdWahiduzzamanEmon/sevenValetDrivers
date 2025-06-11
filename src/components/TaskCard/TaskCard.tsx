@@ -157,6 +157,10 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
       if (data.taskStatus === 'Assigned') {
         setStatus('NOT_STARTED');
       }
+
+      if (data.taskStatus === 'Accepted') {
+        setStatus('NOT_STARTED');
+      }
     }
   }, [data]);
 
@@ -174,22 +178,19 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
       const response = await getAssignedTask(user.id).unwrap();
       console.log('Next task check response:', response);
 
-      if (response?.result?.success) {
-        if (response.code === 3000) {
-          // No available assigned tasks
-          console.log('No available assigned tasks for this driver.');
-          dispatch(setTaskToShow(null));
-        } else if (response?.result?.data) {
-          // Task available, dispatch the data
-          const taskData = response.result.data;
-          const taskType =
-            taskData.taskType === 'Parking' ? 'ParkIn' : 'ParkOut';
+      if (response.result.success === false) {
+        // No available assigned tasks
+        console.log('No available assigned tasks for this driver.');
+        dispatch(setTaskToShow(null));
+      } else if (response.result.success === true) {
+        // Task available, dispatch the data
+        const taskData = response.result.data;
+        const taskType = taskData.taskType === 'Parking' ? 'ParkIn' : 'ParkOut';
 
-          dispatch(setNewTaskData(taskData));
-          dispatch(setTaskToShow(taskType));
-          dispatch(setNewTaskNotification(false));
-          console.log('New task found and dispatched:', taskData);
-        }
+        dispatch(setNewTaskData(taskData));
+        dispatch(setTaskToShow(taskType));
+        dispatch(setNewTaskNotification(false));
+        console.log('New task found and dispatched:', taskData);
       }
     } catch (error: any) {
       console.error('Error checking for next task:', error);
@@ -414,7 +415,9 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
       dispatch(setClearTask());
       stopTracking();
 
-      if (!res?.result?.nextTaskAssigned) return;
+      if (!res?.result?.nextTaskAssigned) {
+        return;
+      }
 
       // Check for next available task after completing current task
       await checkNextAvailableTask();
