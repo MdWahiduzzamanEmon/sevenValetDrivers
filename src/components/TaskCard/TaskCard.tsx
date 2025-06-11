@@ -503,6 +503,19 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
             ? t('waiting_for_new_task')
             : t('no_internet_connection')}
         </TextWrapper>
+
+        {/* //add refresh button to check for new task */}
+        {isConnected && (
+          <CustomButton
+            label={'Refresh'}
+            onPress={checkNextAvailableTask}
+            style={{
+              marginTop: 10,
+              width: '80%',
+              alignSelf: 'center',
+            }}
+          />
+        )}
       </Animated.View>
     );
   }
