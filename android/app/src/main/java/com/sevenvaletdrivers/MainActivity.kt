@@ -1,5 +1,6 @@
 package com.sevenvaletdrivers
 import android.os.Bundle;
+import android.view.WindowManager
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
@@ -11,10 +12,24 @@ class MainActivity : ReactActivity() {
    * Returns the name of the main component registered from JavaScript. This is used to schedule
    * rendering of the component.
    */
-  
+
   override fun getMainComponentName(): String = "sevenValetDrivers"
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(null)
+    // Keep screen awake
+    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+  }
+
+  override fun onResume() {
+    super.onResume()
+    // Ensure screen stays awake when app resumes
+    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+  }
+
+  override fun onPause() {
+    super.onPause()
+    // Remove flag when app goes to background to save battery
+    window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
   }
 
   /**

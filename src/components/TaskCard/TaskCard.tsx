@@ -34,10 +34,6 @@ import {
 import {useFirebaseData} from '../../Hooks/useFirebaseData';
 import formatElapsedTime from '../../Utils/formatElapsedTime';
 // import {stopSound} from '../../Utils/Sound/Sound';
-import {
-  activateKeepAwake,
-  deactivateKeepAwake,
-} from '@sayem314/react-native-keep-awake';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {NetworkStatusContext} from '../../Provider/NetworkStatusProvider/NetworkStatusProvider';
 import {setTaskPrgressingTimer} from '../../Store/feature/Auth/authSlice';
@@ -216,17 +212,17 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
   };
 
   //handle screen lock
-  useEffect(() => {
-    if (status === 'ONGOING') {
-      activateKeepAwake();
-    } else {
-      deactivateKeepAwake();
-    }
-
-    return () => {
-      deactivateKeepAwake();
-    };
-  }, [status]);
+  // useEffect(() => {
+    // Keep awake is now handled at app level, no need to manage it here
+    // if (status === 'ONGOING') {
+    //   activateKeepAwake();
+    // } else {
+    //   deactivateKeepAwake();
+    // }
+    // return () => {
+    //   deactivateKeepAwake();
+    // };
+  // }, [status]);
 
   const getButtonLabel = () => {
     if (data?.taskType === 'ParkIn') {

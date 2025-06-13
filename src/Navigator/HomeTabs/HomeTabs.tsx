@@ -18,10 +18,6 @@ import {useFirebaseData} from '../../Hooks/useFirebaseData';
 import {stopVibration, vibrateDevice} from '../../Utils/vibrate';
 import {playSound, stopSound} from '../../Utils/Sound/Sound';
 import {
-  activateKeepAwake,
-  deactivateKeepAwake,
-} from '@sayem314/react-native-keep-awake';
-import {
   // startBlinkingFlashlight,
   stopBlinkingFlashlight,
 } from '../../Utils/toggleFlashlight';
@@ -314,7 +310,8 @@ const HomeTabs = () => {
       stopBlinkingFlashlight();
       setNewNotification(null);
       stopCountdown();
-      deactivateKeepAwake(); // Deactivate keep awake when timer ends
+      // Keep awake is handled at app level, no need to deactivate here
+      // deactivateKeepAwake(); // Deactivate keep awake when timer ends
       triggerFallbackApi(false); // Call fallback API
     }
   }, [dispatch, stopCountdown, triggerFallbackApi, setNewNotification]);
@@ -364,8 +361,8 @@ const HomeTabs = () => {
       acceptedRef.current = false;
       fallbackApiCalledRef.current = false; // Reset fallback API flag for new task
 
-      // Keep screen awake during countdown
-      activateKeepAwake();
+      // Keep screen awake during countdown - handled at app level
+      // activateKeepAwake();
 
       // Clear previous timer
       if (timerRef.current) {
@@ -419,7 +416,8 @@ const HomeTabs = () => {
     stopVibration();
     stopBlinkingFlashlight();
     setNewNotification(null);
-    deactivateKeepAwake(); // Deactivate keep awake when task is accepted
+    // Keep awake is handled at app level
+    // deactivateKeepAwake(); // Deactivate keep awake when task is accepted
     triggerFallbackApi(true); // Call fallback API
   };
 
@@ -456,7 +454,8 @@ const HomeTabs = () => {
             stopBlinkingFlashlight();
             setNewNotification(null);
             stopCountdown();
-            deactivateKeepAwake(); // Deactivate keep awake when app goes to background
+            // Keep awake is handled at app level
+            // deactivateKeepAwake(); // Deactivate keep awake when app goes to background
             triggerFallbackApi(false); // Notify server
             if (timerRef.current) {
               clearTimeout(timerRef.current);

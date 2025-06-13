@@ -29,7 +29,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
       launchOptions: launchOptions
     )
 
+    // Keep screen awake
+    UIApplication.shared.isIdleTimerDisabled = true
+
     return true
+  }
+
+  func applicationDidEnterBackground(_ application: UIApplication) {
+    // Allow screen to sleep when app goes to background to save battery
+    UIApplication.shared.isIdleTimerDisabled = false
+  }
+
+  func applicationWillEnterForeground(_ application: UIApplication) {
+    // Keep screen awake when app comes to foreground
+    UIApplication.shared.isIdleTimerDisabled = true
   }
 }
 
