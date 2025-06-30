@@ -6,46 +6,68 @@ import {
 } from '@sayem314/react-native-keep-awake';
 import {AppState, AppStateStatus} from 'react-native';
 
-export const useKeepAwake = () => {
+export const useKeepAwake = (enabled: boolean = true) => {
   const isActiveRef = useRef(true);
+  const enabledRef = useRef(enabled);
 
+  // Update enabled ref when enabled prop changes
   useEffect(() => {
-    console.log('useKeepAwake: Initializing keep awake functionality');
+    enabledRef.current = enabled;
 
-    // Immediately activate keep awake
-    const activateNow = () => {
+    if (!enabled) {
+      try {
+        deactivateKeepAwake();
+      } catch (error) {
+        console.error(
+          'useKeepAwake: Failed to deactivate keep awake (disabled):',
+          error,
+        );
+      }
+    } else if (enabled && isActiveRef.current) {
       try {
         activateKeepAwake();
-        console.log('useKeepAwake: Successfully activated keep awake');
+      } catch (error) {
+        console.error(
+          'useKeepAwake: Failed to activate keep awake (enabled):',
+          error,
+        );
+      }
+    }
+  }, [enabled]);
+
+  useEffect(() => {
+    // Immediately activate keep awake if enabled
+    const activateNow = () => {
+      if (!enabledRef.current) {
+        return;
+      }
+
+      try {
+        activateKeepAwake();
       } catch (error) {
         console.error('useKeepAwake: Failed to activate keep awake:', error);
       }
     };
 
-    activateNow();
+    if (enabledRef.current) {
+      activateNow();
+    }
 
     const subscription = AppState.addEventListener(
       'change',
       (nextAppState: AppStateStatus) => {
-        console.log('useKeepAwake: AppState changed to:', nextAppState);
-
         if (nextAppState === 'active') {
           isActiveRef.current = true;
-          console.log(
-            'useKeepAwake: App became active - activating keep awake',
-          );
-          activateNow();
+          if (enabledRef.current) {
+            activateNow();
+          }
         } else if (
           nextAppState === 'background' ||
           nextAppState === 'inactive'
         ) {
           isActiveRef.current = false;
-          console.log(
-            'useKeepAwake: App became inactive - deactivating keep awake',
-          );
           try {
             deactivateKeepAwake();
-            console.log('useKeepAwake: Successfully deactivated keep awake');
           } catch (error) {
             console.error(
               'useKeepAwake: Failed to deactivate keep awake:',
@@ -57,10 +79,8 @@ export const useKeepAwake = () => {
     );
 
     return () => {
-      console.log('useKeepAwake: Cleanup - deactivating keep awake');
       try {
         deactivateKeepAwake();
-        console.log('useKeepAwake: Cleanup successful');
       } catch (error) {
         console.error('useKeepAwake: Cleanup failed:', error);
       }
@@ -68,11 +88,10 @@ export const useKeepAwake = () => {
     };
   }, []);
 
-  // Additional effect to ensure keep awake is maintained
+  // Additional effect to ensure keep awake is maintained when enabled
   useEffect(() => {
     const interval = setInterval(() => {
-      if (isActiveRef.current) {
-        console.log('useKeepAwake: Periodic keep awake refresh');
+      if (isActiveRef.current && enabledRef.current) {
         try {
           activateKeepAwake();
         } catch (error) {

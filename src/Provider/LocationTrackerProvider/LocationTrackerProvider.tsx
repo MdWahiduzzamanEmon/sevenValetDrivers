@@ -1,4 +1,4 @@
-import React, {createContext, useState, ReactNode} from 'react';
+import React, {createContext, useState, ReactNode, useEffect} from 'react';
 import {
   Platform,
   PermissionsAndroid,
@@ -6,6 +6,7 @@ import {
   BackHandler,
   Linking,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Geolocation, {
   GeolocationOptions,
 } from '@react-native-community/geolocation';
@@ -29,12 +30,18 @@ interface LocationContextType {
   location: LocationData | null;
   startTracking: () => void;
   stopTracking: () => void;
+  permissionGranted: boolean | null;
+  checkLocationPermission: () => Promise<boolean>;
+  isTracking: boolean;
 }
 
 // Create Context
 export const LocationContext = createContext<LocationContextType | undefined>(
   undefined,
 );
+
+// Storage key for permission status
+const LOCATION_PERMISSION_KEY = '@location_permission_granted';
 
 // Provider Props
 interface ProviderProps {
@@ -44,9 +51,64 @@ interface ProviderProps {
 export const LocationTrackerProvider = ({children}: ProviderProps) => {
   const [location, setLocation] = useState<LocationData | null>(null);
   const [watchId, setWatchId] = useState<number | null>(null);
+  const [permissionGranted, setPermissionGranted] = useState<boolean | null>(
+    null,
+  );
+  const [isTracking, setIsTracking] = useState<boolean>(false);
 
-  // Ask for permission (Android only)
+  // Check current permission status without requesting
+  const checkLocationPermission = async (): Promise<boolean> => {
+    try {
+      // First check stored permission status
+      const storedPermission = await AsyncStorage.getItem(
+        LOCATION_PERMISSION_KEY,
+      );
+
+      if (Platform.OS === 'android') {
+        const status = await check(PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION);
+        const granted = status === RESULTS.GRANTED;
+
+        // Update stored permission if it changed
+        if (storedPermission !== granted.toString()) {
+          await AsyncStorage.setItem(
+            LOCATION_PERMISSION_KEY,
+            granted.toString(),
+          );
+        }
+
+        setPermissionGranted(granted);
+        return granted;
+      } else {
+        // For iOS, check using the react-native-permissions library
+        const status = await check(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
+        const granted = status === RESULTS.GRANTED;
+
+        // Update stored permission if it changed
+        if (storedPermission !== granted.toString()) {
+          await AsyncStorage.setItem(
+            LOCATION_PERMISSION_KEY,
+            granted.toString(),
+          );
+        }
+
+        setPermissionGranted(granted);
+        return granted;
+      }
+    } catch (error) {
+      console.error('Error checking location permission:', error);
+      return false;
+    }
+  };
+
+  // Request permission only if not already granted
   const requestLocationPermission = async (): Promise<boolean> => {
+    // First check if we already have permission
+    const hasPermission = await checkLocationPermission();
+    if (hasPermission) {
+      return true;
+    }
+
+    // Only request if we don't have permission
     if (Platform.OS === 'android') {
       try {
         const granted = await PermissionsAndroid.request(
@@ -60,7 +122,16 @@ export const LocationTrackerProvider = ({children}: ProviderProps) => {
           },
         );
 
-        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+        const isGranted = granted === PermissionsAndroid.RESULTS.GRANTED;
+        setPermissionGranted(isGranted);
+
+        // Store the permission result
+        await AsyncStorage.setItem(
+          LOCATION_PERMISSION_KEY,
+          isGranted.toString(),
+        );
+
+        if (!isGranted) {
           Alert.alert(
             'Permission Denied',
             'Location permission is required to use this app.',
@@ -83,6 +154,7 @@ export const LocationTrackerProvider = ({children}: ProviderProps) => {
         return true;
       } catch (error) {
         console.warn('Permission error:', error);
+        setPermissionGranted(false);
         return false;
       }
     }
@@ -94,6 +166,28 @@ export const LocationTrackerProvider = ({children}: ProviderProps) => {
   const {user} = useAppSelector(state => state.authSlice) as any;
 
   const [updateDriverLocation] = useUpdateDriverLocationMutation();
+
+  // Check permission status on mount
+  useEffect(() => {
+    const initializePermission = async () => {
+      try {
+        // Load stored permission status first for quick UI update
+        const storedPermission = await AsyncStorage.getItem(
+          LOCATION_PERMISSION_KEY,
+        );
+        if (storedPermission !== null) {
+          setPermissionGranted(storedPermission === 'true');
+        }
+
+        // Then check actual permission status
+        await checkLocationPermission();
+      } catch (error) {
+        console.error('Error initializing permission status:', error);
+      }
+    };
+
+    initializePermission();
+  }, []);
 
   // Helper to check if location services are enabled (Android)
   const checkLocationServicesEnabled = async (): Promise<boolean> => {
@@ -120,6 +214,11 @@ export const LocationTrackerProvider = ({children}: ProviderProps) => {
 
   // Start location tracking
   const startTracking = async () => {
+    // Don't start tracking if already tracking
+    if (isTracking) {
+      return;
+    }
+
     const hasPermission = await requestLocationPermission();
     if (!hasPermission) {
       return;
@@ -225,6 +324,7 @@ export const LocationTrackerProvider = ({children}: ProviderProps) => {
     );
 
     setWatchId(id);
+    setIsTracking(true);
   };
 
   // Stop location tracking
@@ -232,11 +332,19 @@ export const LocationTrackerProvider = ({children}: ProviderProps) => {
     if (watchId !== null) {
       Geolocation.clearWatch(watchId);
       setWatchId(null);
+      setIsTracking(false);
     }
   };
-
   return (
-    <LocationContext.Provider value={{location, startTracking, stopTracking}}>
+    <LocationContext.Provider
+      value={{
+        location,
+        startTracking,
+        stopTracking,
+        permissionGranted,
+        checkLocationPermission,
+        isTracking,
+      }}>
       {children}
     </LocationContext.Provider>
   );
