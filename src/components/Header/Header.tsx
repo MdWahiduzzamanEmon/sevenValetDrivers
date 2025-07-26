@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#333',
   },
   logo: {
-    width: 70,
+    width: 120,
     height: 55,
   },
 });

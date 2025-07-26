@@ -2,7 +2,7 @@ import {Dimensions} from 'react-native';
 import theme from './Theme/theme';
 
 export const GRADIENT_THEME_COLORS = ['#000000', '#000000', '#3c1e00'];
-export const APP_NAME = 'SEVEN Valet Drivers';
+export const APP_NAME = 'SEVEN Valet';
 export const FIREBASE_APP_NAME = 'SevenValet';
 
 const {width, height} = Dimensions.get('window');
