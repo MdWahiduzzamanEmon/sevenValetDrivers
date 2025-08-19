@@ -85,7 +85,7 @@ android {
         versionCode 1
         versionName "1.0.0"
         multiDexEnabled true //to enable multidex
-        archivesBaseName = "sevenvaletDrivers-v$versionCode($versionName)" //to change the name of the apk
+        archivesBaseName = "SEVEN Valet-v$versionCode($versionName)" //to change the name of the apk
         missingDimensionStrategy 'react-native-camera', 'general' //to fix the error of missing dimension
     }
     signingConfigs {
