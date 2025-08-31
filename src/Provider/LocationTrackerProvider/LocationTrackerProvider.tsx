@@ -5,6 +5,7 @@ import {
   Alert,
   BackHandler,
   Linking,
+  AppState,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Geolocation, {
@@ -55,6 +56,8 @@ export const LocationTrackerProvider = ({children}: ProviderProps) => {
     null,
   );
   const [isTracking, setIsTracking] = useState<boolean>(false);
+  const [isRequestingPermission, setIsRequestingPermission] =
+    useState<boolean>(false);
 
   // Check current permission status without requesting
   const checkLocationPermission = async (): Promise<boolean> => {
@@ -102,6 +105,12 @@ export const LocationTrackerProvider = ({children}: ProviderProps) => {
 
   // Request permission only if not already granted
   const requestLocationPermission = async (): Promise<boolean> => {
+    // Prevent multiple simultaneous permission requests
+    if (isRequestingPermission) {
+      console.log('Permission request already in progress, waiting...');
+      return false;
+    }
+
     // First check if we already have permission
     const hasPermission = await checkLocationPermission();
     if (hasPermission) {
@@ -111,6 +120,32 @@ export const LocationTrackerProvider = ({children}: ProviderProps) => {
     // Only request if we don't have permission
     if (Platform.OS === 'android') {
       try {
+        setIsRequestingPermission(true);
+
+        // Check if permission was already denied and user said "Don't ask again"
+        const currentStatus = await check(
+          PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
+        );
+        if (currentStatus === RESULTS.BLOCKED) {
+          Alert.alert(
+            'Permission Required',
+            'Location permission is permanently denied. Please enable it in Settings.',
+            [
+              {
+                text: 'Open Settings',
+                onPress: () => Linking.openSettings(),
+              },
+              {
+                text: 'Cancel',
+                style: 'cancel',
+              },
+            ],
+            {cancelable: false},
+          );
+          setIsRequestingPermission(false);
+          return false;
+        }
+
         const granted = await PermissionsAndroid.request(
           PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
           {
@@ -148,13 +183,16 @@ export const LocationTrackerProvider = ({children}: ProviderProps) => {
             ],
             {cancelable: false},
           );
+          setIsRequestingPermission(false);
           return false;
         }
 
+        setIsRequestingPermission(false);
         return true;
       } catch (error) {
         console.warn('Permission error:', error);
         setPermissionGranted(false);
+        setIsRequestingPermission(false);
         return false;
       }
     }
@@ -169,25 +207,42 @@ export const LocationTrackerProvider = ({children}: ProviderProps) => {
 
   // Check permission status on mount
   useEffect(() => {
+    let isMounted = true;
+
     const initializePermission = async () => {
       try {
+        // Prevent multiple initialization calls
+        if (!isMounted) {
+          return;
+        }
+
         // Load stored permission status first for quick UI update
         const storedPermission = await AsyncStorage.getItem(
           LOCATION_PERMISSION_KEY,
         );
-        if (storedPermission !== null) {
+        if (storedPermission !== null && isMounted) {
           setPermissionGranted(storedPermission === 'true');
         }
 
         // Then check actual permission status
-        await checkLocationPermission();
+        if (isMounted) {
+          await checkLocationPermission();
+        }
       } catch (error) {
         console.error('Error initializing permission status:', error);
       }
     };
 
-    initializePermission();
-  }, []);
+    // Only initialize if permission hasn't been checked yet
+    if (permissionGranted === null) {
+      initializePermission();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Intentionally empty to run only once on mount
 
   // Helper to check if location services are enabled (Android)
   const checkLocationServicesEnabled = async (): Promise<boolean> => {
@@ -216,11 +271,19 @@ export const LocationTrackerProvider = ({children}: ProviderProps) => {
   const startTracking = async () => {
     // Don't start tracking if already tracking
     if (isTracking) {
+      console.log('Location tracking is already active');
+      return;
+    }
+
+    // Don't start if permission request is in progress
+    if (isRequestingPermission) {
+      console.log('Permission request in progress, cannot start tracking');
       return;
     }
 
     const hasPermission = await requestLocationPermission();
     if (!hasPermission) {
+      console.log('Location permission not granted, cannot start tracking');
       return;
     }
 
@@ -241,6 +304,9 @@ export const LocationTrackerProvider = ({children}: ProviderProps) => {
       );
       return;
     }
+
+    console.log('Starting location tracking...');
+    setIsTracking(true);
 
     const options: GeolocationOptions = {
       enableHighAccuracy: true,
@@ -318,13 +384,13 @@ export const LocationTrackerProvider = ({children}: ProviderProps) => {
       },
       error => {
         console.error('Location Error:', error);
+        setIsTracking(false);
         Alert.alert('Location Error', error.message);
       },
       options,
     );
 
     setWatchId(id);
-    setIsTracking(true);
   };
 
   // Stop location tracking
@@ -335,6 +401,32 @@ export const LocationTrackerProvider = ({children}: ProviderProps) => {
       setIsTracking(false);
     }
   };
+
+  // Handle app state changes to re-check permissions
+  useEffect(() => {
+    const handleAppStateChange = async (nextAppState: string) => {
+      if (nextAppState === 'active') {
+        // Re-check permission when app becomes active
+        setTimeout(async () => {
+          try {
+            await checkLocationPermission();
+          } catch (error) {
+            console.error('Error checking permission on app focus:', error);
+          }
+        }, 1000); // Delay to ensure app is fully active
+      }
+    };
+
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
+
+    return () => {
+      subscription?.remove();
+    };
+  }, []);
+
   return (
     <LocationContext.Provider
       value={{
