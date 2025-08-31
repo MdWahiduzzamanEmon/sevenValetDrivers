@@ -23,7 +23,7 @@ import {
   setTaskToShow,
   setNewTaskNotification,
 } from '../../Store/feature/globalSlice';
-import useLocation from '../../Hooks/useLocation';
+import useLocationTracker from '../../Hooks/useLocationTracker';
 import {
   useCompleteTaskMutation,
   useStartNewTaskMutation,
@@ -73,10 +73,10 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
   // const [showCompleteTaskDialog, setShowCompleteTaskDialog] = useState(false);
   const {t} = useTranslation();
   const dispatch = useAppDispatch();
-  const {stopTracking} = useLocation();
+  const {stopTracking} = useLocationTracker();
   const networkContext = useContext(NetworkStatusContext);
   const isConnected = networkContext?.isConnected;
-  const {startTracking, location} = useLocation();
+  const {startTracking, location} = useLocationTracker();
 
   const {user} = useAppSelector(state => state.authSlice) as any;
   const {taskPrgressingTimer, taskStartTime} = useAppSelector(
@@ -213,15 +213,15 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
 
   //handle screen lock
   // useEffect(() => {
-    // Keep awake is now handled at app level, no need to manage it here
-    // if (status === 'ONGOING') {
-    //   activateKeepAwake();
-    // } else {
-    //   deactivateKeepAwake();
-    // }
-    // return () => {
-    //   deactivateKeepAwake();
-    // };
+  // Keep awake is now handled at app level, no need to manage it here
+  // if (status === 'ONGOING') {
+  //   activateKeepAwake();
+  // } else {
+  //   deactivateKeepAwake();
+  // }
+  // return () => {
+  //   deactivateKeepAwake();
+  // };
   // }, [status]);
 
   const getButtonLabel = () => {

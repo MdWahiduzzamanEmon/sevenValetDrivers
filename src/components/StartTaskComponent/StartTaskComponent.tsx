@@ -8,7 +8,7 @@ import {
   Modal,
 } from 'react-native';
 import {SCREEN_HEIGHT} from '../../config';
-import useLocation from '../../Hooks/useLocation';
+import useLocationTracker from '../../Hooks/useLocationTracker';
 import {useAppDispatch} from '../../Store/Store';
 import {setTaskPrgressingTimer} from '../../Store/feature/Auth/authSlice';
 
@@ -25,7 +25,7 @@ const StartTaskComponent = ({
   showDialog: boolean;
   setShowDialog: any;
 }) => {
-  const {startTracking, location} = useLocation();
+  const {startTracking, location} = useLocationTracker();
 
   const dispatch = useAppDispatch();
 
