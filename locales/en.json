@@ -56,5 +56,22 @@
   "park_out_completed": "Park Out Completed",
   "loading_your_task": "Loading your task...",
   "please_wait_while_we_fetch_your_task": "Please wait while we fetch your task",
-  "no_internet_connection": "No internet connection"
+  "no_internet_connection": "No internet connection",
+  "ready_for_service": "Ready for Service",
+  "connection_lost": "Connection Lost",
+  "please_check_internet_connection": "Please check your internet connection",
+  "current_location": "Current Location",
+  "loading_location": "Loading location...",
+  "location_unavailable": "Location unavailable",
+  "location_not_set": "Location not set",
+  "unknown_location": "Unknown location",
+  "retry": "Retry",
+  "online_ready": "Online & Ready",
+  "offline": "Offline",
+  "check_for_tasks": "Check for Tasks",
+  "checking": "Checking...",
+  "monitoring_for_new_tasks": "Monitoring for new tasks",
+  "retry_location": "Retry location",
+  "Current Location": "Current Location",
+  "current_location_updated": "Current location updated successfully"
 }

@@ -141,6 +141,11 @@ export const apiSlice = createApi({
   baseQuery: baseQueryWithRetry as unknown as BaseQueryFn<unknown, unknown, {}>,
 
   endpoints: () => ({}),
-  tagTypes: ['UNAUTHORIZED', 'UNKNOWN_ERROR', 'UserProfile'],
+  tagTypes: [
+    'UNAUTHORIZED',
+    'UNKNOWN_ERROR',
+    'UserProfile',
+    'DriverLocationArea',
+  ],
   refetchOnReconnect: true,
 }) as any;

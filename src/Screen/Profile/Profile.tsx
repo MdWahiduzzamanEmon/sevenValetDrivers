@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   StyleSheet,
   View,
@@ -13,6 +13,7 @@ import Container from '../../components/Container/Container';
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
 import CustomButton from '../../Utils/CustomButton/CustomButton';
 import {PADDING_SCREEN_HORIZONTAL} from '../../config';
+import {PARKING_OPTIONS} from '../../constant/parkingOptions';
 import {LANGUAGES_LIST} from '../../constant';
 import {useTranslation} from 'react-i18next';
 import CustomDropdown from '../../Utils/CustomDropdown/CustomDropdown';
@@ -29,6 +30,7 @@ if (Platform.OS === 'android') {
 
 const Profile = () => {
   const {t, i18n} = useTranslation();
+  const [selectedParking, setSelectedParking] = useState('club');
   const [selectLanguage, setSelectLanguage] = useState('en');
   const [showPasswordSection, setShowPasswordSection] = useState(false);
 
@@ -47,12 +49,27 @@ const Profile = () => {
 
   const [updateProfile, {isLoading}] = useUpdateProfileMutation();
 
+  // Initialize form values from user data
+  useEffect(() => {
+    if (user) {
+      // Set language from user data if available
+      if (user.language) {
+        setSelectLanguage(user.language);
+      }
+      // Set location from user data if available
+      if (user.curLocation) {
+        setSelectedParking(user.curLocation);
+      }
+    }
+  }, [user]);
+
   const togglePasswordSection = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setShowPasswordSection(prev => !prev);
   };
 
-  console.log('user', user);
+  // console.log('user', user);
+  console.log('user structure:', JSON.stringify(user, null, 2));
 
   const handleChangePassword = async () => {
     // Validate inputs
@@ -61,27 +78,38 @@ const Profile = () => {
       showAlert(t('error'), t('password_not_match'), 'error');
       return;
     }
+    // console.log('user?.id', user?.id, 'curLocation:', selectedParking);
+    // console.log('All user properties:', Object.keys(user || {}));
 
+    // Check if we have a valid user ID
+    const userId = user?.id || (user as any)?.driverId || (user as any)?.userId;
+    console.log('Determined userId:', userId);
+
+    if (!userId) {
+      showAlert(t('error'), 'User ID not found. Please login again.', 'error');
+      return;
+    }
+
+    // Prepare data for update
     try {
       const body = {
-        recId: user?.id,
+        recId: userId,
         language: selectLanguageFullName(selectLanguage),
-        // newPasscode: newPassword?.toString(),
+        curLocation: selectedParking,
         ...(newPassword && {
           newPasscode: newPassword?.toString(),
         }),
       };
 
       const response = await updateProfile(body).unwrap();
-      // console.log('response', response);
 
       if (response?.result?.success) {
-        showAlert(t('success'), t('password_updated'), 'success');
-        // Clear all password fields
-        // setOldPassword('');
+        const successMessage = newPassword
+          ? t('password_updated')
+          : t('current_location_updated');
+        showAlert(t('success'), successMessage, 'success');
         setNewPassword('');
         setConfirmPassword('');
-        // Hide password section
         setShowPasswordSection(false);
       } else {
         showAlert(
@@ -92,12 +120,29 @@ const Profile = () => {
       }
     } catch (error: any) {
       console.log('Update profile error:', error);
-      if (
+
+      // Safely extract error message
+      let errorMessage = t('update_failed');
+      try {
+        errorMessage =
+          error?.data?.message ||
+          error?.error?.message ||
+          error?.message ||
+          (typeof error === 'string' ? error : t('update_failed'));
+      } catch (e) {
+        console.log('Error parsing error message:', e);
+        errorMessage = t('update_failed');
+      }
+
+      // Check for network errors safely
+      const isNetworkError =
         error?.status === 'FETCH_ERROR' ||
-        error?.name === 'ApiError' ||
-        error?.message?.toLowerCase().includes('network') ||
-        error?.originalStatus === 0
-      ) {
+        error?.originalStatus === 0 ||
+        (error?.message &&
+          typeof error.message === 'string' &&
+          error.message.toLowerCase().includes('network'));
+
+      if (isNetworkError) {
         showAlert(
           t('error'),
           t('no_internet_connection') ||
@@ -105,13 +150,13 @@ const Profile = () => {
           'error',
         );
       } else {
-        showAlert(
-          t('error'),
-          error?.data?.message || error?.message || t('update_failed'),
-          'error',
-        );
+        showAlert(t('error'), errorMessage, 'error');
       }
     }
+  };
+
+  const handleSelectParking = (value: string) => {
+    setSelectedParking(value);
   };
 
   const handleSelectLanguage = (value: string) => {
@@ -134,6 +179,12 @@ const Profile = () => {
             value={selectLanguage}
             options={LANGUAGES_LIST}
             onSelect={handleSelectLanguage}
+          />
+          <CustomDropdown
+            label={t('Current Location')}
+            value={selectedParking}
+            options={PARKING_OPTIONS}
+            onSelect={handleSelectParking}
           />
 
           <TouchableOpacity

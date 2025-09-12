@@ -1,10 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
 import React, {useState, useEffect, useContext} from 'react';
-import {View, StyleSheet, ActivityIndicator, Pressable} from 'react-native';
+import {View, StyleSheet, ActivityIndicator} from 'react-native';
 import {Avatar, useTheme} from 'react-native-paper';
 // import moment from 'moment';
 import TextWrapper from '../../Utils/TextWrapper/TextWrapper';
+import WaitingForTask from '../WaitingForTask/WaitingForTask';
 import {BG_COLOR_BUTTON, SCREEN_HEIGHT, SCREEN_WIDTH} from '../../config';
 import CustomButton from '../../Utils/CustomButton/CustomButton';
 import Animated, {
@@ -474,50 +475,12 @@ const TaskCard: React.FC<{data: TaskData; isLoadingTask?: boolean}> = ({
   //if no data or task status is assigned then show waiting for new task
   // if (!data || data?.taskStatus === 'Assigned') {
   if (!data || data?.taskStatus === 'Assigned') {
-    // {
-    //   /* //text : waiting for new task ,and waiting icon and content will be in center */
-    // }
     return (
-      <Animated.View
-        style={[
-          animatedBorderStyle,
-          styles.cardContainer,
-          styles.emptyContainer,
-        ]}>
-        <Animated.View
-          style={[pulsingStyle, {padding: Math.min(SCREEN_WIDTH * 0.02, 10)}]}>
-          <Avatar.Icon
-            icon={isConnected ? 'car' : 'wifi-off'}
-            size={Math.min(SCREEN_HEIGHT * 0.1, 80)}
-            backgroundColor={
-              isConnected ? theme.colors.primary : theme.colors.red
-            }
-            style={styles.avatar}
-          />
-        </Animated.View>
-        <TextWrapper variant="titleMedium" style={styles.waitingText}>
-          {/* {t('waiting_for_new_task')} */}
-          {isConnected
-            ? t('waiting_for_new_task')
-            : t('no_internet_connection')}
-        </TextWrapper>
-
-        {/* //add refresh button to check for new task */}
-        {isConnected && (
-          <View style={{alignItems: 'center', marginTop: 10}}>
-            <Pressable
-              onPress={checkNextAvailableTask}
-              accessibilityLabel={t('refresh_tasks')}>
-              <Avatar.Icon
-                icon="refresh"
-                size={50}
-                style={{backgroundColor: 'transparent', marginRight: 8}}
-                color="#fff"
-              />
-            </Pressable>
-          </View>
-        )}
-      </Animated.View>
+      <WaitingForTask
+        isConnected={!!isConnected}
+        onRefresh={checkNextAvailableTask}
+        isRefreshing={false}
+      />
     );
   }
 

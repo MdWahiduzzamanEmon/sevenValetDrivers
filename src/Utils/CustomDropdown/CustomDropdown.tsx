@@ -8,19 +8,12 @@ import {
   StyleSheet,
 } from 'react-native';
 
-interface Option {
+const CustomDropdown: React.FC<{
   label: string;
   value: string;
-}
-
-interface Props {
-  label: string;
-  value: string;
-  options: Option[];
+  options: Array<{label: string; value: string; icon?: React.ReactNode}>;
   onSelect: (value: string) => void;
-}
-
-const CustomDropdown: React.FC<Props> = ({label, value, options, onSelect}) => {
+}> = ({label, value, options, onSelect}) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const selectedLabel =
@@ -29,13 +22,11 @@ const CustomDropdown: React.FC<Props> = ({label, value, options, onSelect}) => {
   return (
     <View style={styles.container}>
       <Text style={styles.label}>{label}</Text>
-
       <TouchableOpacity
         style={styles.dropdown}
         onPress={() => setModalVisible(true)}>
         <Text style={styles.selectedText}>{selectedLabel}</Text>
       </TouchableOpacity>
-
       <Modal
         animationType="slide"
         transparent
@@ -56,7 +47,12 @@ const CustomDropdown: React.FC<Props> = ({label, value, options, onSelect}) => {
                     onSelect(item.value);
                     setModalVisible(false);
                   }}>
-                  <Text style={styles.optionText}>{item.label}</Text>
+                  <View style={styles.rowAlign}>
+                    {item.icon && (
+                      <View style={{marginRight: 8}}>{item.icon}</View>
+                    )}
+                    <Text style={styles.optionText}>{item.label}</Text>
+                  </View>
                 </TouchableOpacity>
               )}
             />
@@ -70,6 +66,10 @@ const CustomDropdown: React.FC<Props> = ({label, value, options, onSelect}) => {
 export default CustomDropdown;
 
 const styles = StyleSheet.create({
+  rowAlign: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   container: {
     marginVertical: 8,
   },

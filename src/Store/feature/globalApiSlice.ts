@@ -2,6 +2,7 @@ import {EndpointBuilder} from '@reduxjs/toolkit/query';
 import {
   COMPLETE_TASK_PUBLIC_KEY,
   GET_ASSIGNED_TASK_PUBLIC_KEY,
+  GET_DRIVER_LOCATION_AREA_PUBLIC_KEY,
   GET_DRIVER_PROFILE_PUBLIC_KEY,
   START_TASK_PUBLIC_KEY,
   TASK_NOT_ACCEPTED_PUBLIC_KEY,
@@ -117,6 +118,18 @@ export const globalApiSlice = apiSlice.injectEndpoints({
         },
       }),
     }),
+
+    //getDriverLocationArea
+    getDriverLocationArea: builder.query({
+      query: (driverId: string) => ({
+        url: `/getDriverLocationArea?publickey=${GET_DRIVER_LOCATION_AREA_PUBLIC_KEY}`,
+        method: 'GET',
+        params: {
+          driverId,
+        },
+      }),
+      providesTags: ['DriverLocationArea'],
+    }),
   }),
 });
 
@@ -139,4 +152,8 @@ export const {
 
   // task not accepted
   useTaskNotAcceptedMutation,
+
+  // getDriverLocationArea
+  useGetDriverLocationAreaQuery,
+  useLazyGetDriverLocationAreaQuery,
 } = globalApiSlice;

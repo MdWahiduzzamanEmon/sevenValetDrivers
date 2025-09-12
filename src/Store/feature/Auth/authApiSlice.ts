@@ -14,7 +14,8 @@ interface LoginRequest {
 interface UpdateProfileRequest {
   recId: number;
   language: string;
-  newPasscode: string;
+  newPasscode?: string;
+  curLocation?: string;
 }
 
 export const authApiSlice = apiSlice.injectEndpoints({
@@ -38,10 +39,22 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: {
           recId: data.recId,
           language: data.language,
-          newPasscode: data.newPasscode,
+          ...(data.newPasscode && {newPasscode: data.newPasscode}),
+          ...(data.curLocation && {curLocation: data.curLocation}),
         },
       }),
-      invalidatesTags: ['UserProfile'], // Invalidate the UserProfile cache tag
+      transformErrorResponse: (response: any) => {
+        // Safely transform error response to prevent crashes
+        return {
+          status: response.status || 'UNKNOWN_ERROR',
+          error: response.data || response.error || 'Unknown error occurred',
+          message:
+            response.data?.message ||
+            response.error?.message ||
+            'Update failed',
+        };
+      },
+      invalidatesTags: ['UserProfile', 'DriverLocationArea'], // Invalidate the UserProfile cache tag
     }),
 
     //logout
@@ -56,5 +69,8 @@ export const authApiSlice = apiSlice.injectEndpoints({
     }),
   }),
 });
-export const {useLoginMutation, useUpdateProfileMutation, useLogoutApiMutation} =
-  authApiSlice;
+export const {
+  useLoginMutation,
+  useUpdateProfileMutation,
+  useLogoutApiMutation,
+} = authApiSlice;

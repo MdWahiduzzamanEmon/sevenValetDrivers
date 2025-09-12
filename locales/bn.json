@@ -56,5 +56,22 @@
   "park_out_completed": "পার্ক আউট সম্পন্ন হয়েছে",
   "loading_your_task": "আপনার কাজ লোড হচ্ছে...",
   "please_wait_while_we_fetch_your_task": "দয়া করে অপেক্ষা করুন যখন আমরা আপনার কাজটি নিয়ে আসি",
-  "no_internet_connection": "কোনও ইন্টারনেট সংযোগ নেই"
+  "no_internet_connection": "কোনও ইন্টারনেট সংযোগ নেই",
+  "ready_for_service": "সেবার জন্য প্রস্তুত",
+  "connection_lost": "সংযোগ বিচ্ছিন্ন",
+  "please_check_internet_connection": "দয়া করে আপনার ইন্টারনেট সংযোগ পরীক্ষা করুন",
+  "current_location": "বর্তমান অবস্থান",
+  "loading_location": "অবস্থান লোড হচ্ছে...",
+  "location_unavailable": "অবস্থান অনুপলব্ধ",
+  "location_not_set": "অবস্থান সেট করা হয়নি",
+  "unknown_location": "অজানা অবস্থান",
+  "retry": "পুনরায় চেষ্টা করুন",
+  "online_ready": "অনলাইন এবং প্রস্তুত",
+  "offline": "অফলাইন",
+  "check_for_tasks": "কাজের জন্য পরীক্ষা করুন",
+  "checking": "পরীক্ষা করা হচ্ছে...",
+  "monitoring_for_new_tasks": "নতুন কাজের জন্য পর্যবেক্ষণ করা হচ্ছে",
+  "retry_location": "অবস্থান পুনরায় চেষ্টা করুন",
+  "Current Location": "বর্তমান অবস্থান",
+  "current_location_updated": "বর্তমান অবস্থান সফলভাবে আপডেট হয়েছে"
 }

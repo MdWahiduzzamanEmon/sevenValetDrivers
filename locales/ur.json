@@ -56,5 +56,22 @@
   "park_out_completed": "پارک اوٹ مکمل",
   "loading_your_task": "آپ کا کام لوڈ ہو رہا ہے...",
   "please_wait_while_we_fetch_your_task": "براہ کرم انتظار کریں جب ہم آپ کا کام حاصل کریں",
-  "no_internet_connection": "انٹرنیٹ کنکشن نہیں ہے"
+  "no_internet_connection": "انٹرنیٹ کنکشن نہیں ہے",
+  "ready_for_service": "خدمت کے لیے تیار",
+  "connection_lost": "کنکشن کھو گیا",
+  "please_check_internet_connection": "براہ کرم اپنا انٹرنیٹ کنکشن چیک کریں",
+  "current_location": "موجودہ مقام",
+  "loading_location": "مقام لوڈ ہو رہا ہے...",
+  "location_unavailable": "مقام دستیاب نہیں",
+  "location_not_set": "مقام مقرر نہیں کیا گیا",
+  "unknown_location": "نامعلوم مقام",
+  "retry": "دوبارہ کوشش کریں",
+  "online_ready": "آن لائن اور تیار",
+  "offline": "آف لائن",
+  "check_for_tasks": "کاموں کے لیے چیک کریں",
+  "checking": "چیک کر رہا ہے...",
+  "monitoring_for_new_tasks": "نئے کاموں کی نگرانی کر رہا ہے",
+  "retry_location": "مقام دوبارہ کوشش کریں",
+  "Current Location": "موجودہ مقام",
+  "current_location_updated": "موجودہ مقام کامیابی سے اپ ڈیٹ ہو گیا"
 }

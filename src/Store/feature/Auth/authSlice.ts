@@ -5,6 +5,7 @@ export type userType = {
   driverName: string;
   id: string;
   language?: string;
+  curLocation?: string;
 };
 interface AuthState {
   isAuthenticated: boolean;

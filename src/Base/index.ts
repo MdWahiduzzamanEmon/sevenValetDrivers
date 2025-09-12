@@ -17,3 +17,4 @@ export const START_TASK_PUBLIC_KEY = 'GtqEpUCvF8J6BShpUyVqk7jZ2';
 export const COMPLETE_TASK_PUBLIC_KEY = 'n0hE4DG7tTmme3NjNxj7aUVDb';
 export const TASK_NOT_ACCEPTED_PUBLIC_KEY = '49dAGO9N7aOu7heh8JnrkrSGh';
 export const LOGOUT_PUBLIC_KEY = '6bj9z1qsTjSN8JjF4E1dD7Bqd';
+export const GET_DRIVER_LOCATION_AREA_PUBLIC_KEY = 'xKxKrNXHHkDWkqmfKKs3YbGzQ';

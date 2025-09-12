@@ -68,9 +68,34 @@ const SignInScreen = () => {
         driverId: userId,
         passcode: password,
       }).unwrap();
-      // console.log(response);
+      console.log('Login response:', JSON.stringify(response, null, 2));
+      console.log(
+        'Response data:',
+        JSON.stringify(response?.result?.data, null, 2),
+      );
+
       if (response?.result?.success) {
-        dispatch(setUser(response?.result?.data));
+        // Map the response data to match our user type structure
+        const userData = {
+          driverId: userId, // Use the input driverId
+          driverName:
+            response?.result?.data?.driverName ||
+            response?.result?.data?.name ||
+            'Driver',
+          id:
+            response?.result?.data?.id ||
+            response?.result?.data?.driverId ||
+            userId,
+          language: response?.result?.data?.language || 'en',
+          curLocation:
+            response?.result?.data?.curLocation ||
+            response?.result?.data?.location ||
+            null,
+        };
+
+        console.log('Mapped user data:', JSON.stringify(userData, null, 2));
+        dispatch(setUser(userData));
+
         if (rememberMe) {
           dispatch(setSavedCredentials({driverId: userId, passcode: password}));
         }

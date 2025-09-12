@@ -144,18 +144,30 @@ const HomeTabs = () => {
     skip: !user?.id,
   });
 
-  // console.log('userProfileData', userProfileData);
+  console.log('userProfileData:', JSON.stringify(userProfileData, null, 2));
+  console.log('Current user for profile query:', JSON.stringify(user, null, 2));
 
   //if user profile data is success, set user data
   useEffect(() => {
-    if (isSuccess) {
+    if (isSuccess && userProfileData?.result?.data) {
+      const profileData = userProfileData.result.data;
       const userData = {
         ...user,
-        language:
-          userProfileData?.result?.data?.id === user?.id
-            ? userProfileData?.result?.data?.language
-            : 'en',
+        id: profileData.id || user?.id || user?.driverId,
+        driverId: profileData.driverId || user?.driverId || profileData.id,
+        driverName:
+          profileData.driverName ||
+          profileData.name ||
+          user?.driverName ||
+          'Driver',
+        language: profileData.language || user?.language || 'en',
+        curLocation:
+          profileData.curLocation || profileData.location || user?.curLocation,
       };
+      console.log(
+        'Updated user data from profile:',
+        JSON.stringify(userData, null, 2),
+      );
       dispatch(setUser(userData));
       i18n.changeLanguage(revertLanguageFullName(userData?.language));
     }
