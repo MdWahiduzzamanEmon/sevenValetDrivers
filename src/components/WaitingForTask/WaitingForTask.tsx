@@ -153,9 +153,9 @@ const WaitingForTask: React.FC<{
 
     return formatText(
       location.locationName ||
-      location.area ||
-      location.location ||
-      t('unknown_location')
+        location.area ||
+        location.location ||
+        t('unknown_location'),
     );
   };
 
@@ -184,11 +184,14 @@ const WaitingForTask: React.FC<{
     <Animated.View style={[animatedBorderStyle, styles.container]}>
       {/* Header Section */}
       <View style={styles.header}>
-        <Animated.View style={pulsingStyle}>
+        <Animated.View style={[pulsingStyle, {marginBottom: 20}]}>
           <Avatar.Icon
-            icon={isConnected ? 'steering' : 'wifi-off'}
-            size={Math.min(SCREEN_HEIGHT * 0.08, 70)}
-            backgroundColor="transparent"
+            icon={isConnected ? 'car' : 'wifi-off'}
+            size={Math.min(SCREEN_HEIGHT * 0.1, 80)}
+            backgroundColor={
+              isConnected ? theme.colors.primary : theme.colors.error
+            }
+            style={{borderRadius: 100}}
             color="#fff"
           />
         </Animated.View>
