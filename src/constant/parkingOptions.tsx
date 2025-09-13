@@ -4,19 +4,19 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 export const PARKING_OPTIONS = [
   {
     label: 'Club',
-    value: 'club',
+    value: 'Club',
     icon: (
       <MaterialCommunityIcons name="account-group" size={24} color="#fff" />
     ),
   },
   {
     label: 'Afghan Parking',
-    value: 'afghan_parking',
+    value: 'Afghan Parking',
     icon: <MaterialCommunityIcons name="car" size={24} color="#fff" />,
   },
   {
     label: 'VIP Parking',
-    value: 'vip_parking',
+    value: 'VIP Parking',
     icon: <MaterialCommunityIcons name="star" size={24} color="#fff" />,
   },
 ];
