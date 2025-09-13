@@ -218,7 +218,7 @@ const WaitingForTask: React.FC<{
           <View
             style={[
               styles.locationHeader,
-              {justifyContent: 'center', alignItems: 'center', width: '100%'},
+              // {justifyContent: 'center', alignItems: 'center', width: '100%'},
             ]}>
             <MaterialCommunityIcons
               name="map-marker"
@@ -229,8 +229,9 @@ const WaitingForTask: React.FC<{
               variant="titleMedium"
               style={[
                 styles.locationTitle,
-                {textAlign: 'center', width: '100%'},
-              ]}>
+                // {textAlign: 'center', width: '100%'},
+              ]}
+              >
               {t('current_location')}
             </TextWrapper>
           </View>
@@ -245,7 +246,7 @@ const WaitingForTask: React.FC<{
               variant="bodyLarge"
               style={[
                 styles.locationName,
-                {textAlign: 'center', width: '100%'},
+                // {textAlign: 'center', width: '100%'},
               ]}>
               {getLocationDisplayName()}
             </TextWrapper>
@@ -393,7 +394,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   locationContent: {
-    marginLeft: 32,
+    // marginLeft: 32,
   },
   locationName: {
     color: '#fff',
