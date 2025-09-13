@@ -209,27 +209,54 @@ const WaitingForTask: React.FC<{
 
       {/* Current Location Card */}
       {isConnected && (
-        <Animated.View style={[locationCardStyle, styles.locationCard]}>
-          <View style={styles.locationHeader}>
+        <Animated.View
+          style={[
+            locationCardStyle,
+            styles.locationCard,
+            {alignItems: 'center', justifyContent: 'center'},
+          ]}>
+          <View
+            style={[
+              styles.locationHeader,
+              {justifyContent: 'center', alignItems: 'center', width: '100%'},
+            ]}>
             <MaterialCommunityIcons
               name="map-marker"
               size={24}
               color={theme.colors.primary}
             />
-            <TextWrapper variant="titleMedium" style={styles.locationTitle}>
+            <TextWrapper
+              variant="titleMedium"
+              style={[
+                styles.locationTitle,
+                {textAlign: 'center', width: '100%'},
+              ]}>
               {t('current_location')}
             </TextWrapper>
           </View>
 
-          <View style={styles.locationContent}>
-            <TextWrapper variant="bodyLarge" style={styles.locationName}>
+          {/* Centered location content */}
+          <View
+            style={[
+              styles.locationContent,
+              {alignItems: 'center', justifyContent: 'center', width: '100%'},
+            ]}>
+            <TextWrapper
+              variant="bodyLarge"
+              style={[
+                styles.locationName,
+                {textAlign: 'center', width: '100%'},
+              ]}>
               {getLocationDisplayName()}
             </TextWrapper>
 
             {getLocationDescription() && (
               <TextWrapper
                 variant="bodySmall"
-                style={styles.locationDescription}>
+                style={[
+                  styles.locationDescription,
+                  {textAlign: 'center', width: '100%'},
+                ]}>
                 {getLocationDescription()}
               </TextWrapper>
             )}
@@ -291,61 +318,35 @@ const WaitingForTask: React.FC<{
       {/* Action Buttons */}
       <View style={styles.actionSection}>
         {isConnected && (
-          <Pressable
-            onPress={onRefresh}
+          <Animated.View
             style={[
+              pulsingStyle,
               styles.refreshButton,
               {backgroundColor: theme.colors.primary},
-            ]}
-            disabled={isRefreshing}
-            accessibilityLabel={t('check_for_tasks')}>
-            {isRefreshing ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <MaterialCommunityIcons name="refresh" size={24} color="#fff" />
-            )}
-            <TextWrapper variant="bodyMedium" style={styles.refreshButtonText}>
-              {isRefreshing ? t('checking') : t('check_for_tasks')}
-            </TextWrapper>
-          </Pressable>
+            ]}>
+            <Pressable
+              onPress={onRefresh}
+              style={{flexDirection: 'row', alignItems: 'center'}}
+              disabled={isRefreshing}
+              accessibilityLabel={t('check_for_tasks')}>
+              {isRefreshing ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <MaterialCommunityIcons name="refresh" size={24} color="#fff" />
+              )}
+              <TextWrapper
+                variant="bodyMedium"
+                style={styles.refreshButtonText}>
+                {isRefreshing ? t('checking') : t('check_for_tasks')}
+              </TextWrapper>
+            </Pressable>
+          </Animated.View>
         )}
       </View>
 
       {/* Waiting Animation */}
-      {isConnected && (
-        <View style={styles.waitingAnimation}>
-          <AnimatedDotsLoadingText
-            text={t('monitoring_for_new_tasks')}
-            color={'#fff'}
-          />
-        </View>
-      )}
+      {/* Removed below animation as per request */}
     </Animated.View>
-  );
-};
-
-// Animated Dots Loading Text Component
-const AnimatedDotsLoadingText = ({
-  text,
-  color: _color,
-}: {
-  text: string;
-  color?: string;
-}) => {
-  const [dots, setDots] = useState('');
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDots(prev => (prev.length >= 3 ? '' : prev + '.'));
-    }, 500);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <TextWrapper variant="bodyMedium" style={styles.animatedText}>
-      {text}
-      {dots}
-    </TextWrapper>
   );
 };
 
